@@ -42,7 +42,7 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(
-            roles::class,
+            Role::class,
             'role_id'
         );
     }
@@ -54,7 +54,7 @@ class User extends Authenticatable
 
     public function supervisor()
     {
-        return $this->belongsTo(employee_profile::class, 'supervisor_id');
+        return $this->belongsTo(EmployeeProfile::class, 'supervisor_id');
     }
 
     public function outlets()

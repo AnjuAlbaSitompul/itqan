@@ -9,7 +9,7 @@ class OutletController extends Controller
 {
     public function index()
     {
-        $outlet = outlet::where('is_active', true)->get();
+        $outlet = Outlet::where('is_active', true)->get();
         return response()->json($outlet);
     }
 
@@ -21,7 +21,7 @@ class OutletController extends Controller
             'man_power' => 'required|integer|min:0',
         ]);
 
-        $outlet = outlet::create($validated);
+        $outlet = Outlet::create($validated);
         return response()->json([
             'message' => 'Outlet created successfully',
             'data' => $outlet
@@ -30,7 +30,7 @@ class OutletController extends Controller
 
     public function update(Request $request, $id)
     {
-        $outlet = outlet::findOrFail($id);
+        $outlet = Outlet::findOrFail($id);
         $validated = $request->validate([
             'name' => 'string',
             'alamat' => 'string',
@@ -46,7 +46,7 @@ class OutletController extends Controller
 
     public function destroy($id)
     {
-        $outlet = outlet::findOrFail($id);
+        $outlet = Outlet::findOrFail($id);
         $outlet->is_active = false;
         $outlet->save();
         return response()->json([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ApproveUserRequest;
 use App\Models\Jabatan;
 use App\Models\outlet;
+use App\Models\Role;
 use App\Models\roles;
 use App\Models\Unit;
 use App\Models\User;
@@ -17,10 +18,10 @@ class UserManagementController extends Controller
 {
     public function userRequest()
     {
-        $outlets = outlet::where('is_active', true)->select('id', 'name')->get();
+        $outlets = Outlet::where('is_active', true)->select('id', 'name')->get();
         $jabatans = Jabatan::where('is_active', true)->select('id', 'name')->get();
         $units = Unit::where('is_active', true)->select('id', 'name')->get();
-        $roles = roles::select('id', 'name')->get();
+        $roles = Role::select('id', 'name')->get();
         return view('user-management.user-request.index', compact('outlets', 'jabatans', 'units', 'roles'));
     }
 
@@ -147,7 +148,7 @@ class UserManagementController extends Controller
 
     public function supervisorData()
     {
-        $role = roles::where('name', 'admin')->first();
+        $role = Role::where('name', 'admin')->first();
         $supervisors = User::where('role_id', '!=', $role->id)
             ->with('profile')
             ->get();

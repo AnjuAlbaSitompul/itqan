@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class menu extends Model
+class Menu extends Model
 {
     protected $fillable = [
         'name',
@@ -24,7 +24,7 @@ class menu extends Model
     public function children()
     {
         return $this->hasMany(
-            menu::class,
+            Menu::class,
             'parent_id'
         )->orderBy('sort');
     }
@@ -38,7 +38,7 @@ class menu extends Model
     public function parent()
     {
         return $this->belongsTo(
-            menu::class,
+            Menu::class,
             'parent_id'
         );
     }
@@ -52,7 +52,7 @@ class menu extends Model
     public function roles()
     {
         return $this->belongsToMany(
-            roles::class,
+            Role::class,
             'menu_role',
             'menu_id',
             'role_id'

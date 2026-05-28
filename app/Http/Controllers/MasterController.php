@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Jabatan;
-use App\Models\outlet;
-use App\Models\roles;
+use App\Models\Outlet;
+use App\Models\Role;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 
@@ -12,8 +12,8 @@ class MasterController extends Controller
 {
     public function users()
     {
-        $roles = roles::select('id', 'name')->get();
-        $outlet = outlet::where('is_active', true)->select('id', 'name')->get();
+        $roles = Role::select('id', 'name')->get();
+        $outlet = Outlet::where('is_active', true)->select('id', 'name')->get();
         $units = Unit::where('is_active', true)->select('id', 'name')->get();
         $jabatans = Jabatan::where('is_active', true)->select('id', 'name')->get();
         return view('master.users.index', compact('roles', 'outlet', 'units', 'jabatans'));
