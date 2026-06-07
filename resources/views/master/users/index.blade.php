@@ -892,7 +892,7 @@
                         swal({
                             type: 'error',
                             title: 'Error',
-                            text: err.responseJSON?.message
+                            text: err.responseJSON?.error
                         });
 
                     }
