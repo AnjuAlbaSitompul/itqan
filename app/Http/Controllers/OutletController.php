@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\outlet;
+use App\Models\Outlet;
 use Illuminate\Http\Request;
 
 class OutletController extends Controller
@@ -18,7 +18,6 @@ class OutletController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'alamat' => 'nullable|string',
-            'man_power' => 'required|integer|min:0',
         ]);
 
         $outlet = Outlet::create($validated);
@@ -34,7 +33,6 @@ class OutletController extends Controller
         $validated = $request->validate([
             'name' => 'string',
             'alamat' => 'string',
-            'man_power' => 'integer|min:0',
         ]);
 
         $outlet->update($validated);

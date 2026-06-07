@@ -17,7 +17,6 @@ return new class extends Migration {
 
             $table->string('alamat')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->integer('man_power')->default(0);
             $table->timestamps();
         });
     }

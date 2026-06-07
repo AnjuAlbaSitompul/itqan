@@ -14,19 +14,20 @@ class MasterController extends Controller
     {
         $roles = Role::select('id', 'name')->get();
         $outlet = Outlet::where('is_active', true)->select('id', 'name')->get();
-        $units = Unit::where('is_active', true)->select('id', 'name')->get();
+        // $units = Unit::where('is_active', true)->select('id', 'name')->get();
         $jabatans = Jabatan::where('is_active', true)->select('id', 'name')->get();
-        return view('master.users.index', compact('roles', 'outlet', 'units', 'jabatans'));
+        return view('master.users.index', compact('roles', 'outlet', 'jabatans'));
     }
 
     public function outlet()
     {
+
         return view('master.outlet.index');
     }
 
-    public function tpi()
+    public function kpi()
     {
-        return view('master.tpi.index');
+        return view('master.kpi.index');
     }
     public function idp()
     {
@@ -40,6 +41,8 @@ class MasterController extends Controller
 
     public function unit()
     {
-        return view('master.unit.index');
+        $outlets = Outlet::where('is_active', true)->select('id', 'name')->get();
+
+        return view('master.unit.index', compact('outlets'));
     }
 }

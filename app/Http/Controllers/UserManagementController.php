@@ -4,18 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ApproveUserRequest;
 use App\Models\Jabatan;
-use App\Models\outlet;
+use App\Models\Outlet;
 use App\Models\Role;
-use App\Models\roles;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\UserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\TryCatch;
 
 class UserManagementController extends Controller
 {
+
     public function userRequest()
     {
         $outlets = Outlet::where('is_active', true)->select('id', 'name')->get();
@@ -139,20 +140,4 @@ class UserManagementController extends Controller
         }
     }
 
-
-    public function userSupervisor()
-    {
-
-        return view('user-management.user-supervisor.index');
-    }
-
-    public function supervisorData()
-    {
-        $role = Role::where('name', 'admin')->first();
-        $supervisors = User::where('role_id', '!=', $role->id)
-            ->with('profile')
-            ->get();
-
-        return response()->json($supervisors);
-    }
 }

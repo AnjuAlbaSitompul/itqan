@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\roles;
+use App\Models\Role;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,14 +19,6 @@ class StoreUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $requiredOutletRoles = roles::query()
-            ->whereIn('name', [
-                'spv',
-                'pegawai',
-                'manager',
-            ])
-            ->pluck('id')
-            ->toArray();
 
         return [
 
@@ -47,25 +39,15 @@ class StoreUserRequest extends FormRequest
                 'exists:roles,id',
             ],
 
-            'outlet_id' => [
-                Rule::requiredIf(
-                    in_array($this->role, $requiredOutletRoles)
-                ),
-                'nullable',
-                'exists:outlets,id',
-            ],
-
             // PROFILE
             'nip' => 'required|string|max:100',
             'jenis_kelamin' => 'required|in:L,P',
             'tanggal_lahir' => 'required|date',
             'tanggal_masuk' => 'required|date',
-            'tamatan' => 'required|string|max:255',
+            'tamatan' => 'required|string|max:4',
             'domisili' => 'required|string|max:255',
             'tipe_bpjs' => 'required|string|max:100',
-            'golongan' => 'required|string|max:100',
-            'unit_id' => 'required|exists:units,id',
-            'jabatan_id' => 'required|exists:jabatans,id',
+            'golongan' => 'required|string|max:4',
             'alamat' => 'required|string',
         ];
     }
@@ -73,7 +55,8 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'outlet_id.required' => 'Outlet wajib dipilih untuk role ini.',
+            'role.required' => 'The role field is required.',
+            'role.exists' => 'The selected role is invalid.',
         ];
     }
 }

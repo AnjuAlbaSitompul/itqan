@@ -21,8 +21,6 @@ return new class extends Migration {
             $table->date('tanggal_masuk');
             $table->string('domisili');
             $table->enum('tipe_bpjs', ['Kesehatan', 'Ketenagakerjaan']);
-            $table->foreignId('unit_id')->constrained();
-            $table->foreignId('jabatan_id')->constrained();
             $table->string('golongan');
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');

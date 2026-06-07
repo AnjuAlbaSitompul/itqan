@@ -17,12 +17,12 @@ class JabatanController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:jabatans,name',
-            'description' => 'nullable|string',
+            'level' => 'required|integer',
         ]);
 
         $jabatan = Jabatan::create([
             'name' => $request->name,
-            'description' => $request->description,
+            'level' => $request->level,
         ]);
 
         return response()->json([
@@ -37,12 +37,12 @@ class JabatanController extends Controller
 
         $request->validate([
             'name' => 'required|unique:jabatans,name,' . $jabatan->id,
-            'description' => 'nullable|string',
+            'level' => 'required|integer',
         ]);
 
         $jabatan->update([
             'name' => $request->name,
-            'description' => $request->description,
+            'level' => $request->level,
         ]);
 
         return response()->json([

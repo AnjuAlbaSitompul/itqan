@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class JobLevelHistoryController extends Controller
+class UserKpiController extends Controller
 {
     //
 }

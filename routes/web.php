@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\OrganizationalUnitController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -36,6 +37,10 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::post('/user/create', [UserController::class, 'create'])
         ->name('user.create');
+    Route::post('/user/import', [UserController::class, 'import'])
+        ->name('user.import');
+    Route::get('/user/template', [UserController::class, 'downloadTemplate'])
+        ->name('user.template');
     Route::patch('/user/update/{id}', [UserController::class, 'update'])
         ->name('user.update');
     Route::delete('/user/delete/{id}', [UserController::class, 'delete'])
@@ -60,8 +65,8 @@ Route::middleware(['role:admin'])->group(function () {
     Route::delete('/unit/{id}', [UnitController::class, 'destroyUnit'])->name('unit.destroy');
 
 
-    Route::get('/tpi', [MasterController::class, 'tpi'])
-        ->name('tpi');
+    Route::get('/kpi', [MasterController::class, 'kpi'])
+        ->name('kpi');
     Route::get('/idp', [MasterController::class, 'idp'])
         ->name('idp');
 
@@ -71,8 +76,7 @@ Route::middleware(['role:admin'])->group(function () {
     Route::post('/request/approve/{id}', [UserManagementController::class, 'approveRequest'])->name('request.approve');
     Route::delete('/request/reject/{id}', [UserManagementController::class, 'rejectRequest'])->name('request.reject');
 
-    Route::get('/users/supervisor', [UserManagementController::class, 'userSupervisor'])->name('user.supervisor');
-    Route::get('supervisor/data', [UserManagementController::class, 'supervisorData'])->name('supervisor.data');
-
+    Route::get('/organization/structure', [OrganizationalUnitController::class, 'index'])->name('organization.structure');
+    Route::post('/organization/save', [OrganizationalUnitController::class, 'store'])->name('organization.save');
 
 });

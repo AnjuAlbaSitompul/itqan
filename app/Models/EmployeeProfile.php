@@ -8,8 +8,9 @@ class EmployeeProfile extends Model
 {
     protected $fillable = [
         'user_id',
-        'outlet_id',
-        'supervisor_id',
+        'organizational_unit_id',
+        'jabatan_id',
+        'supervisor_id'
     ];
 
     public function user()
@@ -17,8 +18,18 @@ class EmployeeProfile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function jobLevel()
+    public function organizationalUnit()
     {
-        return $this->belongsTo(job_level::class);
+        return $this->belongsTo(OrganizationalUnit::class, 'organizational_unit_id');
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, 'jabatan_id');
+    }
+
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 }

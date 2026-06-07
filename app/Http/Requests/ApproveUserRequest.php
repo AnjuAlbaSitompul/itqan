@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\roles;
+use App\Models\Role;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +26,7 @@ class ApproveUserRequest extends FormRequest
     public function rules(): array
     {
 
-        $requiredOutletRoles = roles::query()
+        $requiredOutletRoles = Role::query()
             ->whereIn('name', [
                 'spv',
                 'pegawai',

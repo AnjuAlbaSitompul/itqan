@@ -13,7 +13,6 @@ class Outlet extends Model
         'name',
         'alamat',
         'is_active',
-        'man_power'
     ];
 
     public function users()

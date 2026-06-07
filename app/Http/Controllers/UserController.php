@@ -2,16 +2,138 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UserTemplateExport;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\roles;
+use App\Models\Profile;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
+
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new UserTemplateExport(),
+            'user_import_template.xlsx'
+        );
+    }
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $rows = Excel::toArray([], $request->file('file'));
+
+            $users = $rows[0];
+
+            if (count($users) <= 1) {
+                throw new \Exception('File tidak memiliki data.');
+            }
+
+            unset($users[0]); // hapus header
+
+            $success = 0;
+
+            foreach ($users as $index => $row) {
+
+                $line = $index + 2;
+
+                [
+                    $name,
+                    $username,
+                    $password,
+                    $roleName,
+                    $nip,
+                    $alamat,
+                    $tamatan,
+                    $jenisKelamin,
+                    $tanggalLahir,
+                    $tanggalMasuk,
+                    $domisili,
+                    $tipeBpjs,
+                    $golongan
+                ] = $row;
+
+                if (
+                    empty($name) ||
+                    empty($username) ||
+                    empty($password) ||
+                    empty($roleName) ||
+                    empty($nip)
+                ) {
+                    throw new \Exception("Data tidak lengkap pada baris {$line}");
+                }
+
+                $role = Role::whereRaw('LOWER(name) = ?', [
+                    strtolower(trim($roleName))
+                ])->first();
+
+                if (!$role) {
+                    throw new \Exception("Role '{$roleName}' tidak ditemukan pada baris {$line}");
+                }
+
+                if (User::where('username', $username)->exists()) {
+                    throw new \Exception("Username '{$username}' sudah digunakan pada baris {$line}");
+                }
+
+                if (Profile::where('nip', $nip)->exists()) {
+                    throw new \Exception("NIP '{$nip}' sudah digunakan pada baris {$line}");
+                }
+
+                $user = User::create([
+                    'name' => $name,
+                    'username' => $username,
+                    'password' => Hash::make($password),
+                    'role_id' => $role->id,
+                ]);
+
+                Profile::create([
+                    'user_id' => $user->id,
+                    'nip' => $nip,
+                    'alamat' => $alamat,
+                    'tamatan' => $tamatan,
+                    'jenis_kelamin' => $jenisKelamin,
+                    'tanggal_lahir' => $tanggalLahir,
+                    'tanggal_masuk' => $tanggalMasuk,
+                    'domisili' => $domisili,
+                    'tipe_bpjs' => $tipeBpjs,
+                    'golongan' => $golongan,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+
+                $success++;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "{$success} user berhasil diimport."
+            ]);
+
+        } catch (\Throwable $th) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Import gagal',
+                'error' => $th->getMessage()
+            ], 500);
+
+        }
+    }
     public function create(StoreUserRequest $request)
     {
         DB::beginTransaction();
@@ -27,17 +149,8 @@ class UserController extends Controller
                 'role_id' => $validated['role'],
             ]);
 
-            // outlet pivot
-            if (!empty($validated['outlet_id'])) {
-
-                $user->outlets()->sync([
-                    $validated['outlet_id']
-                ]);
-            }
-
             // profile
             $user->profile()->create([
-
                 'nip' => $validated['nip'],
                 'alamat' => $validated['alamat'],
                 'tamatan' => $validated['tamatan'],
@@ -46,10 +159,7 @@ class UserController extends Controller
                 'tanggal_masuk' => $validated['tanggal_masuk'],
                 'domisili' => $validated['domisili'],
                 'tipe_bpjs' => $validated['tipe_bpjs'],
-                'unit_id' => $validated['unit_id'],
-                'jabatan_id' => $validated['jabatan_id'],
                 'golongan' => $validated['golongan'],
-
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
             ]);
@@ -74,33 +184,27 @@ class UserController extends Controller
     {
         $users = User::with([
             'role',
-            'outlets'
+            'profile'
         ])->where('is_active', true)->get();
 
         $data = $users->map(function ($item, $index) {
 
             return [
-
                 'id' => $item->id,
-
                 'no' => $index + 1,
-
                 'name' => $item->name,
-
                 'username' => $item->username,
-
                 'role' => $item->role?->name ?? '-',
-
                 'role_id' => $item->role_id,
-
-                'outlet' => $item->outlets
-                    ->pluck('name')
-                    ->join(', ') ?: '-',
-
-                'outlet_id' => $item->outlets
-                    ->pluck('id')
-                    ->first(),
-
+                'golongan' => $item->profile?->golongan ?? '-',
+                'jenis_kelamin' => $item->profile?->jenis_kelamin ?? '-',
+                'tanggal_lahir' => $item->profile?->tanggal_lahir ?? '-',
+                'tanggal_masuk' => $item->profile?->tanggal_masuk ?? '-',
+                'domisili' => $item->profile?->domisili ?? '-',
+                'tipe_bpjs' => $item->profile?->tipe_bpjs ?? '-',
+                'tamatan' => $item->profile?->tamatan ?? '-',
+                'nip' => $item->profile?->nip ?? '-',
+                'alamat' => $item->profile?->alamat ?? '-',
                 'action' => '
             <button 
                 class="btn btn-sm btn-primary rounded-pill"
@@ -116,7 +220,6 @@ class UserController extends Controller
                 Delete
             </button>
         '
-
             ];
         });
 
@@ -165,22 +268,9 @@ class UserController extends Controller
 
             // PASSWORD
             if (!empty($validated['password'])) {
-
                 $user->update([
                     'password' => bcrypt($validated['password']),
                 ]);
-            }
-
-            // OUTLET
-            if (!empty($validated['outlet_id'])) {
-
-                $user->outlets()->sync([
-                    $validated['outlet_id']
-                ]);
-
-            } else {
-
-                $user->outlets()->detach();
             }
 
             // PROFILE
@@ -197,11 +287,7 @@ class UserController extends Controller
                     'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
                     'tanggal_masuk' => $validated['tanggal_masuk'] ?? null,
                     'domisili' => $validated['domisili'] ?? null,
-                    'tipe_bpjs' => $validated['tipe_bpjs'] ?? null,
-                    'unit_id' => $validated['unit_id'] ?? null,
-                    'jabatan_id' => $validated['jabatan_id'] ?? null,
                     'golongan' => $validated['golongan'] ?? null,
-
                     'updated_by' => Auth::id(),
                 ]
             );

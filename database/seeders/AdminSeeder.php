@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\roles;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminRole = roles::where('name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
 
         User::firstOrCreate(
             [

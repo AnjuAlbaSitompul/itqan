@@ -124,28 +124,6 @@
 
                             </div>
 
-                            <!-- OUTLET -->
-                            <div class="col-xl-4 col-lg-6 d-none" id="outletWrapper">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Outlet
-                                </label>
-
-                                <select class="form-select modern-select select2" id="outlet_id" name="outlet_id">
-
-                                    <option value="">
-                                        Pilih Outlet
-                                    </option>
-
-                                    @foreach ($outlet as $item)
-                                        <option value="{{ $item->id }}">
-                                            {{ $item->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-
-                            </div>
 
                             <!-- SECTION TITLE -->
                             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
@@ -262,17 +240,33 @@
                                     Tamatan
                                 </label>
 
-                                <div class="modern-input">
 
-                                    <span>
-                                        <i class="fe fe-book-open"></i>
-                                    </span>
+                                <select class="form-select modern-select select2" id="tamatan" name="tamatan">
 
-                                    <input type="text" id="tamatan" name="tamatan"
-                                        placeholder="Contoh: S1 Teknik Informatika">
+                                    <option value="">
+                                        Pilih Tamatan
+                                    </option>
 
-                                </div>
+                                    <option value="SMA">
+                                        SMA
+                                    </option>
 
+                                    <option value="D3">
+                                        D3
+                                    </option>
+
+                                    <option value="S1">
+                                        S1
+                                    </option>
+
+                                    <option value="S2">
+                                        S2
+                                    </option>
+
+                                    <option value="S3">
+                                        S3
+                                    </option>
+                                </select>
                             </div>
 
                             <!-- DOMISILI -->
@@ -288,8 +282,7 @@
                                         <i class="fe fe-map-pin"></i>
                                     </span>
 
-                                    <input type="text" id="domisili" name="domisili"
-                                        placeholder="Masukkan domisili">
+                                    <input type="text" id="domisili" name="domisili" placeholder="Masukkan domisili">
 
                                 </div>
 
@@ -327,62 +320,25 @@
                                     Golongan
                                 </label>
 
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-award"></i>
-                                    </span>
-
-                                    <input type="text" id="golongan" name="golongan"
-                                        placeholder="Masukkan golongan">
-
-                                </div>
-
-                            </div>
-
-                            <!-- UNIT -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Unit
-                                </label>
-
-                                <select class="form-select modern-select select2" id="unit_id" name="unit_id">
+                                <select class="form-select modern-select select2" id="golongan" name="golongan">
 
                                     <option value="">
-                                        Pilih Unit
+                                        Pilih Golongan
                                     </option>
 
-                                    @foreach ($units as $unit)
-                                        <option value="{{ $unit->id }}">
-                                            {{ $unit->name }}
-                                        </option>
+                                    @php
+                                        $golonganRomawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+                                        $golonganHuruf = ['A', 'B', 'C', 'D', 'E'];
+                                    @endphp
+
+                                    @foreach ($golonganRomawi as $romawi)
+                                        @foreach ($golonganHuruf as $huruf)
+                                            <option value="{{ $romawi . $huruf }}">{{ $romawi . $huruf }}</option>
+                                        @endforeach
                                     @endforeach
 
                                 </select>
 
-                            </div>
-
-                            <!-- JABATAN -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Jabatan
-                                </label>
-
-                                <select class="form-select modern-select select2" id="jabatan_id" name="jabatan_id">
-
-                                    <option value="">
-                                        Pilih Jabatan
-                                    </option>
-
-                                    @foreach ($jabatans as $jabatan)
-                                        <option value="{{ $jabatan->id }}">
-                                            {{ $jabatan->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
 
                             </div>
 
@@ -411,12 +367,126 @@
 
                             </button>
 
-                            <button type="button"
-                                class="btn btn-success rounded-pill px-5 py-2 fw-semibold shadow-sm d-none"
-                                id="updateButton">
+                            <button type="button" class="btn btn-success rounded-pill px-5 py-2 fw-semibold shadow-sm"
+                                style="display: none;" id="updateButton">
 
                                 <i class="fe fe-check-circle me-2"></i>
                                 Update User
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BULK IMPORT CARD -->
+        <div class="col-12 mt-4">
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+                <!-- HEADER -->
+                <div class="card-header bulk-header p-4 border-0">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                        <div>
+                            <h3 class="fw-bold text-white mb-1">
+                                Bulk Import User
+                            </h3>
+
+                            <p class="text-white-50 mb-0">
+                                Upload file Excel (.xlsx) untuk membuat banyak user sekaligus
+                            </p>
+                        </div>
+
+                        <a href="{{ route('user.template') }}" class="btn btn-light rounded-pill px-4 fw-semibold">
+
+                            <i class="fe fe-download me-2"></i>
+                            Download Template
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <!-- BODY -->
+                <div class="card-body p-4">
+
+                    <form id="bulkImportForm" enctype="multipart/form-data">
+
+                        <div class="upload-area" id="uploadArea">
+
+                            <input type="file" id="xlsxFile" name="file" accept=".xlsx,.xls" hidden>
+
+                            <div class="upload-content">
+
+                                <div class="upload-icon">
+                                    <i class="fe fe-upload-cloud"></i>
+                                </div>
+
+                                <h5 class="fw-bold mb-2">
+                                    Drag & Drop File Excel
+                                </h5>
+
+                                <p class="text-muted mb-3">
+                                    atau klik area ini untuk memilih file
+                                </p>
+
+                                <button type="button" class="btn btn-primary rounded-pill px-4" id="chooseFile">
+
+                                    Pilih File
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FILE INFO -->
+                        <div class="selected-file mt-4 d-none">
+
+                            <div class="file-card">
+
+                                <div class="file-icon">
+                                    <i class="fe fe-file-text"></i>
+                                </div>
+
+                                <div class="flex-grow-1">
+
+                                    <h6 class="mb-1 file-name">
+                                        -
+                                    </h6>
+
+                                    <small class="text-muted file-size">
+                                        -
+                                    </small>
+
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="removeFile">
+
+                                    Remove
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ACTION -->
+                        <div class="d-flex justify-content-end mt-4">
+
+                            <button type="submit" class="btn btn-success rounded-pill px-5">
+
+                                <i class="fe fe-upload me-2"></i>
+                                Import User
 
                             </button>
 
@@ -489,6 +559,72 @@
 
     <!-- STYLE -->
     <style>
+        .bulk-header {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        }
+
+        .upload-area {
+            border: 2px dashed #dbeafe;
+            border-radius: 20px;
+            min-height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .3s;
+            background: #f8fbff;
+        }
+
+        .upload-area:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            width: 90px;
+            height: 90px;
+            margin: auto;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, .1);
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .file-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fff;
+        }
+
+        .file-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, .12);
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
         .user-header {
             background: linear-gradient(135deg, #6259ca 0%, #867efc 100%);
         }
@@ -627,41 +763,142 @@
 
     <!-- SCRIPT -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
+            $('#uploadArea')
+                .on('dragover', function (e) {
+                    e.preventDefault();
+                    $(this).addClass('dragover');
+                })
+                .on('dragleave', function () {
+                    $(this).removeClass('dragover');
+                })
+                .on('drop', function (e) {
 
-            function toggleOutlet() {
+                    e.preventDefault();
 
-                let roleName = $('#role option:selected')
-                    .data('name');
+                    $(this).removeClass('dragover');
 
-                if (
-                    roleName === 'spv' ||
-                    roleName === 'pegawai' ||
-                    roleName === 'manager'
-                ) {
+                    const files = e.originalEvent.dataTransfer.files;
 
-                    $('#outletWrapper').removeClass('d-none');
+                    if (files.length) {
 
-                } else {
+                        $('#xlsxFile')[0].files = files;
+                        $('#xlsxFile').trigger('change');
 
-                    $('#outletWrapper').addClass('d-none');
+                    }
 
-                    $('#outlet_id').val('').trigger('change');
+                });
 
-                }
-            }
+            $('#chooseFile').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            toggleOutlet();
-
-            $('#role').on('change', function() {
-                toggleOutlet();
+                document.getElementById('xlsxFile').click();
             });
 
+            $('#uploadArea').on('click', function (e) {
+
+                if ($(e.target).is('#xlsxFile')) {
+                    return;
+                }
+
+                document.getElementById('xlsxFile').click();
+            });
+
+            $('#xlsxFile').on('change', function () {
+
+                const file = this.files[0];
+
+                if (!file) return;
+
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                if (!['xlsx', 'xls'].includes(ext)) {
+
+                    swal({
+                        type: 'error',
+                        title: 'File Tidak Valid',
+                        text: 'Hanya file Excel (.xlsx atau .xls)'
+                    });
+
+                    $(this).val('');
+
+                    return;
+                }
+
+                $('.selected-file').removeClass('d-none');
+
+                $('.file-name').text(file.name);
+
+                $('.file-size').text(
+                    (file.size / 1024).toFixed(2) + ' KB'
+                );
+
+            });
+            $('#removeFile').on('click', function () {
+
+                $('#xlsxFile').val('');
+
+                $('.selected-file').addClass('d-none');
+
+            });
+
+            $('#bulkImportForm').submit(function (e) {
+
+                e.preventDefault();
+
+                let file = $('#xlsxFile')[0].files[0];
+
+                if (!file) {
+
+                    swal({
+                        type: 'warning',
+                        title: 'Pilih File',
+                        text: 'Silakan pilih file Excel terlebih dahulu'
+                    });
+
+                    return;
+                }
+
+                let formData = new FormData(this);
+
+                $.ajax({
+
+                    url: '/user/import',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function (res) {
+
+                        swal({
+                            type: 'success',
+                            title: 'Berhasil',
+                            text: res.message
+                        });
+
+                        $('#userTable').DataTable().ajax.reload();
+
+                    },
+
+                    error: function (err) {
+                        console.error(err.responseJSON?.error)
+                        swal({
+                            type: 'error',
+                            title: 'Error',
+                            text: err.responseJSON?.message
+                        });
+
+                    }
+
+                });
+            });
             $('.select2').select2({
                 width: '100%'
             });
@@ -683,29 +920,29 @@
                 },
 
                 columns: [{
-                        data: 'no'
-                    },
-                    {
-                        data: 'name'
-                    },
-                    {
-                        data: 'username'
-                    },
-                    {
-                        data: 'role'
-                    },
-                    {
-                        data: 'outlet'
-                    },
-                    {
-                        data: 'action'
-                    }
+                    data: 'no'
+                },
+                {
+                    data: 'name'
+                },
+                {
+                    data: 'username'
+                },
+                {
+                    data: 'role'
+                },
+                {
+                    data: 'golongan'
+                },
+                {
+                    data: 'action'
+                }
                 ]
 
             });
 
 
-            window.deleteUser = function(userId) {
+            window.deleteUser = function (userId) {
 
                 swal({
                     title: 'Are you sure?',
@@ -714,7 +951,7 @@
                     showCancelButton: true,
                     confirmButtonText: 'Yes, delete it!',
                     cancelButtonText: 'Cancel'
-                }, function(isConfirm) {
+                }, function (isConfirm) {
 
                     if (isConfirm) {
 
@@ -722,7 +959,7 @@
 
                             url: `/user/delete/${userId}`,
                             type: 'delete',
-                            success: function(res) {
+                            success: function (res) {
                                 swal({
                                     type: 'success',
                                     title: 'Deleted',
@@ -733,7 +970,7 @@
 
                             },
 
-                            error: function(err) {
+                            error: function (err) {
 
                                 swal({
                                     type: 'error',
@@ -751,7 +988,7 @@
                 });
             };
 
-            window.editUser = function(userId) {
+            window.editUser = function (userId) {
                 $('#updateButton').attr('data-id', userId);
                 $('#submitButton').hide();
                 $('#updateButton').show();
@@ -781,23 +1018,34 @@
                 $('#role')
                     .val(data.role_id)
                     .trigger('change');
-
-                $('#outlet_id')
-                    .val(data.outlet_id)
+                $('#golongan')
+                    .val(data.golongan)
                     .trigger('change');
+                $('#jenis_kelamin')
+                    .val(data.jenis_kelamin)
+                    .trigger('change');
+                $('#tanggal_lahir').val(data.tanggal_lahir);
+                $('#tanggal_masuk').val(data.tanggal_masuk);
+                $('#nip').val(data.nip);
+                $('#tamatan')
+                    .val(data.tamatan)
+                    .trigger('change');
+                $('#domisili').val(data.domisili);
+                $('#tipe_bpjs')
+                    .val(data.tipe_bpjs).trigger('change');
+                $('#alamat').val(data.alamat);
+
             };
 
-            $('#userForm').on('submit', function(e) {
+            $('#userForm').on('submit', function (e) {
 
                 e.preventDefault();
 
                 let data = $(this).serializeArray();
                 console.log(data);
-                let roleName = $('#role option:selected')
-                    .data('name');
 
                 $.post('/user/create', data)
-                    .done(function(res) {
+                    .done(function (res) {
 
                         swal({
                             type: 'success',
@@ -809,11 +1057,9 @@
                         $('#userForm')[0].reset();
                         $('#userTable').DataTable().ajax.reload();
 
-                        $('#role').val('').trigger('change');
-
                     })
 
-                    .fail(function(xhr) {
+                    .fail(function (xhr) {
                         $('.invalid-feedback').remove();
                         $('.is-invalid').removeClass('is-invalid');
 
@@ -821,17 +1067,17 @@
 
                             let errors = xhr.responseJSON.errors;
 
-                            $.each(errors, function(field, messages) {
+                            $.each(errors, function (field, messages) {
 
                                 let input = $(`[name="${field}"]`);
 
                                 input.addClass('is-invalid');
 
                                 input.after(`
-                        <div class="invalid-feedback">
-                            ${messages[0]}
-                        </div>
-                    `);
+                                                                                                            <div class="invalid-feedback">
+                                                                                                                ${messages[0]}
+                                                                                                            </div>
+                                                                                                        `);
                             });
                         }
                         swal({
@@ -850,24 +1096,34 @@
                 $('#submitButton').show();
                 $('#updateButton').hide();
                 $('#role').val('').trigger('change');
+                $('#golongan').val('').trigger('change');
+                $('#jenis_kelamin').val('').trigger('change');
+                $('#tanggal_lahir').val('');
+                $('#tanggal_masuk').val('');
+                $('#nip').val('');
+                $('#domisili').val('');
+                $('#tipe_bpjs').val('').trigger('change');
+                $('#alamat').val('');
+                $('#tamatan').val('').trigger('change');
+                $('.invalid-feedback').remove();
+                $('.is-invalid').removeClass('is-invalid');
             }
 
-            $('#btnReset').click(function() {
+            $('#btnReset').click(function () {
                 resetForm();
             });
 
-            $('#updateButton').click(function() {
+            $('#updateButton').click(function () {
                 let userId = $(this).data('id');
                 let name = $('#name').val();
                 let username = $('#username').val();
                 let password = $('#password').val();
                 let role = $('#role').val();
                 let outlet = $('#outlet_id').val();
-
+                let data = $('#userForm').serializeArray();
                 if (
                     name === '' ||
                     username === '' ||
-                    password === '' ||
                     role === ''
                 ) {
                     swal({
@@ -880,22 +1136,15 @@
                 }
                 $.ajax({
 
-                        url: '/user/update/' + userId,
+                    url: '/user/update/' + userId,
 
-                        type: 'PATCH',
+                    type: 'PATCH',
 
-                        data: {
-                            name: name,
-                            username: username,
-                            password: password,
-                            role: role,
-                            outlet_id: outlet,
-                            _token: '{{ csrf_token() }}'
-                        }
+                    data: data
 
-                    })
+                })
 
-                    .done(function(res) {
+                    .done(function (res) {
                         resetForm();
                         $('#userTable').DataTable().ajax.reload();
 
@@ -906,7 +1155,7 @@
                                 'User berhasil diupdate'
                         });
                     })
-                    .fail(function(err) {
+                    .fail(function (err) {
                         swal({
                             type: 'error',
                             title: 'Error',

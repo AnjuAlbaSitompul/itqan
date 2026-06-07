@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             MenuSeeder::class,
             MenuRoleSeeder::class,
             OutletSeeder::class,
+            JabatanSeeder::class,
         ]);
     }
 }

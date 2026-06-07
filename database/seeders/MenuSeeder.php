@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\menu;
+use App\Models\Menu;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,7 +19,7 @@ class MenuSeeder extends Seeder
        |--------------------------------------------------------------------------
        */
 
-        menu::create([
+        Menu::create([
             'name' => 'Dashboard',
             'icon' => 'fe fe-home',
             'route' => 'dashboard',
@@ -29,26 +29,48 @@ class MenuSeeder extends Seeder
         ]);
 
 
-        menu::create([
-            'name' => 'TPI',
+
+        // KPI
+        $kpi = Menu::create([
+            'name' => 'KPI',
             'icon' => 'fe fe-clipboard',
-            'route' => 'tpi',
+            'route' => null,
             'parent_id' => null,
             'sort' => 2,
             'is_active' => 1,
         ]);
 
+        Menu::create([
+            'name' => 'KPI Master',
+            'icon' => 'fe fe-target',
+            'route' => 'kpi',
+            'parent_id' => $kpi->id,
+            'sort' => 1,
+            'is_active' => 1,
+        ]);
 
-        menu::create([
-            'name' => 'IDP',
-            'icon' => 'fe fe-package',
-            'route' => 'idp',
+        // Organization
+
+        $organization = Menu::create([
+            'name' => 'Organization',
+            'icon' => 'fe fe-users',
+            'route' => null,
             'parent_id' => null,
             'sort' => 3,
             'is_active' => 1,
         ]);
+        Menu::create([
+            'name' => 'Structure',
+            'icon' => 'fe fe-sitemap',
+            'route' => 'organization.structure',
+            'parent_id' => $organization->id,
+            'sort' => 1,
+            'is_active' => 1,
+        ]);
 
-        $users = menu::create([
+
+
+        $users = Menu::create([
             'name' => 'User Management',
             'icon' => 'fe fe-users',
             'route' => null,
@@ -57,20 +79,12 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        menu::create([
+        Menu::create([
             'name' => 'User Request',
             'icon' => 'fe fe-user-check',
             'route' => 'user.request',
             'parent_id' => $users->id,
             'sort' => 1,
-            'is_active' => 1,
-        ]);
-        menu::create([
-            'name' => 'User Supervisor',
-            'icon' => 'fe fe-user-check',
-            'route' => 'user.supervisor',
-            'parent_id' => $users->id,
-            'sort' => 2,
             'is_active' => 1,
         ]);
 
@@ -83,7 +97,7 @@ class MenuSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $master = menu::create([
+        $master = Menu::create([
             'name' => 'Master',
             'icon' => 'fe fe-database',
             'route' => null,
@@ -92,7 +106,7 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        menu::create([
+        Menu::create([
             'name' => 'Users',
             'icon' => 'fe fe-users',
             'route' => 'master.users',
@@ -100,7 +114,7 @@ class MenuSeeder extends Seeder
             'sort' => 2,
             'is_active' => 1,
         ]);
-        menu::create([
+        Menu::create([
             'name' => 'Outlet',
             'icon' => 'fe fe-map-pin',
             'route' => 'master.outlet',
@@ -108,7 +122,7 @@ class MenuSeeder extends Seeder
             'sort' => 3,
             'is_active' => 1,
         ]);
-        menu::create([
+        Menu::create([
             'name' => 'Jabatan',
             'icon' => 'fe fe-user-check',
             'route' => 'master.jabatan',
@@ -117,7 +131,7 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        menu::create([
+        Menu::create([
             'name' => 'Unit',
             'icon' => 'fe fe-layers',
             'route' => 'master.unit',
@@ -131,7 +145,7 @@ class MenuSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $settings = menu::create([
+        $settings = Menu::create([
             'name' => 'Settings',
             'icon' => 'fe fe-settings',
             'route' => null,
@@ -140,7 +154,7 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        menu::create([
+        Menu::create([
             'name' => 'Role Permissions',
             'icon' => 'fe fe-shield',
             'route' => 'settings.role-permissions',

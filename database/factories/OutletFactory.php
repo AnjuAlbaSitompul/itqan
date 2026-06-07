@@ -20,7 +20,6 @@ class OutletFactory extends Factory
         return [
             'name' => fake()->company() . ' Outlet',
             'alamat' => fake()->address(),
-            'man_power' => fake()->numberBetween(5, 20),
         ];
     }
 }

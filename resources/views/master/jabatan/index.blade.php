@@ -60,42 +60,50 @@
 
                             </div>
 
-                        </div>
-                        <div class="row">
-
                             <!-- USERNAME -->
-                            <div class="col-12 mb-4">
+                            <div class="col-xl-4 col-lg-6 mb-4">
 
                                 <label class="form-label fw-semibold mb-2">
-                                    Deskripsi Jabatan
+                                    Level Jabatan
                                 </label>
 
-                                <textarea class="form-control modern-textarea" rows="4" id="description" name="description"
-                                    placeholder="Masukkan deskripsi jabatan..."></textarea>
+                                <div class="modern-input">
+
+                                    <span>
+                                        <i class="fe fe-user"></i>
+                                    </span>
+
+                                    <input type="number" id="level" name="level"
+                                        placeholder="Masukkan level jabatan">
+
+                                </div>
 
                             </div>
 
-                            <!-- ACTION -->
-                            <div class="d-flex justify-content-end mt-2">
-
-                                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
-                                    id="submitButton">
-
-                                    <i class="fe fe-save me-2"></i>
-                                    Save Jabatan
-
-                                </button>
+                        </div>
 
 
-                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
-                                    id="updateButton" style="display: none">
+                        <!-- ACTION -->
+                        <div class="d-flex justify-content-end mt-2">
 
-                                    <i class="fe fe-save me-2"></i>
-                                    Update Jabatan
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
+                                id="submitButton">
 
-                                </button>
+                                <i class="fe fe-save me-2"></i>
+                                Save Jabatan
 
-                            </div>
+                            </button>
+
+
+                            <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
+                                id="updateButton" style="display: none">
+
+                                <i class="fe fe-save me-2"></i>
+                                Update Jabatan
+
+                            </button>
+
+                        </div>
 
                     </form>
 
@@ -140,7 +148,7 @@
                                 <tr>
                                     <th width="5%">#</th>
                                     <th>Nama</th>
-                                    <th>Deskripsi</th>
+                                    <th>Level</th>
                                     <th width="15%">Action</th>
                                 </tr>
 
@@ -288,7 +296,7 @@
                         data: 'name'
                     },
                     {
-                        data: 'description'
+                        data: 'level'
                     },
                     {
                         data: 'action',
@@ -387,7 +395,7 @@
                 }
 
                 $('#name').val(data.name);
-                $('#description').val(data.description);
+                $('#level').val(data.level);
 
                 // Smooth scroll to form
                 $('html, body').animate({
@@ -400,11 +408,11 @@
                 e.preventDefault();
 
                 let name = $('#name').val();
-                let description = $('#description').val();
+                let level = $('#level').val();
 
                 if (
                     name === '' ||
-                    description === ''
+                    level === ''
                 ) {
                     swal({
                         type: 'warning',
@@ -417,7 +425,7 @@
 
                 $.post('/jabatan', {
                         name: name,
-                        description: description,
+                        level: level,
                     })
 
                     .done(function(res) {
@@ -459,11 +467,11 @@
             $('#updateButton').click(function() {
                 let jabatanId = $(this).data('id');
                 let name = $('#name').val();
-                let description = $('#description').val();
+                let level = $('#level').val();
 
                 if (
                     name === '' ||
-                    description === ''
+                    level === ''
                 ) {
                     swal({
                         type: 'warning',
@@ -478,7 +486,7 @@
                         type: 'PATCH',
                         data: {
                             name: name,
-                            description: description,
+                            level: level,
                         }
                     })
                     .done(function(res) {

@@ -12,16 +12,10 @@ return new class extends Migration {
     {
         Schema::create('employee_profiles', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('user_id')->constrained();
-
-            // atasannya langsung
-            $table->foreignId('supervisor_id')
-                ->nullable()
-                ->references('id')
-                ->on('users');
-
-
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('organizational_unit_id')->nullable()->constrained('organizational_units')->onDelete('set null');
+            $table->foreignId('jabatan_id')->nullable()->constrained('jabatans');
+            $table->foreignId('supervisor_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

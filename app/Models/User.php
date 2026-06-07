@@ -56,14 +56,4 @@ class User extends Authenticatable
     {
         return $this->belongsTo(EmployeeProfile::class, 'supervisor_id');
     }
-
-    public function outlets()
-    {
-        return $this->belongsToMany(
-            Outlet::class,
-            'outlet_users',
-            'user_id',
-            'outlet_id'
-        );
-    }
 }

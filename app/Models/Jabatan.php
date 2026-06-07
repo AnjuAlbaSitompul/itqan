@@ -8,7 +8,7 @@ class Jabatan extends Model
 {
     protected $fillable = [
         'name',
-        'description',
+        'level',
         'is_active',
     ];
 }

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\menu;
-use App\Models\roles;
+use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,7 +20,7 @@ class MenuRoleSeeder extends Seeder
 |--------------------------------------------------------------------------
 */
 
-        $admin = roles::where('name', 'admin')->first();
+        $admin = Role::where('name', 'admin')->first();
 
         if (!$admin) {
             return;
@@ -34,9 +34,8 @@ class MenuRoleSeeder extends Seeder
 
         $menus = menu::whereIn('name', [
             'Dashboard',
-            'TPI',
-            'IDP',
-            'User Management',
+            'KPI',
+            'Organization',
             'Master',
         ])->pluck('id');
 

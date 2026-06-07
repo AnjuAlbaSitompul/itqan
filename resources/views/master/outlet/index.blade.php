@@ -60,20 +60,25 @@
 
                             </div>
 
+                        </div>
+
+                        <div class="row">
+
+                            <!-- USERNAME -->
                             <div class="col-xl-4 col-lg-6 mb-4">
 
                                 <label class="form-label fw-semibold mb-2">
-                                    Jumlah Tenaga Kerja
+                                    Nama Outlet
                                 </label>
+
 
                                 <div class="modern-input">
 
                                     <span>
-                                        <i class="fe fe-users"></i>
+                                        <i class="fe fe-map-pin"></i>
                                     </span>
 
-                                    <input type="number" id="man_power" name="man_power"
-                                        placeholder="Masukkan jumlah tenaga kerja" min="0">
+                                    <input type="text" id="name" name="name" placeholder="Masukkan nama outlet">
 
                                 </div>
 
@@ -160,7 +165,6 @@
                                 <tr>
                                     <th width="5%">#</th>
                                     <th>Nama</th>
-                                    <th>Tenaga Kerja</th>
                                     <th>Alamat</th>
                                     <th width="15%">Action</th>
                                 </tr>
@@ -309,17 +313,6 @@
                         data: 'name'
                     },
                     {
-                        data: 'man_power',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fe fe-users"></i>
-                                    <span>${data}</span>
-                                </div>
-                            `;
-                        }
-                    },
-                    {
                         data: 'alamat'
                     },
                     {
@@ -420,7 +413,6 @@
 
                 $('#name').val(data.name);
                 $('#alamat').val(data.alamat);
-                $('#man_power').val(data.man_power);
 
                 // Smooth scroll to form
                 $('html, body').animate({
@@ -434,11 +426,9 @@
 
                 let name = $('#name').val();
                 let alamat = $('#alamat').val();
-                let man_power = $('#man_power').val();
                 if (
                     name === '' ||
-                    alamat === '' ||
-                    man_power === ''
+                    alamat === ''
                 ) {
                     swal({
                         type: 'warning',
@@ -452,7 +442,6 @@
                 $.post('/outlet', {
                         name: name,
                         alamat: alamat,
-                        man_power: man_power
                     })
 
                     .done(function(res) {

@@ -59,43 +59,78 @@
                                 </div>
 
                             </div>
-
-                        </div>
-                        <div class="row">
-
-                            <!-- USERNAME -->
-                            <div class="col-12 mb-4">
+                            <div class="col-xl-4 col-lg-6 mb-4">
 
                                 <label class="form-label fw-semibold mb-2">
-                                    Deskripsi unit
+                                    Outlet terkait, <small class="text-muted">Opsional</small>
                                 </label>
 
-                                <textarea class="form-control modern-textarea" rows="4" id="description" name="description"
-                                    placeholder="Masukkan deskripsi unit..."></textarea>
+                                <select class="form-select modern-select" id="outlet_id" name="outlet_id">
+                                    <option value="">Pilih outlet terkait</option>
+                                    @foreach ($outlets as $outlet)
+                                        <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
+                                    @endforeach
+                                </select>
 
                             </div>
 
-                            <!-- ACTION -->
-                            <div class="d-flex justify-content-end mt-2">
+                        </div>
 
-                                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
-                                    id="submitButton">
+                        <!-- USERNAME -->
+                        <div class="col-12 mb-4">
 
-                                    <i class="fe fe-save me-2"></i>
-                                    Save unit
+                            <label class="form-label fw-semibold mb-2">
+                                Deskripsi unit
+                            </label>
 
-                                </button>
+                            <textarea class="form-control modern-textarea" rows="4" id="description" name="description"
+                                placeholder="Masukkan deskripsi unit..."></textarea>
 
+                        </div>
+                        <div class="col-12 mb-4">
 
-                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
-                                    id="updateButton" style="display: none">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                                    <i class="fe fe-save me-2"></i>
-                                    Update unit
+                                <label class="form-label fw-semibold mb-0">
+                                    Sub Unit
+                                </label>
+
+                                <button type="button" class="btn btn-success btn-sm rounded-pill" id="btnAddSubUnit">
+
+                                    <i class="fe fe-plus"></i>
+                                    Tambah
 
                                 </button>
 
                             </div>
+
+                            <div id="subUnitContainer">
+
+                            </div>
+
+                        </div>
+
+                        <!-- ACTION -->
+                        <div class="d-flex justify-content-end mt-2">
+
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
+                                id="submitButton">
+
+                                <i class="fe fe-save me-2"></i>
+                                Save unit
+
+                            </button>
+
+
+                            <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold"
+                                id="updateButton" style="display: none">
+
+                                <i class="fe fe-save me-2"></i>
+                                Update unit
+
+                            </button>
+
+                        </div>
 
                     </form>
 
@@ -136,14 +171,13 @@
                         <table class="table align-middle table-hover custom-table" id="unitTable" width="100%">
 
                             <thead>
-
                                 <tr>
                                     <th width="5%">#</th>
-                                    <th>Nama</th>
+                                    <th>Nama Unit</th>
+                                    <th>Outlet</th>
                                     <th>Deskripsi</th>
                                     <th width="15%">Action</th>
                                 </tr>
-
                             </thead>
 
                             <tbody></tbody>
@@ -162,6 +196,21 @@
 
     <!-- STYLE -->
     <style>
+        .sub-unit-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .sub-unit-item input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            outline: none;
+        }
+
         .user-header {
             background: linear-gradient(135deg, #6259ca 0%, #867efc 100%);
         }
@@ -260,7 +309,90 @@
 
     <!-- SCRIPT -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
+            function createSubUnitRow(value = '') {
+                return `
+                                <div class="sub-unit-item">
+
+                                    <div class="d-flex gap-2 align-items-center">
+
+                                        <input
+                                            type="text"
+                                            class="form-control sub-unit-name"
+                                            value="${value}"
+                                            placeholder="Nama Sub Unit">
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-danger btn-sm remove-sub-unit">
+
+                                            <i class="fe fe-trash"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            `;
+            }
+
+            function getSubUnits() {
+
+                let subUnits = [];
+
+                $('.sub-unit-name').each(function () {
+
+                    const value = $(this).val().trim();
+
+                    if (value !== '') {
+
+                        subUnits.push({
+                            name: value
+                        });
+
+                    }
+
+                });
+
+                return subUnits;
+            }
+
+            $('#btnAddSubUnit').click(function () {
+
+                $('#subUnitContainer')
+                    .append(createSubUnitRow());
+
+            });
+
+            $(document).on(
+                'click',
+                '.remove-sub-unit',
+                function () {
+
+                    $(this)
+                        .closest('.sub-unit-item')
+                        .remove();
+
+                }
+            );
+
+
+            $('.sub-unit-name').each(function () {
+
+                let value = $(this).val().trim();
+
+                if (value !== '') {
+                    subUnits.push({
+                        name: value
+                    });
+                }
+
+            });
+            $('#outlet_id').select2({
+                width: '100%',
+                placeholder: 'Pilih outlet terkait',
+                allowClear: true
+            });
 
             let table = $('#unitTable').DataTable({
 
@@ -279,47 +411,51 @@
                 },
 
                 columns: [{
-                        data: 'no',
-                        render: function(data, type, row, meta) {
-                            return meta.row + 1;
-                        }
-                    },
-                    {
-                        data: 'name'
-                    },
-                    {
-                        data: 'description'
-                    },
-                    {
-                        data: 'action',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return `
-          <div class="d-flex gap-2 justify-content-center">
-    <button 
-        class="btn btn-icon btn-primary rounded-circle"
-        onclick="editunit(${row.id})"
-    >
-        <i class="fe fe-edit-2"></i>
-    </button>
-
-    <button 
-        class="btn btn-icon btn-danger rounded-circle"
-        onclick="deleteunit(${row.id})"
-    >
-        <i class="fe fe-trash-2"></i>
-    </button>
-</div>
-                            `;
-                        }
+                    data: 'no',
+                    render: function (data, type, row, meta) {
+                        return meta.row + 1;
                     }
+                },
+                {
+                    data: 'name'
+                },
+                {
+                    data: 'outlet.name',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'description'
+                },
+                {
+                    data: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return `
+                                  <div class="d-flex gap-2 justify-content-center">
+                            <button 
+                                class="btn btn-icon btn-primary rounded-circle"
+                                onclick="editunit(${row.id})"
+                            >
+                                <i class="fe fe-edit-2"></i>
+                            </button>
+
+                            <button 
+                                class="btn btn-icon btn-danger rounded-circle"
+                                onclick="deleteunit(${row.id})"
+                            >
+                                <i class="fe fe-trash-2"></i>
+                            </button>
+                        </div>
+                                                    `;
+                    }
+                }
                 ]
 
             });
 
 
-            window.deleteunit = function(unitId) {
+            window.deleteunit = function (unitId) {
 
                 swal({
                     title: 'Are you sure?',
@@ -328,7 +464,7 @@
                     showCancelButton: true,
                     confirmButtonText: 'Yes, delete it!',
                     cancelButtonText: 'Cancel'
-                }, function(isConfirm) {
+                }, function (isConfirm) {
 
                     if (isConfirm) {
 
@@ -336,18 +472,18 @@
 
                             url: `/unit/${unitId}`,
                             type: 'delete',
-                            success: function(res) {
+                            success: function (res) {
                                 swal({
                                     type: 'success',
                                     title: 'Deleted',
                                     text: res.message
                                 });
 
-                                $('#unitTable').DataTable().ajax.reload();
+                                table.ajax.reload();
 
                             },
 
-                            error: function(err) {
+                            error: function (err) {
 
                                 swal({
                                     type: 'error',
@@ -365,7 +501,7 @@
                 });
             };
 
-            window.editunit = function(unitId) {
+            window.editunit = function (unitId) {
                 $('#updateButton').attr('data-id', unitId);
                 $('#submitButton').hide();
                 $('#updateButton').show();
@@ -388,39 +524,50 @@
 
                 $('#name').val(data.name);
                 $('#description').val(data.description);
+                $('#outlet_id').val(data.outlet_id).trigger('change');
+                $('#subUnitContainer').empty();
 
+                (data.subunit || []).forEach(function (sub) {
+
+                    $('#subUnitContainer').append(
+                        createSubUnitRow(sub.name)
+                    );
+
+                });
                 // Smooth scroll to form
                 $('html, body').animate({
                     scrollTop: $('#unitForm').offset().top - 80
                 }, 600);
             };
 
-            $('#unitForm').on('submit', function(e) {
+            $('#unitForm').on('submit', function (e) {
 
                 e.preventDefault();
 
                 let name = $('#name').val();
+                let outlet_id = $('#outlet_id').val();
                 let description = $('#description').val();
-
+                let subUnits = getSubUnits();
                 if (
-                    name === '' ||
-                    description === ''
+                    name === ''
                 ) {
                     swal({
                         type: 'warning',
                         title: 'Oops...',
-                        text: 'Semua field wajib diisi'
+                        text: 'Nama unit wajib diisi'
                     });
 
                     return;
                 }
 
                 $.post('/unit', {
-                        name: name,
-                        description: description,
-                    })
+                    name: name,
+                    description: description,
+                    outlet_id: outlet_id,
+                    subUnits: subUnits
+                })
 
-                    .done(function(res) {
+                    .done(function (res) {
 
                         swal({
                             type: 'success',
@@ -430,15 +577,15 @@
                         });
 
                         $('#unitForm')[0].reset();
-                        $('#unitTable').DataTable().ajax.reload();
+                        table.ajax.reload();
                     })
 
-                    .fail(function(err) {
+                    .fail(function (err) {
 
                         swal({
                             type: 'error',
                             title: 'Error',
-                            text: err.responseJSON?.message ??
+                            text: err.responseJSON?.error ??
                                 'Terjadi kesalahan'
                         });
 
@@ -447,55 +594,70 @@
             });
 
             function resetForm() {
+
                 $('#unitForm')[0].reset();
+
+                $('#outlet_id')
+                    .val(null)
+                    .trigger('change');
+
+                $('#subUnitContainer').empty();
+
                 $('#submitButton').show();
-                $('#updateButton').hide();
+                $('#updateButton')
+                    .hide()
+                    .removeAttr('data-id');
+
             }
 
-            $('#btnReset').click(function() {
+            $('#btnReset').click(function () {
                 resetForm();
             });
 
-            $('#updateButton').click(function() {
+            $('#updateButton').click(function () {
                 let unitId = $(this).data('id');
                 let name = $('#name').val();
                 let description = $('#description').val();
-
+                let outlet_id = $('#outlet_id').val();
+                let subUnits = getSubUnits();
                 if (
                     name === '' ||
-                    description === ''
+                    subUnits.length === 0
                 ) {
                     swal({
                         type: 'warning',
                         title: 'Oops...',
-                        text: 'Semua field wajib diisi'
+                        text: 'Nama unit dan sub-unit wajib diisi'
                     });
 
                     return;
                 }
                 $.ajax({
-                        url: '/unit/' + unitId,
-                        type: 'PATCH',
-                        data: {
-                            name: name,
-                            description: description,
-                        }
-                    })
-                    .done(function(res) {
+                    url: '/unit/' + unitId,
+                    type: 'PATCH',
+                    data: {
+                        name: name,
+                        description: description,
+                        outlet_id: outlet_id,
+                        subUnits: subUnits
+                    }
+                })
+                    .done(function (res) {
                         resetForm();
-                        $('#unitTable').DataTable().ajax.reload();
+
+                        table.ajax.reload();
+
                         swal({
                             type: 'success',
                             title: 'Berhasil',
-                            text: res.message ??
-                                'unit berhasil diupdate'
+                            text: res.message
                         });
                     })
-                    .fail(function(err) {
+                    .fail(function (err) {
                         swal({
                             type: 'error',
                             title: 'Error',
-                            text: err.responseJSON?.message ??
+                            text: err.responseJSON?.error ??
                                 'Terjadi kesalahan'
                         });
                     });
