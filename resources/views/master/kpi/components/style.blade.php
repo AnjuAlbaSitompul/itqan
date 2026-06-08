@@ -86,4 +86,70 @@
     .text-danger {
         color: #dc2626 !important;
     }
+
+    .kpi-offcanvas {
+        width: 650px !important;
+    }
+
+    .kpi-offcanvas .offcanvas-header {
+        background: #fff;
+        flex-shrink: 0;
+    }
+
+    .kpi-offcanvas .offcanvas-body {
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #fafbfc;
+    }
+
+    .kpi-offcanvas .offcanvas-footer {
+        background: #fff;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: .75rem;
+        flex-shrink: 0;
+    }
+
+    .form-section {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #eef2f7;
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #6259ca;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 45px;
+        border-radius: 10px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: none;
+        border-color: #6259ca;
+    }
+
+    @media (max-width: 768px) {
+
+        .kpi-offcanvas {
+            width: 100% !important;
+        }
+
+        .offcanvas-body {
+            padding: 1rem;
+        }
+
+        .offcanvas-footer {
+            padding: 1rem;
+        }
+
+    }
 </style>

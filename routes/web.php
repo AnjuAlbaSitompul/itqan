@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\KpiMasterController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationalUnitController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\UnitController;
@@ -21,6 +23,11 @@ Route::post('/signup', [AuthController::class, 'createUser'])->middleware('throt
 Route::middleware('auth')
     ->get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/signout', [AuthController::class, 'signout'])->name('signout');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+});
 
 Route::middleware(['role:admin'])->group(function () {
 
@@ -67,6 +74,10 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::get('/kpi', [MasterController::class, 'kpi'])
         ->name('kpi');
+    Route::get('/kpi/period', [KpiMasterController::class, 'kpiPeriod'])
+        ->name('kpi.period');
+    Route::post('/kpi/period', [KpiMasterController::class, 'storeKpiPeriod'])
+        ->name('kpi.period.store');
     Route::get('/idp', [MasterController::class, 'idp'])
         ->name('idp');
 

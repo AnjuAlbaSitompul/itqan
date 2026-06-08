@@ -24,7 +24,8 @@
 
                         </div>
 
-                        <button class="btn btn-primary rounded-pill btn-sm">
+                        <button class="btn btn-primary rounded-pill btn-smoff-canvas" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#periodCanvas" aria-controls="periodCanvas">
 
                             <i class="fe fe-plus"></i>
 
@@ -37,90 +38,6 @@
                 <div class="card-body p-0">
 
                     <div class="period-list">
-
-                        <div class="period-item active">
-
-                            <div class="period-content">
-
-                                <div class="period-icon">
-                                    <i class="fe fe-calendar"></i>
-                                </div>
-
-                                <div>
-
-                                    <div class="fw-semibold">
-                                        KPI Januari 2026
-                                    </div>
-
-                                    <small class="text-muted">
-                                        01 Jan - 31 Jan 2026
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                            <span class="badge bg-success-subtle text-success">
-                                Open
-                            </span>
-
-                        </div>
-
-                        <div class="period-item">
-
-                            <div class="period-content">
-
-                                <div class="period-icon">
-                                    <i class="fe fe-calendar"></i>
-                                </div>
-
-                                <div>
-
-                                    <div class="fw-semibold">
-                                        KPI Februari 2026
-                                    </div>
-
-                                    <small class="text-muted">
-                                        01 Feb - 28 Feb 2026
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                            <span class="badge bg-warning-subtle text-warning">
-                                Draft
-                            </span>
-
-                        </div>
-
-                        <div class="period-item">
-
-                            <div class="period-content">
-
-                                <div class="period-icon">
-                                    <i class="fe fe-calendar"></i>
-                                </div>
-
-                                <div>
-
-                                    <div class="fw-semibold">
-                                        KPI Maret 2026
-                                    </div>
-
-                                    <small class="text-muted">
-                                        01 Mar - 31 Mar 2026
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                            <span class="badge bg-danger-subtle text-danger">
-                                Closed
-                            </span>
-
-                        </div>
 
                     </div>
 
@@ -308,6 +225,157 @@
                 </div>
 
             </div>
+
+        </div>
+
+    </div>
+
+    <div class="offcanvas offcanvas-end kpi-offcanvas" tabindex="-1" id="periodCanvas">
+
+        <div class="offcanvas-header border-bottom">
+
+            <div>
+                <h5 class="mb-0 fw-bold" id="canvasTitle">
+                    Create KPI Period
+                </h5>
+
+                <small class="text-muted">
+                    Configure KPI period settings
+                </small>
+            </div>
+
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas">
+            </button>
+
+        </div>
+
+        <div class="offcanvas-body">
+
+            <form id="periodForm">
+
+                <div class="form-section">
+
+                    <h6 class="section-title">
+                        General Information
+                    </h6>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Period Name
+                        </label>
+
+                        <input type="text" id="name" class="form-control" placeholder="Ex: KPI January 2026">
+
+                    </div>
+
+                </div>
+
+                <div class="form-section">
+
+                    <h6 class="section-title">
+                        Registration Period
+                    </h6>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Start
+                            </label>
+
+                            <input type="datetime-local" id="registration_start" class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                End
+                            </label>
+
+                            <input type="datetime-local" id="registration_end" class="form-control">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="form-section">
+
+                    <h6 class="section-title">
+                        KPI Period
+                    </h6>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                Start Date
+                            </label>
+
+                            <input type="date" id="period_start" class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label">
+                                End Date
+                            </label>
+
+                            <input type="date" id="period_end" class="form-control">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="form-section">
+
+                    <h6 class="section-title">
+                        Status
+                    </h6>
+
+                    <select id="status" class="form-select">
+
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                        <option value="open">
+                            Open
+                        </option>
+
+                        <option value="closed">
+                            Closed
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="offcanvas-footer border-top">
+
+            <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">
+
+                Cancel
+
+            </button>
+
+            <button type="button" id="btnSavePeriod" class="btn btn-primary">
+
+                Save Period
+
+            </button>
 
         </div>
 

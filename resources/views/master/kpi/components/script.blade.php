@@ -1,108 +1,276 @@
 <script>
-    $(document).ready(function () {
+    $(function () {
+        loadPeriods();
+        let periodCanvas = new bootstrap.Offcanvas(
+            document.getElementById('periodCanvas')
+        );
 
-        $('.select2').select2({
-            width: '100%'
+        /*
+        |--------------------------------------------------------------------------
+        | OPEN CREATE
+        |--------------------------------------------------------------------------
+        */
+
+        $('#btnCreatePeriod').on('click', function () {
+
+            $('#periodForm')[0].reset();
+
+            $('#period_id').val('');
+
+            $('#canvasTitle').text('Create KPI Period');
+
+            periodCanvas.show();
+
         });
 
-        $('#jobLevelTable').DataTable({
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO GENERATE NAME
+        |--------------------------------------------------------------------------
+        */
 
-            processing: true,
-            serverSide: false,
+        $('#period_start').on('change', function () {
 
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Search job level..."
-            },
+            let date = $(this).val();
 
-            data: [],
+            if (!date) return;
 
-            columns: [{
-                data: 'no'
-            },
-            {
-                data: 'name'
-            },
-            {
-                data: 'period'
-            },
-            {
-                data: 'status'
-            },
-            {
-                data: 'created_by'
-            },
-            {
-                data: 'action'
+            let d = new Date(date);
+
+            let month = d.toLocaleString(
+                'en-US',
+                {
+                    month: 'long'
+                }
+            );
+
+            let year = d.getFullYear();
+
+            if ($('#name').val() === '') {
+
+                $('#name').val(
+                    `KPI ${month} ${year}`
+                );
+
             }
-            ]
 
         });
 
-        $('#jobLevelForm').submit(function (e) {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
 
-            e.preventDefault();
+        function validateForm() {
+            let registrationStart =
+                $('#registration_start').val();
 
-            let formData = {
+            let registrationEnd =
+                $('#registration_end').val();
 
-                name: $('#name').val(),
-                description: $('#description').val(),
-                start_period: $('#start_period').val(),
-                end_period: $('#end_period').val(),
-                status: $('#status').val(),
-                _token: '{{ csrf_token() }}'
+            let periodStart =
+                $('#period_start').val();
 
-            };
+            let periodEnd =
+                $('#period_end').val();
 
             if (
-                formData.name === '' ||
-                formData.start_period === '' ||
-                formData.end_period === ''
+                registrationStart > registrationEnd
             ) {
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Oops',
-                    text: 'Semua field wajib diisi'
+                swal({
+                    type: 'warning',
+                    title: 'Validation',
+                    text: 'Registration end must be greater than registration start'
                 });
 
-                return;
-
+                return false;
             }
 
-            $.post('/job-level/store', formData)
+            if (
+                periodStart > periodEnd
+            ) {
 
-                .done(function (res) {
+                swal({
+                    type: 'warning',
+                    title: 'Validation',
+                    text: 'Period end must be greater than period start'
+                });
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: res.message ??
-                            'Job level berhasil disimpan'
+                return false;
+            }
+
+            return true;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAVE
+        |--------------------------------------------------------------------------
+        */
+
+        $('#btnSavePeriod').on('click', function () {
+
+            if (!validateForm()) {
+                return;
+            }
+
+            let btn = $(this);
+
+            btn.prop('disabled', true);
+
+            $.ajax({
+
+                url: "/kpi/period",
+
+                method: "POST",
+
+                data: {
+
+                    name: $('#name').val(),
+
+                    registration_start:
+                        $('#registration_start').val(),
+
+                    registration_end:
+                        $('#registration_end').val(),
+
+                    period_start:
+                        $('#period_start').val(),
+
+                    period_end:
+                        $('#period_end').val(),
+
+                    status:
+                        $('#status').val(),
+
+                    _token:
+                        "{{ csrf_token() }}"
+                },
+
+                success: function (res) {
+
+                    swal({
+                        type: 'success',
+                        title: 'Success',
+                        text: res.message
                     });
 
-                    $('#jobLevelForm')[0].reset();
+                    periodCanvas.hide();
 
-                })
+                    loadPeriods();
 
-                .fail(function (err) {
+                },
 
-                    Swal.fire({
-                        icon: 'error',
+                error: function (xhr) {
+
+                    let message =
+                        xhr.responseJSON?.message ??
+                        'Something went wrong';
+
+                    swal({
+                        type: 'error',
                         title: 'Error',
-                        text: err.responseJSON?.message ??
-                            'Terjadi kesalahan'
+                        text: message
                     });
+
+                },
+
+                complete: function () {
+
+                    btn.prop(
+                        'disabled',
+                        false
+                    );
+
+                }
+
+            });
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESET WHEN CLOSED
+        |--------------------------------------------------------------------------
+        */
+
+        $('#periodCanvas').on(
+            'hidden.bs.offcanvas',
+            function () {
+
+                $('#periodForm')[0].reset();
+
+            }
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD PERIODS
+        |--------------------------------------------------------------------------
+        */
+        function loadPeriods() {
+
+            $.get('/kpi/period', function (res) {
+
+                let html = '';
+
+                res.data.forEach(period => {
+
+                    let statusClass = '';
+
+                    switch (period.status.toLowerCase()) {
+
+                        case 'open':
+                            statusClass = 'bg-success-subtle text-success';
+                            break;
+
+                        case 'closed':
+                            statusClass = 'bg-danger-subtle text-danger';
+                            break;
+
+                        default:
+                            statusClass = 'bg-warning-subtle text-warning';
+                            break;
+                    }
+
+                    html += `
+                <div class="period-item" data-id="${period.id}">
+
+                    <div class="period-content">
+
+                        <div class="period-icon">
+                            <i class="fe fe-calendar"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="fw-semibold">
+                                ${period.name}
+                            </div>
+
+                            <small class="text-muted">
+                                ${period.period}
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <span class="badge ${statusClass}">
+                        ${period.status.toUpperCase()}
+                    </span>
+
+                </div>
+            `;
 
                 });
 
-        });
+                $('.period-list').html(html);
 
-        $('#btnReset, #btnCancel').click(function () {
+            });
 
-            $('#jobLevelForm')[0].reset();
-
-        });
-
+        }
     });
 </script>

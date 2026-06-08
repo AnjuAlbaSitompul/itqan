@@ -1,7 +1,8 @@
 <div class="app-header header sticky">
     <div class="container-fluid main-container">
         <div class="d-flex">
-            <a aria-label="Hide Sidebar" class="app-sidebar__toggle" data-bs-toggle="sidebar" href="javascript:void(0)"></a>
+            <a aria-label="Hide Sidebar" class="app-sidebar__toggle" data-bs-toggle="sidebar"
+                href="javascript:void(0)"></a>
 
             <!-- sidebar-toggle-->
 
@@ -54,95 +55,26 @@
 
                             <!-- FULL-SCREEN -->
 
-                            <div class="dropdown d-flex notifications">
+                            @php
+                                $notifications = auth()->user()
+                                    ->notifications()
+                                    ->latest()
+                                    ->take(10)
+                                    ->get();
 
-                                <a class="nav-link icon" data-bs-toggle="dropdown">
-                                    <i class="fe fe-bell"></i>
-                                    <span class="pulse"></span>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-
-                                    <div class="drop-heading border-bottom">
-                                        <div class="d-flex">
-                                            <h6 class="mt-1 mb-0 fs-16 fw-semibold text-dark">
-                                                Notifications
-                                            </h6>
-                                        </div>
-                                    </div>
-
-                                    <div class="notifications-menu">
-
-                                        <a class="dropdown-item d-flex" href="notify-list.html">
-                                            <div class="me-3 notifyimg bg-primary brround box-shadow-primary">
-                                                <i class="fe fe-mail"></i>
-                                            </div>
-
-                                            <div class="mt-1 wd-80p">
-                                                <h5 class="notification-label mb-1">
-                                                    New Application received
-                                                </h5>
-                                                <span class="notification-subtext">3 days ago</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="notify-list.html">
-                                            <div class="me-3 notifyimg bg-secondary brround box-shadow-secondary">
-                                                <i class="fe fe-check-circle"></i>
-                                            </div>
-
-                                            <div class="mt-1 wd-80p">
-                                                <h5 class="notification-label mb-1">
-                                                    Project has been approved
-                                                </h5>
-                                                <span class="notification-subtext">2 hours ago</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="notify-list.html">
-                                            <div class="me-3 notifyimg bg-success brround box-shadow-success">
-                                                <i class="fe fe-shopping-cart"></i>
-                                            </div>
-
-                                            <div class="mt-1 wd-80p">
-                                                <h5 class="notification-label mb-1">
-                                                    Your Product Delivered
-                                                </h5>
-                                                <span class="notification-subtext">30 min ago</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="notify-list.html">
-                                            <div class="me-3 notifyimg bg-pink brround box-shadow-pink">
-                                                <i class="fe fe-user-plus"></i>
-                                            </div>
-
-                                            <div class="mt-1 wd-80p">
-                                                <h5 class="notification-label mb-1">
-                                                    Friend Requests
-                                                </h5>
-                                                <span class="notification-subtext">1 day ago</span>
-                                            </div>
-                                        </a>
-
-                                    </div>
-
-                                    <div class="dropdown-divider m-0"></div>
-
-                                    <a href="notify-list.html" class="dropdown-item text-center p-3 text-muted">
-                                        View all Notification
-                                    </a>
-
-                                </div>
-                            </div>
-
-                            <!-- NOTIFICATIONS -->
+                                $unreadCount = auth()->user()
+                                    ->unreadNotifications()
+                                    ->count();
+                            @endphp
 
                             <div class="dropdown d-flex message">
 
                                 <a class="nav-link icon text-center" data-bs-toggle="dropdown">
-                                    <i class="fe fe-message-square"></i>
-                                    <span class="pulse-danger"></span>
+                                    <i class="fe fe-bell"></i>
+
+                                    @if($unreadCount > 0)
+                                        <span class="pulse-danger"></span>
+                                    @endif
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
@@ -150,118 +82,72 @@
                                     <div class="drop-heading border-bottom">
                                         <div class="d-flex">
                                             <h6 class="mt-1 mb-0 fs-16 fw-semibold text-dark">
-                                                You have 5 Messages
+                                                You have {{ $unreadCount }} unread notifications
                                             </h6>
 
-                                            <div class="ms-auto">
-                                                <a href="javascript:void(0)" class="text-muted p-0 fs-12">
-                                                    make all unread
-                                                </a>
-                                            </div>
+                                            @if($unreadCount > 0)
+                                                <div class="ms-auto">
+                                                    <form action="{{ route('notifications.read-all') }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-link text-muted p-0 fs-12">
+                                                            Mark all as read
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
 
                                     <div class="message-menu message-menu-scroll">
 
-                                        <a class="dropdown-item d-flex" href="chat.html">
-                                            <span class="avatar avatar-md brround me-3 align-self-center cover-image"
-                                                data-bs-image-src="{{ asset('assets/images/users/1.jpg') }}">
-                                            </span>
+                                        @forelse($notifications as $notification)
 
-                                            <div class="wd-90p">
-                                                <div class="d-flex">
-                                                    <h5 class="mb-1">Peter Theil</h5>
+                                            <a class="dropdown-item d-flex {{ is_null($notification->read_at) ? 'bg-light' : '' }}"
+                                                href="{{ $notification->data['url'] ?? '#' }}">
 
-                                                    <small class="text-muted ms-auto text-end">
-                                                        6:45 am
-                                                    </small>
+                                                <span
+                                                    class="avatar avatar-md brround me-3 align-self-center bg-primary text-white">
+                                                    <i class="fe fe-bell"></i>
+                                                </span>
+
+                                                <div class="wd-90p">
+
+                                                    <div class="d-flex">
+                                                        <h5 class="mb-1">
+                                                            {{ $notification->data['title'] ?? 'Notification' }}
+                                                        </h5>
+
+                                                        <small class="text-muted ms-auto text-end">
+                                                            {{ $notification->created_at->diffForHumans() }}
+                                                        </small>
+                                                    </div>
+
+                                                    <span>
+                                                        {{ $notification->data['message'] ?? '' }}
+                                                    </span>
+
                                                 </div>
 
-                                                <span>Commented on file Guest list....</span>
+                                            </a>
+
+                                        @empty
+
+                                            <div class="text-center p-4 text-muted">
+                                                No notifications
                                             </div>
-                                        </a>
 
-                                        <a class="dropdown-item d-flex" href="chat.html">
-                                            <span class="avatar avatar-md brround me-3 align-self-center cover-image"
-                                                data-bs-image-src="{{ asset('assets/images/users/15.jpg') }}">
-                                            </span>
-
-                                            <div class="wd-90p">
-                                                <div class="d-flex">
-                                                    <h5 class="mb-1">Abagael Luth</h5>
-
-                                                    <small class="text-muted ms-auto text-end">
-                                                        10:35 am
-                                                    </small>
-                                                </div>
-
-                                                <span>New Meetup Started......</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="chat.html">
-                                            <span class="avatar avatar-md brround me-3 align-self-center cover-image"
-                                                data-bs-image-src="{{ asset('assets/images/users/12.jpg') }}">
-                                            </span>
-
-                                            <div class="wd-90p">
-                                                <div class="d-flex">
-                                                    <h5 class="mb-1">Brizid Dawson</h5>
-
-                                                    <small class="text-muted ms-auto text-end">
-                                                        2:17 pm
-                                                    </small>
-                                                </div>
-
-                                                <span>Brizid is in the Warehouse...</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="chat.html">
-                                            <span class="avatar avatar-md brround me-3 align-self-center cover-image"
-                                                data-bs-image-src="{{ asset('assets/images/users/4.jpg') }}">
-                                            </span>
-
-                                            <div class="wd-90p">
-                                                <div class="d-flex">
-                                                    <h5 class="mb-1">Shannon Shaw</h5>
-
-                                                    <small class="text-muted ms-auto text-end">
-                                                        7:55 pm
-                                                    </small>
-                                                </div>
-
-                                                <span>New Product Realease......</span>
-                                            </div>
-                                        </a>
-
-                                        <a class="dropdown-item d-flex" href="chat.html">
-                                            <span class="avatar avatar-md brround me-3 align-self-center cover-image"
-                                                data-bs-image-src="{{ asset('assets/images/users/3.jpg') }}">
-                                            </span>
-
-                                            <div class="wd-90p">
-                                                <div class="d-flex">
-                                                    <h5 class="mb-1">Cherry Blossom</h5>
-
-                                                    <small class="text-muted ms-auto text-end">
-                                                        7:55 pm
-                                                    </small>
-                                                </div>
-
-                                                <span>You have appointment on......</span>
-                                            </div>
-                                        </a>
+                                        @endforelse
 
                                     </div>
 
                                     <div class="dropdown-divider m-0"></div>
 
-                                    <a href="javascript:void(0)" class="dropdown-item text-center p-3 text-muted">
-                                        See all Messages
+                                    <a href="" class="dropdown-item text-center p-3 text-muted">
+                                        See all Notifications
                                     </a>
 
                                 </div>
+
                             </div>
 
                             <!-- MESSAGE-BOX -->
@@ -283,10 +169,10 @@
                                     <div class="drop-heading">
                                         <div class="text-center">
                                             <h5 class="text-dark mb-0 fs-14 fw-semibold">
-                                                Percy Kewshun
+                                                {{ auth()->user()->name }}
                                             </h5>
 
-                                            <small class="text-muted">Senior Admin</small>
+                                            {{-- <small class="text-muted">{{ auth()->user()->role }}</small> --}}
                                         </div>
                                     </div>
 
