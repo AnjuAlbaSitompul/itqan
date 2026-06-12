@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KpiMaster;
 use App\Models\KpiPeriod;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserKpi;
 use App\Notifications\KPIOpenNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -14,6 +16,77 @@ use Illuminate\Support\Facades\Notification;
 
 class KpiMasterController extends Controller
 {
+
+    public function storeMyKpi(Request $request)
+    {
+        // 1. Validasi
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'definition_of_done' => 'nullable|string',
+            'guard_rail' => 'nullable|string',
+            'satuan' => 'required|in:percentage,number,currency',
+            'bobot' => 'required|numeric|min:0', // <-- Tambahkan validasi bobot
+            'target' => 'required|numeric',
+            'formulas' => 'required|array',
+            'formulas.*.from' => 'required|numeric',
+            'formulas.*.to' => 'required|numeric|gt:formulas.*.from',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // 2. Simpan Master KPI
+            $kpimaster = KpiMaster::create([
+                'title' => $validated['title'],
+                'definition_of_done' => $validated['definition_of_done'] ?? null,
+                'guard_rail' => $validated['guard_rail'] ?? null,
+                'satuan' => $validated['satuan'],
+                'bobot' => $validated['bobot'], // <-- Simpan bobot ke DB
+                'target' => $validated['target'],
+                'created_by' => Auth::id(),
+                'is_active' => true,
+            ]);
+
+            // 3. Simpan Relasi Formula
+            foreach ($validated['formulas'] as $formula) {
+                $kpimaster->formulas()->create([
+                    'from' => $formula['from'],
+                    'to' => $formula['to'],
+                ]);
+            }
+
+            DB::commit();
+
+            // 4. Load relasi formulas agar JSON memiliki data lengkap
+            $kpimaster->load('formulas');
+
+            // 5. Kembalikan FULL OBJECT agar JS bisa menggambar Card dengan lengkap
+            return response()->json([
+                'success' => true,
+                'message' => 'KPI Master berhasil dibuat.',
+                'data' => $kpimaster // <-- Kirim seluruh objek
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function myKpi()
+    {
+        $kpimaster = Auth::user()->createdKpis()->with('formulas')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $kpimaster,
+        ]);
+
+
+    }
 
     public function storeKpiPeriod(Request $request)
     {
@@ -70,16 +143,18 @@ class KpiMasterController extends Controller
 
             DB::commit();
 
-            $roles = Role::whereIn('name', ['admin', 'manager'])->pluck('id');
+            if ($validated['status'] === 'open') {
+                $roles = Role::whereIn('name', ['admin', 'spv', 'manager', 'manager_HO', 'direksi'])->pluck('id');
 
-            $users = User::whereIn('role_id', $roles)->get();
-            Notification::send(
-                $users,
-                new KPIOpenNotification(
-                    'Approval KPI',
-                    'Terdapat KPI yang menunggu persetujuan Anda.'
-                )
-            );
+                $users = User::whereIn('role_id', $roles)->get();
+                Notification::send(
+                    $users,
+                    new KPIOpenNotification(
+                        'KPI Period ' . $period->name . ' telah dibuka.',
+                        'Silahkan akses aplikasi untuk melihat detail KPI Period.'
+                    )
+                );
+            }
 
 
             return response()->json([
@@ -103,12 +178,20 @@ class KpiMasterController extends Controller
     public function kpiPeriod()
     {
         $periods = KpiPeriod::with('creator')
-            ->latest()
+            ->orderByRaw("
+            CASE
+                WHEN status = 'open' THEN 1
+                WHEN status = 'draft' THEN 2
+                WHEN status = 'closed' THEN 3
+                ELSE 4
+            END
+        ")
+            ->orderByDesc('period_start')
             ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $periods
+            'data' => $periods,
         ]);
     }
 }

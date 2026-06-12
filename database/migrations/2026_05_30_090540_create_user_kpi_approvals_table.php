@@ -13,13 +13,14 @@ return new class extends Migration {
         Schema::create('user_kpi_approvals', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_kpi_id')
-                ->constrained();
-
             $table->unsignedTinyInteger('level');
-
+            $table->foreignId('kpi_period_id')
+                ->constrained('kpi_periods');
             $table->foreignId('approver_id')
                 ->constrained('users');
+            $table->foreignId('created_by')
+                ->constrained('users');
+
 
             $table->enum('status', [
                 'pending',

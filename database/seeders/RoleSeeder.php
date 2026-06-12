@@ -18,8 +18,9 @@ class RoleSeeder extends Seeder
             'spv',
             'manager',
             'admin',
-            'admin_approve',
-            'owner',
+            'admin_HO',
+            'manager_HO',
+            'direksi',
         ];
 
         foreach ($roles as $role) {

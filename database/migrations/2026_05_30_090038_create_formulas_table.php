@@ -10,13 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('user_kpis', function (Blueprint $table) {
+        Schema::create('formulas', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('kpi_approval_id')
-                ->constrained('user_kpi_approvals');
-            $table->foreignId('user_id')
-                ->constrained('users');
+            $table->foreignId('kpi_master_id')->constrained('kpi_masters')->onDelete('cascade');
+            $table->decimal('from', 10, 2)->nullable();
+            $table->decimal('to', 10, 2)->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_kpis');
+        Schema::dropIfExists('formulas');
     }
 };

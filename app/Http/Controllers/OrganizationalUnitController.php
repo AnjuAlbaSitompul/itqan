@@ -22,19 +22,17 @@ class OrganizationalUnitController extends Controller
         ])
             ->whereNull('parent_id')
             ->get();
+
         $users = User::orderBy('name')->get();
         $jabatans = Jabatan::orderBy('name')->get();
         $outlets = Outlet::orderBy('name')->get();
 
-        return view(
-            'organization.structure.index',
-            compact(
-                'organizations',
-                'users',
-                'jabatans',
-                'outlets'
-            )
-        );
+        return view('organization.structure.index', compact(
+            'organizations',
+            'users',
+            'jabatans',
+            'outlets'
+        ));
     }
 
     public function store(Request $request)
@@ -46,24 +44,15 @@ class OrganizationalUnitController extends Controller
         DB::beginTransaction();
 
         try {
-
             $savedIds = [];
 
             foreach ($request->tree as $node) {
-
-                $this->saveNode(
-                    $node,
-                    null,
-                    $savedIds
-                );
-
+                // Memanggil saveNode dengan parameter awal supervisorId = null
+                $this->saveNode($node, null, $savedIds, null);
             }
 
-            // hapus node yang tidak ada lagi di tree
-            OrganizationalUnit::whereNotIn(
-                'id',
-                $savedIds
-            )->delete();
+            // Hapus node yang tidak ada lagi di tree
+            OrganizationalUnit::whereNotIn('id', $savedIds)->delete();
 
             DB::commit();
 
@@ -73,7 +62,6 @@ class OrganizationalUnitController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
 
             return response()->json([
@@ -81,22 +69,19 @@ class OrganizationalUnitController extends Controller
                 'message' => $e->getMessage(),
                 'line' => $e->getLine()
             ], 500);
-
         }
     }
 
     private function saveNode(
         array $node,
         ?int $parentId,
-        array &$savedIds
+        array &$savedIds,
+        ?int $supervisorId = null // <--- Tambahkan parameter ini
     ): OrganizationalUnit {
 
-        $isNew =
-            !isset($node['id']) ||
-            Str::startsWith((string) $node['id'], 'tmp_');
+        $isNew = !isset($node['id']) || Str::startsWith((string) $node['id'], 'tmp_');
 
         if ($isNew) {
-
             $unit = OrganizationalUnit::create([
                 'parent_id' => $parentId,
                 'name' => $node['name'],
@@ -105,13 +90,8 @@ class OrganizationalUnitController extends Controller
                 'man_power' => $node['man_power'] ?: 0,
                 'is_active' => true,
             ]);
-
         } else {
-
-            $unit = OrganizationalUnit::findOrFail(
-                $node['id']
-            );
-
+            $unit = OrganizationalUnit::findOrFail($node['id']);
             $unit->update([
                 'parent_id' => $parentId,
                 'name' => $node['name'],
@@ -119,7 +99,6 @@ class OrganizationalUnitController extends Controller
                 'outlet_id' => $node['outlet_id'] ?: null,
                 'man_power' => $node['man_power'] ?: 0,
             ]);
-
         }
 
         $savedIds[] = $unit->id;
@@ -127,49 +106,46 @@ class OrganizationalUnitController extends Controller
         // ======================
         // Sync Employees
         // ======================
+        $employeeIds = collect($node['employees'] ?? [])->pluck('user_id')->toArray();
 
-        $employeeIds = collect(
-            $node['employees'] ?? []
-        )->pluck('user_id')->toArray();
-
-        EmployeeProfile::where(
-            'organizational_unit_id',
-            $unit->id
-        )
-            ->whereNotIn(
-                'user_id',
-                $employeeIds
-            )
+        EmployeeProfile::where('organizational_unit_id', $unit->id)
+            ->whereNotIn('user_id', $employeeIds)
             ->update([
-                'organizational_unit_id' => null
+                'organizational_unit_id' => null,
+                'supervisor_id' => null // Optional: clear supervisor jika di-remove
             ]);
 
-        foreach ($node['employees'] ?? [] as $employee) {
+        // Simpan id user pertama di node ini untuk dijadikan atasan node child
+        $currentUnitHeadId = null;
+
+        foreach ($node['employees'] ?? [] as $index => $employee) {
+
+            // Jadikan user pertama di array ini sebagai kepala dari unit tersebut
+            if ($index === 0) {
+                $currentUnitHeadId = $employee['user_id'];
+            }
 
             EmployeeProfile::updateOrCreate(
-                [
-                    'user_id' => $employee['user_id']
-                ],
+                ['user_id' => $employee['user_id']],
                 [
                     'organizational_unit_id' => $unit->id,
-                    'jabatan_id' => $employee['jabatan_id'] ?? null
+                    'jabatan_id' => $employee['jabatan_id'] ?? null,
+                    'supervisor_id' => $supervisorId // <--- Set ke atasan yang diturunkan
                 ]
             );
-
         }
 
         // ======================
         // Children Recursive
         // ======================
 
+        // Siapa atasan untuk node di bawahnya? 
+        // Jika unit ini punya head, gunakan id head tersebut. 
+        // Jika kosong, teruskan atasan dari unit sebelumnya
+        $nextSupervisorId = $currentUnitHeadId ?? $supervisorId;
+
         foreach ($node['children'] ?? [] as $child) {
-
-            $this->saveNode(
-                $child,
-                $unit->id,
-                $savedIds
-            );
-
+            $this->saveNode($child, $unit->id, $savedIds, $nextSupervisorId);
         }
 
         return $unit;

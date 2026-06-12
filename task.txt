@@ -1,0 +1,11 @@
+Tambahkan kontrak karyawan,
+SP,
+notifikasi kontrak berakhir [admin hr, spv hr, manager hr],
+Kehadiran [HR],
+Pengangkatan Karyawan Magang [HR],
+cronjob Pengangkatan bisa di tentukan dan notifikasi,
+Profile tambahkan foto,
+Dashboard 
+IDP KPI, HR= [Karyawan, Organization (man power approve spv), manager approval kpi)
+Dasboard hr di gambar, 
+Pengumuman HR ONLY,

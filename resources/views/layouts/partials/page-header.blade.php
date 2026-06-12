@@ -7,7 +7,7 @@
     @endphp
 
     <h1 class="page-title">
-        {{ $currentPage }}
+        {{ strtoupper($currentPage) }}
     </h1>
 
     <div>
@@ -15,13 +15,13 @@
 
             <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}">
-                    Dashboard
+                    DASHBOARD
                 </a>
             </li>
 
             @if ($currentPage !== 'Dashboard')
                 <li class="breadcrumb-item active" aria-current="page">
-                    {{ $currentPage }}
+                    {{ strtoupper($currentPage) }}
                 </li>
             @endif
 

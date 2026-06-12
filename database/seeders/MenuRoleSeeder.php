@@ -14,37 +14,35 @@ class MenuRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        /*
-|--------------------------------------------------------------------------
-| GET ROLE ADMIN
-|--------------------------------------------------------------------------
-*/
+        $roleMenus = [
+            'admin' => [
+                'Dashboard',
+                'KPI',
+                'Organization',
+                'Karyawan',
+                'Kehadiran',
+            ],
+            'spv' => [
+                'Dashboard',
+                'Task',
+                'Team',
+            ],
+            'user' => [
+                'Dashboard',
+                'Kehadiran',
+            ],
+        ];
 
-        $admin = Role::where('name', 'admin')->first();
+        foreach ($roleMenus as $roleName => $menuNames) {
+            $role = Role::where('name', $roleName)->first();
 
-        if (!$admin) {
-            return;
+            if (!$role) {
+                continue;
+            }
+
+            $menus = menu::whereIn('name', $menuNames)->pluck('id');
+
+            $role->menus()->syncWithoutDetaching($menus);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | GET MENUS
-        |--------------------------------------------------------------------------
-        */
-
-        $menus = menu::whereIn('name', [
-            'Dashboard',
-            'KPI',
-            'Organization',
-            'Master',
-        ])->pluck('id');
-
-        /*
-        |--------------------------------------------------------------------------
-        | ATTACH MENU TO ADMIN
-        |--------------------------------------------------------------------------
-        */
-
-        $admin->menus()->syncWithoutDetaching($menus);
     }
 }

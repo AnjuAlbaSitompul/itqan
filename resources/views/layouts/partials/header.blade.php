@@ -68,21 +68,19 @@
                             @endphp
 
                             <div class="dropdown d-flex message">
-
                                 <a class="nav-link icon text-center" data-bs-toggle="dropdown">
                                     <i class="fe fe-bell"></i>
-
                                     @if($unreadCount > 0)
-                                        <span class="pulse-danger"></span>
+                                        <span class="pulse-danger" id="notification-pulse"></span>
                                     @endif
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-
                                     <div class="drop-heading border-bottom">
                                         <div class="d-flex">
                                             <h6 class="mt-1 mb-0 fs-16 fw-semibold text-dark">
-                                                You have {{ $unreadCount }} unread notifications
+                                                You have <span id="unread-count">{{ $unreadCount }}</span> unread
+                                                notifications
                                             </h6>
 
                                             @if($unreadCount > 0)
@@ -99,11 +97,10 @@
                                     </div>
 
                                     <div class="message-menu message-menu-scroll">
-
                                         @forelse($notifications as $notification)
-
-                                            <a class="dropdown-item d-flex {{ is_null($notification->read_at) ? 'bg-light' : '' }}"
-                                                href="{{ $notification->data['url'] ?? '#' }}">
+                                            <a class="dropdown-item d-flex notification-item {{ is_null($notification->read_at) ? 'bg-light unread' : '' }}"
+                                                href="{{ $notification->data['url'] ?? '#' }}"
+                                                data-id="{{ $notification->id }}">
 
                                                 <span
                                                     class="avatar avatar-md brround me-3 align-self-center bg-primary text-white">
@@ -111,33 +108,24 @@
                                                 </span>
 
                                                 <div class="wd-90p">
-
                                                     <div class="d-flex">
                                                         <h5 class="mb-1">
                                                             {{ $notification->data['title'] ?? 'Notification' }}
                                                         </h5>
-
                                                         <small class="text-muted ms-auto text-end">
                                                             {{ $notification->created_at->diffForHumans() }}
                                                         </small>
                                                     </div>
-
                                                     <span>
                                                         {{ $notification->data['message'] ?? '' }}
                                                     </span>
-
                                                 </div>
-
                                             </a>
-
                                         @empty
-
                                             <div class="text-center p-4 text-muted">
                                                 No notifications
                                             </div>
-
                                         @endforelse
-
                                     </div>
 
                                     <div class="dropdown-divider m-0"></div>
@@ -145,9 +133,7 @@
                                     <a href="" class="dropdown-item text-center p-3 text-muted">
                                         See all Notifications
                                     </a>
-
                                 </div>
-
                             </div>
 
                             <!-- MESSAGE-BOX -->

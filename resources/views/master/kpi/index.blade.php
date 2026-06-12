@@ -1,45 +1,47 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row mb-4">
 
-        <!-- PERIOD LIST -->
+    <div class="row g-4">
+
+        <!-- LEFT PANEL -->
         <div class="col-xl-4">
 
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-header bg-white border-0 p-4">
+                <div class="period-filter">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="row g-2">
 
-                        <div>
-
-                            <h5 class="fw-bold mb-1">
-                                KPI Period
-                            </h5>
-
-                            <small class="text-muted">
-                                Available periods
-                            </small>
-
+                        <div class="col-5">
+                            <label class="form-label small text-muted">
+                                From
+                            </label>
+                            <input type="date" id="filterStart" class="form-control">
                         </div>
 
-                        <button class="btn btn-primary rounded-pill btn-smoff-canvas" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#periodCanvas" aria-controls="periodCanvas">
+                        <div class="col-5">
+                            <label class="form-label small text-muted">
+                                Until
+                            </label>
+                            <input type="date" id="filterEnd" class="form-control">
+                        </div>
 
-                            <i class="fe fe-plus"></i>
-
-                        </button>
+                        <div class="col-2 d-flex align-items-center">
+                            <button class="btn btn-light" id="resetFilter">
+                                <i class="fe fe-refresh-cw"></i>
+                            </button>
+                        </div>
 
                     </div>
 
                 </div>
 
-                <div class="card-body p-0">
+                <div class="period-list">
 
-                    <div class="period-list">
-
-                    </div>
+                    <small class="text-muted">
+                        No KPI period available.
+                    </small>
 
                 </div>
 
@@ -47,176 +49,140 @@
 
         </div>
 
-        <!-- DETAIL PANEL -->
+        <!-- RIGHT PANEL -->
         <div class="col-xl-8">
 
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card border-0 shadow-sm">
 
-                <div class="card-body p-4">
+                <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-start mb-4">
 
                         <div>
-
-                            <h4 class="fw-bold mb-1">
+                            <h4 class="fw-semibold mb-1" id="periodName">
                                 KPI Januari 2026
                             </h4>
 
                             <p class="text-muted mb-0">
-                                Registration: 01 Jan 2026 - 05 Jan 2026
+                                Registration:
+                                01 Jan 2026 - 05 Jan 2026
                             </p>
-
                         </div>
 
-                        <span class="badge bg-success-subtle text-success px-3 py-2">
+                        <span class="badge bg-success">
                             OPEN
                         </span>
 
                     </div>
 
-                    <div class="row g-3">
+                    <!-- KPI STATS -->
+                    <div class="row g-3 mb-4">
 
                         <div class="col-md-3">
-
                             <div class="mini-stat">
-
-                                <div class="mini-stat-icon bg-primary">
+                                <div class="mini-stat-icon bg-primary text-white">
                                     <i class="fe fe-users"></i>
                                 </div>
-
                                 <div>
-
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block">
                                         Employee
                                     </small>
-
-                                    <h5 class="mb-0 fw-bold">
+                                    <h5 class="mb-0">
                                         120
                                     </h5>
-
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="col-md-3">
-
                             <div class="mini-stat">
-
-                                <div class="mini-stat-icon bg-success">
+                                <div class="mini-stat-icon bg-success text-white">
                                     <i class="fe fe-user-check"></i>
                                 </div>
-
                                 <div>
-
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block">
                                         Supervisor
                                     </small>
-
-                                    <h5 class="mb-0 fw-bold">
+                                    <h5 class="mb-0">
                                         12
                                     </h5>
-
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="col-md-3">
-
                             <div class="mini-stat">
-
-                                <div class="mini-stat-icon bg-warning">
+                                <div class="mini-stat-icon bg-warning text-white">
                                     <i class="fe fe-briefcase"></i>
                                 </div>
-
                                 <div>
-
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block">
                                         Manager
                                     </small>
-
-                                    <h5 class="mb-0 fw-bold">
+                                    <h5 class="mb-0">
                                         8
                                     </h5>
-
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="col-md-3">
-
                             <div class="mini-stat">
-
-                                <div class="mini-stat-icon bg-danger">
+                                <div class="mini-stat-icon bg-danger text-white">
                                     <i class="fe fe-user-x"></i>
                                 </div>
-
                                 <div>
-
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block">
                                         Pending
                                     </small>
-
-                                    <h5 class="mb-0 fw-bold">
+                                    <h5 class="mb-0">
                                         24
                                     </h5>
-
                                 </div>
-
                             </div>
-
                         </div>
 
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="row">
+                    <!-- DETAIL -->
+                    <div class="row g-3 mb-4">
 
                         <div class="col-md-6">
-
-                            <label class="text-muted small">
+                            <small class="text-muted d-block">
                                 KPI Period
-                            </label>
-
+                            </small>
                             <div class="fw-semibold">
                                 01 Jan 2026 - 31 Jan 2026
                             </div>
-
                         </div>
 
                         <div class="col-md-6">
-
-                            <label class="text-muted small">
+                            <small class="text-muted d-block">
                                 Registration Period
-                            </label>
-
+                            </small>
                             <div class="fw-semibold">
                                 01 Jan 2026 - 05 Jan 2026
                             </div>
-
                         </div>
 
                     </div>
 
-                    <hr class="my-4">
+                    <!-- ACTION -->
+                    <div class="d-flex flex-wrap gap-2">
 
-                    <div class="d-flex gap-2">
-
-                        <button class="btn btn-primary rounded-pill">
-                            Edit Period
+                        <button class="btn btn-primary">
+                            Edit
                         </button>
 
-                        <button class="btn btn-light rounded-pill">
+                        <button class="btn btn-outline-secondary">
                             View KPI
                         </button>
 
-                        <button class="btn btn-danger rounded-pill">
+                        <button class="btn btn-success" id="btnCreatePeriod">
+                            New Period
+                        </button>
+
+                        <button class="btn btn-danger">
                             Close Period
                         </button>
 
@@ -363,7 +329,7 @@
 
         </div>
 
-        <div class="offcanvas-footer border-top">
+        <div class="offcanvas-footer border-top p-3 d-flex justify-content-end gap-2">
 
             <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">
 

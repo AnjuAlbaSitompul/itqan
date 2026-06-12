@@ -14,12 +14,16 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('user_kpi_id')
-                ->constrained();
+                ->constrained('user_kpis');
+            $table->foreignId('user_kpi_detail_id')
+                ->constrained('user_kpi_details');
 
             $table->decimal('realization', 18, 2);
 
             $table->decimal('achievement_percent', 8, 2)
                 ->nullable();
+
+            $table->decimal('nilai', 8, 2)->nullable();
 
             $table->text('notes')->nullable();
 

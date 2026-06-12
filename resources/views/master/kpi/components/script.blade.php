@@ -1,5 +1,7 @@
 <script>
     $(function () {
+
+        console.log({{ $detail }})
         loadPeriods();
         let periodCanvas = new bootstrap.Offcanvas(
             document.getElementById('periodCanvas')
@@ -234,36 +236,49 @@
                             statusClass = 'bg-warning-subtle text-warning';
                             break;
                     }
-
                     html += `
-                <div class="period-item" data-id="${period.id}">
+<div class="period-item" data-id="${period.id}">
 
-                    <div class="period-content">
+    <div class="period-content">
 
-                        <div class="period-icon">
-                            <i class="fe fe-calendar"></i>
-                        </div>
+        <div class="period-icon">
+            <i class="fe fe-calendar"></i>
+        </div>
 
-                        <div>
+        <div>
 
-                            <div class="fw-semibold">
-                                ${period.name}
-                            </div>
+            <div class="fw-semibold">
+                ${period.name}
+            </div>
 
-                            <small class="text-muted">
-                                ${period.period}
-                            </small>
+            <small class="text-muted">
+                ${period.period_start} / ${period.period_end}
+            </small>
 
-                        </div>
+        </div>
 
-                    </div>
+    </div>
 
-                    <span class="badge ${statusClass}">
-                        ${period.status.toUpperCase()}
-                    </span>
+    <div class="d-flex align-items-center gap-2">
 
-                </div>
-            `;
+        <span class="badge ${statusClass}">
+            ${period.status.toUpperCase()}
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-sm btn-icon btn-delete-period"
+            data-id="${period.id}"
+            title="Delete">
+
+            <i class="fe fe-trash-2 text-danger"></i>
+
+        </button>
+
+    </div>
+
+</div>
+`;
 
                 });
 
@@ -271,6 +286,74 @@
 
             });
 
+        }
+        $(document).on('click', '.btn-delete-period', function (e) {
+
+            e.stopPropagation();
+
+            let id = $(this).data('id');
+
+            swal({
+                title: 'Are you sure?',
+                text: 'KPI Period akan dihapus.',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya Hapus!',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: false
+            }, function (isConfirm) {
+
+                if (!isConfirm) {
+                    return;
+                }
+
+                $.ajax({
+
+                    url: `/kpi/period/${id}`,
+
+                    type: 'DELETE',
+
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+
+                    success: function (res) {
+
+                        swal(
+                            'Berhasil!',
+                            res.message,
+                            'success'
+                        );
+
+                        loadPeriods();
+
+                    },
+
+                    error: function (xhr) {
+
+                        swal(
+                            'Error!',
+                            xhr.responseJSON?.message || 'Terjadi kesalahan',
+                            'error'
+                        );
+
+                    }
+
+                });
+
+            });
+
+        });
+
+        function kpiDetail(id) {
+            $.get(`/kpi/detail/${id}`, function (res) {
+                $('#detailTitle').text(res.data.title);
+                $('#detailDefinitionOfDone').text(res.data.definition_of_done);
+                $('#detailGuardRail').text(res.data.guard_rail);
+                $('#detailCreator').text(res.data.creator.name);
+                $('#detailCreatedAt').text(new Date(res.data.created_at).toLocaleString());
+                $('#kpiDetailCanvas').offcanvas('show');
+            });
         }
     });
 </script>

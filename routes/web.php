@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\KpiController;
 use App\Http\Controllers\KpiMasterController;
+use App\Http\Controllers\KpiTeamController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationalUnitController;
@@ -73,7 +75,7 @@ Route::middleware(['role:admin'])->group(function () {
 
 
     Route::get('/kpi', [MasterController::class, 'kpi'])
-        ->name('kpi');
+        ->name('key.performance.indicator');
     Route::get('/kpi/period', [KpiMasterController::class, 'kpiPeriod'])
         ->name('kpi.period');
     Route::post('/kpi/period', [KpiMasterController::class, 'storeKpiPeriod'])
@@ -90,4 +92,16 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/organization/structure', [OrganizationalUnitController::class, 'index'])->name('organization.structure');
     Route::post('/organization/save', [OrganizationalUnitController::class, 'store'])->name('organization.save');
 
+    Route::get('/attendance', [MasterController::class, 'attendance'])->name('attendance');
+});
+
+Route::middleware(['role:spv'])->group(function () {
+    Route::get('/task/kpi', [KpiController::class, 'index'])->name('task.kpi');
+    Route::get('/task/idp', [MasterController::class, 'myIdp'])->name('task.idp');
+
+    Route::get('/team/kpi', [KpiTeamController::class, 'index'])->name('team.kpi');
+    Route::post('/team/kpi/assign', [KpiTeamController::class, 'assignKpi'])->name('team.kpi.assign');
+    Route::get('/team/idp', [MasterController::class, 'teamIdp'])->name('team.idp');
+    Route::get('/kpi/master/me', [KpiMasterController::class, 'myKpi'])->name('kpi.master.me');
+    Route::post('/kpi/master/me', [KpiMasterController::class, 'storeMyKpi'])->name('kpi.master.me.store');
 });

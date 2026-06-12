@@ -27,7 +27,7 @@ class KPIOpenNotification extends Notification
         return [
             'title' => $this->title,
             'message' => $this->message,
-            'url' => '/kpi/Team'
+            'url' => '/team/kpi',
         ];
     }
 

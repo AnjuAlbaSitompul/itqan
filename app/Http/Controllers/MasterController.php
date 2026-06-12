@@ -6,6 +6,7 @@ use App\Models\Jabatan;
 use App\Models\Outlet;
 use App\Models\Role;
 use App\Models\Unit;
+use App\Models\UserKpi;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
@@ -27,7 +28,8 @@ class MasterController extends Controller
 
     public function kpi()
     {
-        return view('master.kpi.index');
+        $detail = UserKpi::with('kpiApproval.kpiPeriod')->first();
+        return view('master.kpi.index', compact('detail'));
     }
     public function idp()
     {
