@@ -25,7 +25,7 @@ class MenuRoleSeeder extends Seeder
             'spv' => [
                 'Dashboard',
                 'Task',
-                'Team',
+                'Team Management',
             ],
             'manager' => [
                 'Dashboard',

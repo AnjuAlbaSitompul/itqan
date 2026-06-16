@@ -105,6 +105,8 @@ Route::middleware(['role:admin'])->group(function () {
 
 Route::middleware(['role:spv,manager'])->group(function () {
 
+
+    Route::get('/team/approval', [UserKpiApprovalController::class, 'teamApprovalList'])->name('team.approval');
     Route::get('/team/kpi', [KpiTeamController::class, 'index'])->name('team.kpi');
     Route::post('/team/kpi/assign', [KpiTeamController::class, 'assignKpi'])->name('team.kpi.assign');
     Route::put('/team/kpi/assign/{id}', [KpiTeamController::class, 'updateAssignment'])->name('team.kpi.update');
