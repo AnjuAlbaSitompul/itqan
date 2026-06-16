@@ -25,8 +25,9 @@ return new class extends Migration {
             $table->enum('status', [
                 'pending',
                 'approved',
-                'rejected'
-            ]);
+                'rejected',
+                'review',
+            ])->default('pending');
 
             $table->text('notes')->nullable();
 

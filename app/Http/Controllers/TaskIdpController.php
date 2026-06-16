@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class KpiController extends Controller
+class TaskIdpController extends Controller
 {
     public function index()
     {
-        return view('task.kpi.index');
+        return view('task.idp.index');
     }
 }

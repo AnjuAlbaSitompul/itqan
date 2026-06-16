@@ -213,6 +213,24 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
+        $approval = Menu::create([
+            'name' => 'Approval',
+            'icon' => 'fe fe-check',
+            'route' => null,
+            'parent_id' => null,
+            'sort' => 8,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Approval KPI',
+            'icon' => 'fe fe-check',
+            'route' => 'approval.kpi',
+            'parent_id' => $approval->id,
+            'sort' => 1,
+            'is_active' => 1,
+        ]);
+
 
 
 

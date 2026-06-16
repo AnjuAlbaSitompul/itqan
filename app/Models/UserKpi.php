@@ -3,18 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserKpi extends Model
 {
     protected $fillable = [
         'user_id',
-        'master_kpi_id',
-        'period_id',
-        'weight',
-        'target',
-        'achievement_percent',
-        'score',
-        'status',
+        'kpi_approval_id',
     ];
 
     public function user()
@@ -22,13 +17,16 @@ class UserKpi extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function masterKpi()
+    public function kpiApproval()
     {
-        return $this->belongsTo(KpiMaster::class, 'kpi_master_id');
+        return $this->belongsTo(
+            UserKpiApproval::class,
+            'kpi_approval_id'
+        );
     }
 
-    public function period()
+    public function realizations(): HasMany
     {
-        return $this->belongsTo(KpiPeriod::class, 'period_id');
+        return $this->hasMany(UserKpiRealization::class, 'user_kpi_id');
     }
 }

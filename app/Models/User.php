@@ -92,4 +92,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(KpiMaster::class, 'created_by');
     }
+
+    public function createdKpiApprovals()
+    {
+        return $this->hasMany(UserKpiApproval::class, 'created_by');
+    }
+
 }

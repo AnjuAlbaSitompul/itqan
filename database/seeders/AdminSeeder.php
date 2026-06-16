@@ -23,6 +23,11 @@ class AdminSeeder extends Seeder
                 'role' => 'manager',
             ],
             [
+                'username' => 'direksi',
+                'name' => 'Direksi',
+                'role' => 'direksi',
+            ],
+            [
                 'username' => 'spv',
                 'name' => 'Supervisor',
                 'role' => 'spv',

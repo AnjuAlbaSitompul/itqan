@@ -904,14 +904,20 @@
             });
 
             let table = $('#userTable').DataTable({
-
                 processing: true,
                 serverSide: false,
-
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search user..."
+                responsive: {
+                    details: {
+                        type: 'column',
+                        target: 0
+                    }
                 },
+
+                columnDefs: [{
+                    className: 'dtr-control',
+                    orderable: false,
+                    targets: 0
+                }],
 
                 ajax: {
                     url: '/user',
@@ -919,28 +925,15 @@
                     dataSrc: ''
                 },
 
-                columns: [{
-                    data: 'no'
-                },
-                {
-                    data: 'name'
-                },
-                {
-                    data: 'username'
-                },
-                {
-                    data: 'role'
-                },
-                {
-                    data: 'golongan'
-                },
-                {
-                    data: 'action'
-                }
+                columns: [
+                    { data: null, defaultContent: '' },
+                    { data: 'name' },
+                    { data: 'username' },
+                    { data: 'role' },
+                    { data: 'golongan' },
+                    { data: 'action' }
                 ]
-
             });
-
 
             window.deleteUser = function (userId) {
 
@@ -1074,10 +1067,10 @@
                                 input.addClass('is-invalid');
 
                                 input.after(`
-                                                                                                            <div class="invalid-feedback">
-                                                                                                                ${messages[0]}
-                                                                                                            </div>
-                                                                                                        `);
+                                                                                                                    <div class="invalid-feedback">
+                                                                                                                        ${messages[0]}
+                                                                                                                    </div>
+                                                                                                                `);
                             });
                         }
                         swal({

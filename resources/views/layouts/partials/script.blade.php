@@ -38,6 +38,8 @@
 <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
 <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
 
+
+
 <!-- INTERNAL APEXCHART JS -->
 <script src="{{ asset('assets/js/apexcharts.js') }}"></script>
 <script src="{{ asset('assets/plugins/apexchart/irregular-data-series.js') }}"></script>
@@ -82,7 +84,4 @@
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-    });
-
-
-</script>
+    });</script>

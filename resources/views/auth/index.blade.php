@@ -129,19 +129,16 @@
                     </div>
                     <div class="social-icons position-absolute d-flex gap-8">
                         <div class="avatar avatar-md bg-body-secondary shadow-lg rounded-3 linkedin">
-                            <img src="assetsSignIn/images/social-icons/linkedin.png" alt="Avatar Image"
-                                class="avatar-2xs">
+                            <img src="assetsSignIn/images/social-icons/linkedin.png" alt="Avatar Image" class="avatar-2xs">
                         </div>
                         <div class="avatar avatar-md bg-body-secondary shadow-lg rounded-3 google">
                             <img src="assetsSignIn/images/social-icons/google.png" alt="Avatar Image" class="avatar-2xs">
                         </div>
                         <div class="avatar avatar-md bg-body-secondary shadow-lg rounded-3 instagram">
-                            <img src="assetsSignIn/images/social-icons/instagram.png" alt="Avatar Image"
-                                class="avatar-2xs">
+                            <img src="assetsSignIn/images/social-icons/instagram.png" alt="Avatar Image" class="avatar-2xs">
                         </div>
                         <div class="avatar avatar-md bg-body-secondary shadow-lg rounded-3 facebook">
-                            <img src="assetsSignIn/images/social-icons/facebook.png" alt="Avatar Image"
-                                class="avatar-2xs">
+                            <img src="assetsSignIn/images/social-icons/facebook.png" alt="Avatar Image" class="avatar-2xs">
                         </div>
                         <div class="avatar avatar-md bg-body-secondary shadow-lg rounded-3 apple">
                             <img src="assetsSignIn/images/social-icons/apple.png" alt="Avatar Image"
@@ -155,8 +152,8 @@
         </div>
     </div>
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="toast1" class="toast align-items-center text-white bg-primary border-0" role="alert"
-            aria-live="assertive" aria-atomic="true">
+        <div id="toast1" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">Hello, world! This is a toast message.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
@@ -165,18 +162,18 @@
         </div>
     </div>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             function toast(message, type = 'primary') {
                 var toastEl = $('#toast1');
                 toastEl.removeClass(
-                        'bg-primary bg-secondary bg-success bg-danger bg-warning bg-info bg-light bg-dark')
+                    'bg-primary bg-secondary bg-success bg-danger bg-warning bg-info bg-light bg-dark')
                     .addClass('bg-' + type);
                 toastEl.find('.toast-body').text(message);
                 var toast = new bootstrap.Toast(toastEl[0]);
                 toast.show();
             }
 
-            $('#signin-form').on('submit', function(e) {
+            $('#signin-form').on('submit', function (e) {
                 e.preventDefault();
                 var data = {
                     username: $(this).find('input[name="username"]').val(),
@@ -191,11 +188,11 @@
                     url: '/signin',
                     method: 'POST',
                     data: data,
-                    success: function(res) {
+                    success: function (res) {
                         toast(res.message || 'Signed in successfully', 'success');
                         if (res.redirect) window.location.href = res.redirect;
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         var msg = 'Sign in failed';
                         if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON
                             .message;

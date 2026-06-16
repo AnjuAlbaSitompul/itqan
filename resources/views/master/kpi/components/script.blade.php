@@ -1,7 +1,6 @@
 <script>
     $(function () {
 
-        console.log({{ $detail }})
         loadPeriods();
         let periodCanvas = new bootstrap.Offcanvas(
             document.getElementById('periodCanvas')

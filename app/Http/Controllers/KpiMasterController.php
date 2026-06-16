@@ -7,6 +7,7 @@ use App\Models\KpiPeriod;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserKpi;
+use App\Models\UserKpiApproval;
 use App\Notifications\KPIOpenNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Notification;
 
 class KpiMasterController extends Controller
 {
+
+
 
     public function storeMyKpi(Request $request)
     {
@@ -175,23 +178,130 @@ class KpiMasterController extends Controller
         }
     }
 
-    public function kpiPeriod()
+    public function updateKpiPeriod(Request $request, $id)
     {
-        $periods = KpiPeriod::with('creator')
-            ->orderByRaw("
-            CASE
-                WHEN status = 'open' THEN 1
-                WHEN status = 'draft' THEN 2
-                WHEN status = 'closed' THEN 3
-                ELSE 4
-            END
-        ")
-            ->orderByDesc('period_start')
-            ->get();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'registration_start' => 'required|date',
+            'registration_end' => 'required|date|after:registration_start',
+            'period_start' => 'required|date',
+            'period_end' => 'required|date|after:period_start',
+            'status' => 'required|in:draft,open,closed',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $period = KpiPeriod::findOrFail($id);
+
+            if ($validated['status'] === 'open' && $period->status !== 'open') {
+                $currentOpen = KpiPeriod::where('status', 'open')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($currentOpen && $currentOpen->id !== $period->id) {
+                    if (
+                        Carbon::parse($currentOpen->period_end)
+                            ->lt(Carbon::today())
+                    ) {
+                        $currentOpen->update([
+                            'status' => 'closed'
+                        ]);
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Masih terdapat KPI Period yang sedang aktif.'
+                        ], 422);
+                    }
+                }
+            }
+
+            $period->update($validated);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'KPI Period updated successfully',
+                'data' => $period
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function kpiPeriod(Request $request)
+    {
+        $query = KpiPeriod::query()->orderBy('period_start', 'desc');
+
+        // Opsional: Implementasi filter tanggal dari front-end
+        if ($request->filled('start') && $request->filled('end')) {
+            $query->whereBetween('period_start', [$request->start, $request->end]);
+        }
+
+        $periods = $query->get();
 
         return response()->json([
             'success' => true,
-            'data' => $periods,
+            'data' => $periods
+        ]);
+    }
+
+    public function show($id)
+    {
+        // 1. Ambil data utama KpiPeriod
+        $period = KpiPeriod::findOrFail($id);
+
+        // 2. Hitung jumlah approval berdasarkan status 'pending' untuk periode ini
+        $pending = UserKpiApproval::where('kpi_period_id', $period->id)
+            ->where('status', 'pending')
+            ->count();
+
+        /**
+         * 3. Ambil data statistik peran (role) dari user yang terikat dalam periode ini.
+         * Menggunakan subquery Join agar menghemat memori RAM server, daripada menarik ribuan koleksi model.
+         */
+        $roleCounts = DB::table('user_kpi_approvals')
+            ->join('user_kpis', 'user_kpi_approvals.id', '=', 'user_kpis.kpi_approval_id')
+            ->join('users', 'user_kpis.user_id', '=', 'users.id')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->where('user_kpi_approvals.kpi_period_id', $period->id)
+            ->select('roles.name as role_name', DB::raw('count(*) as total'))
+            ->groupBy('roles.name')
+            ->pluck('total', 'role_name')
+            ->toArray();
+
+        // Ambil nilai dari array pemetaan (jika role tidak ditemukan dalam database, beri nilai default 0)
+        // Sesuaikan string 'pegawai', 'spv', 'manager' dengan value kolom 'name' di tabel roles Anda
+        $employee = $roleCounts['pegawai'] ?? 0;
+        $spv = $roleCounts['spv'] ?? 0;
+        $manager = $roleCounts['manager'] ?? 0;
+
+        $stats = [
+            'employee' => $employee,
+            'supervisor' => $spv,
+            'manager' => $manager,
+            'pending' => $pending
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $period->id,
+                'name' => $period->name,
+                'status' => strtolower($period->status),
+                'registration_start' => $period->registration_start,
+                'registration_end' => $period->registration_end,
+                'period_start' => $period->period_start,
+                'period_end' => $period->period_end,
+                'stats' => $stats
+            ]
         ]);
     }
 }

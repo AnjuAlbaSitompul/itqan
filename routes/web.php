@@ -10,9 +10,13 @@ use App\Http\Controllers\MasterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationalUnitController;
 use App\Http\Controllers\OutletController;
+use App\Http\Controllers\TaskIdpController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserKpiApprovalController;
+use App\Http\Controllers\UserKpiRealizationController;
 use App\Http\Controllers\UserManagementController;
+use App\Models\UserKpiApproval;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -80,6 +84,10 @@ Route::middleware(['role:admin'])->group(function () {
         ->name('kpi.period');
     Route::post('/kpi/period', [KpiMasterController::class, 'storeKpiPeriod'])
         ->name('kpi.period.store');
+    Route::get('/kpi/period/{id}', [KpiMasterController::class, 'show'])
+        ->name('kpi.period');
+    Route::put('/kpi/period/{id}/update', [KpiMasterController::class, 'updateKpiPeriod'])
+        ->name('kpi.period.update');
     Route::get('/idp', [MasterController::class, 'idp'])
         ->name('idp');
 
@@ -95,13 +103,29 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/attendance', [MasterController::class, 'attendance'])->name('attendance');
 });
 
-Route::middleware(['role:spv'])->group(function () {
-    Route::get('/task/kpi', [KpiController::class, 'index'])->name('task.kpi');
-    Route::get('/task/idp', [MasterController::class, 'myIdp'])->name('task.idp');
+Route::middleware(['role:spv,manager'])->group(function () {
 
     Route::get('/team/kpi', [KpiTeamController::class, 'index'])->name('team.kpi');
     Route::post('/team/kpi/assign', [KpiTeamController::class, 'assignKpi'])->name('team.kpi.assign');
+    Route::put('/team/kpi/assign/{id}', [KpiTeamController::class, 'updateAssignment'])->name('team.kpi.update');
+
+    Route::get('/team/kpi/approval', [KpiTeamController::class, 'approvalList'])->name('team.kpi.approval');
+    Route::get('/team/kpi/report', [KpiTeamController::class, 'report'])->name('team.kpi.report');
     Route::get('/team/idp', [MasterController::class, 'teamIdp'])->name('team.idp');
     Route::get('/kpi/master/me', [KpiMasterController::class, 'myKpi'])->name('kpi.master.me');
     Route::post('/kpi/master/me', [KpiMasterController::class, 'storeMyKpi'])->name('kpi.master.me.store');
+});
+
+Route::middleware(['role:manager,direksi'])->group(function () {
+    Route::get('/approval/kpi', [UserKpiApprovalController::class, 'index'])->name('approval.kpi');
+    Route::get('/approval/kpi/list', [UserKpiApprovalController::class, 'list'])->name('approval.kpi.list');
+    Route::post('/approval/kpi/{id}/{action}', [UserKpiApprovalController::class, 'approval'])->name('approval.kpi');
+});
+
+
+Route::middleware('role:pegawai,spv,manager,direksi')->group(function () {
+    Route::get('/task/kpi', [UserKpiRealizationController::class, 'index'])->name('task.kpi');
+    Route::post('/task/kpi/realization', [UserKpiRealizationController::class, 'store'])->name('kpi.realization.store');
+
+    Route::get('/task/idp', [TaskIdpController::class, 'index'])->name('task.idp');
 });

@@ -27,9 +27,21 @@ class MenuRoleSeeder extends Seeder
                 'Task',
                 'Team',
             ],
-            'user' => [
+            'manager' => [
                 'Dashboard',
-                'Kehadiran',
+                'Task',
+                'Team',
+                'Approval',
+            ],
+            'direksi' => [
+                'Dashboard',
+                'Task',
+                'Team',
+                'Approval',
+            ],
+            'pegawai' => [
+                'Dashboard',
+                'Task',
             ],
         ];
 

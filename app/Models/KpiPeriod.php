@@ -20,4 +20,9 @@ class KpiPeriod extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function kpiApprovals()
+    {
+        return $this->hasMany(UserKpiApproval::class);
+    }
 }
