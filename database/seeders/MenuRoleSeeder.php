@@ -17,7 +17,7 @@ class MenuRoleSeeder extends Seeder
         $roleMenus = [
             'admin' => [
                 'Dashboard',
-                'KPI',
+                'Performance Management',
                 'Organization',
                 'Karyawan',
                 'Kehadiran',

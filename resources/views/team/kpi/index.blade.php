@@ -226,12 +226,18 @@
 
                                                     <div class="col-md-5">
                                                         <label class="form-label fw-semibold">Member</label>
-                                                        <select class="form-select select2" id="memberFilter">
+                                                        <select class="form-select select2" id="memberFilter"
+                                                            style="width: 100%;">
                                                             <option value="" disabled selected>Cari Member...</option>
 
-                                                            @foreach($subordinates ?? [] as $member)
-                                                                <option value="{{ $member->id }}">{{ $member->name }}
-                                                                    ({{ $member->role->name ?? '-' }})</option>
+                                                            @foreach($allSubordinate ?? [] as $member)
+                                                                <option value="{{ $member->id }}"
+                                                                    data-nama="{{ $member->name }}"
+                                                                    data-jabatan="{{ $member->profile?->jabatan?->name ?? 'Tanpa Jabatan' }}"
+                                                                    data-unit="{{ $member->profile?->organizationalUnit?->name ?? 'Tanpa Unit' }}">
+                                                                    {{ $member->name }} -
+                                                                    {{ $member->profile?->jabatan?->name ?? 'Tanpa Jabatan' }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </div>

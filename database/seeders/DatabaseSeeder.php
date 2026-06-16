@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             MenuRoleSeeder::class,
             OutletSeeder::class,
             JabatanSeeder::class,
+            PrayerScheduleSeeder::class,
         ]);
     }
 }

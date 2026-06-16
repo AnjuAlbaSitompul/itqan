@@ -1,46 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-
     <div class="org-page">
 
         <div class="org-toolbar">
-
             <div>
                 <h3>Organization Structure</h3>
-                <p>
-                    Manage organization hierarchy and manpower allocation.
-                </p>
+                <p>Manage organization hierarchy and manpower allocation.</p>
             </div>
 
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" id="addRootDivision">
-                    <i class="fe fe-plus"></i>
-                    Division
+            <div class="org-toolbar-actions">
+                <button class="btn btn-primary shadow-sm rounded-pill px-4" id="addRootDivision">
+                    <i class="fe fe-plus me-1"></i> Division
                 </button>
-
-                <button class="btn btn-success" id="saveTree">
-                    <i class="fe fe-save"></i>
-                    Save
+                <button class="btn btn-success shadow-sm rounded-pill px-4" id="saveTree">
+                    <i class="fe fe-save me-1"></i> Save
                 </button>
             </div>
-
         </div>
 
-        <div id="organization-tree">
-
-            @foreach($organizations as $organization)
-                @include('organization.partials.node', [
-                    'node' => $organization
-                ])
-            @endforeach
-
+        <div class="org-tree-wrapper">
+            <div id="organization-tree">
+                @foreach($organizations as $organization)
+                    @include('organization.partials.node', [
+                        'node' => $organization
+                    ])
+                @endforeach
+                </div>
         </div>
 
     </div>
 
-    @include('organization.structure.components.options')
-
+        @include('organization.structure.components.options')
 @endsection
 @push('styles')
     @include('organization.structure.components.styles')

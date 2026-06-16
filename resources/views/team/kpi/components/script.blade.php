@@ -601,5 +601,59 @@
             });
 
         });
+
+        // Fungsi untuk merender ulang tampilan list dropdown Select2
+        function formatMember(member) {
+            // Jika ini adalah placeholder (tidak ada ID), tampilkan teks bawaan
+            if (!member.id) {
+                return member.text;
+            }
+
+            // Ambil data dari atribut HTML data-*
+            let nama = $(member.element).data('nama');
+            let jabatan = $(member.element).data('jabatan');
+            let unit = $(member.element).data('unit');
+
+            // Susun HTML kustom untuk dropdown item
+            let $result = $(`
+                <div style="line-height: 1.4;">
+                    <span style="font-weight: 600; color: #333;">${nama}</span><br>
+                    <small style="color: #6c757d; font-size: 0.85em;">
+                        <i class="fe fe-briefcase"></i> ${jabatan} | <i class="fe fe-building"></i> ${unit}
+                    </small>
+                </div>
+            `);
+
+            return $result;
+        }
+
+        // Fungsi untuk merender teks saat item sudah dipilih
+        function formatMemberSelection(member) {
+            if (!member.id) {
+                return member.text;
+            }
+            let nama = $(member.element).data('nama');
+            return nama; // Hanya tampilkan nama saat sudah dipilih agar input box tidak kepenuhan
+        }
+
+        // Inisialisasi Select2
+        $('#memberFilter').select2({
+            placeholder: "Cari Member...",
+            allowClear: true,
+            width: '100%',               // Memastikan lebarnya mengikuti container
+            templateResult: formatMember, // Gunakan template custom untuk list dropdown
+            templateSelection: formatMemberSelection, // Gunakan template custom untuk item yang terpilih
+            language: {
+                noResults: function () {
+                    return "Member tidak ditemukan"; // Teks jika pencarian tidak ada hasil
+                }
+            }
+        });
+
+        // (Opsional) Auto-focus ke kolom search ketika Select2 dibuka
+        $('#memberFilter').on('select2:open', function (e) {
+            document.querySelector('.select2-search__field').focus();
+        });
+
     });
 </script>

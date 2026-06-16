@@ -127,154 +127,62 @@
         // =========================
 
         function nodeTemplate(parentId, type) {
-
-            const uid =
-                'tmp_' +
-                Date.now() +
-                Math.floor(Math.random() * 99999);
+            const uid = 'tmp_' + Date.now() + Math.floor(Math.random() * 99999);
+            const badgeType = type.toLowerCase();
+            const typeLabel = type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
 
             return `
-            <div
-                class="org-node open"
-                data-id="${uid}"
-                data-parent-id="${parentId ?? ''}"
-                data-type="${type}"
-            >
-
-                <div class="org-item">
-
-                    <div class="org-main">
-
-                        <button type="button" class="btn-icon toggle-node">
-    <i class="fe fe-chevron-right"></i>
-</button>
-
-                        <div class="org-content">
-
-                            <div class="node-view d-none">
-
-                                <div class="org-title node-title">
-                                    New ${type}
-                                </div>
-
-                                <div class="org-meta">
-
-                                    <span class="org-badge">
-                                        ${type.replace('_', ' ')}
-                                    </span>
-
-                                    <span class="org-stat">
-                                        MP:
-                                        <span class="manpower-count">
-                                            0
-                                        </span>
-                                    </span>
-
-                                    <span class="org-stat">
-                                        EMP:
-                                        <span class="employee-count">
-                                            0
-                                        </span>
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-<div class="node-edit">
-
-    <div class="row g-2">
-
-        <div class="col-md-${type === 'unit' ? '4' : '8'}">
-
-            <input
-                type="text"
-                class="form-control form-control-sm node-name"
-                placeholder="Name"
-            >
-
-        </div>
-
-        ${type === 'unit'
-                    ?
-                    `
-                <div class="col-md-4">
-
-                    <select
-                        class="form-select form-select-sm node-outlet select2-outlet"
-                    >
-                        ${window.outletOptions}
-                    </select>
-
-                </div>
-                `
-                    :
-                    ''
-                }
-
-        <div class="col-md-4">
-
-            <input
-                type="number"
-                value="0"
-                class="form-control form-control-sm node-man-power"
-                placeholder="MP"
-            >
-
-        </div>
-
-    </div>
-
-</div>
-
+    <div class="org-node open" data-id="${uid}" data-parent-id="${parentId ?? ''}" data-type="${type}">
+        <div class="org-item">
+            <div class="org-main">
+                <button type="button" class="btn-icon toggle-node"><i class="fe fe-chevron-right"></i></button>
+                <div class="org-content">
+                    <div class="node-view d-none">
+                        <div class="org-title node-title">New ${typeLabel}</div>
+                        <div class="org-meta">
+                            <span class="org-badge badge-${badgeType}">${typeLabel}</span>
+                            <span class="org-stat"><i class="fe fe-target me-1"></i> MP: <strong class="manpower-count">0</strong></span>
+                            <span class="org-stat"><i class="fe fe-users me-1"></i> EMP: <strong class="employee-count">0</strong></span>
                         </div>
-
                     </div>
 
-                    <div class="org-actions">
-
-                        <button
-                            type="button"
-                            class="btn-icon manage-employee"
-                        >
-                            <i class="fe fe-users"></i>
-                        </button>
-
-                        ${type !== 'sub_unit'
-                    ? `
-                                <button
-                                    type="button"
-                                    class="btn-icon add-child"
-                                >
-                                    <i class="fe fe-plus"></i>
-                                </button>
-                                `
-                    : ''
-                }
-
-                        <button
-                            type="button"
-                            class="btn-icon delete-node danger"
-                        >
-                            <i class="fe fe-trash"></i>
-                        </button>
-
+                    <div class="node-edit">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-12 col-md-4">
+                                <input type="text" class="form-control node-name" placeholder="${typeLabel} Name">
+                            </div>
+                            <div class="col-12 col-md-3 mt-2 mt-md-0">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted">MP</span>
+                                    <input type="number" value="0" class="form-control node-man-power">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-5 mt-2 mt-md-0">
+                                <select class="form-select node-outlet select2-outlet">
+                                    ${window.outletOptions}
+                                </select>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
-
-                <div class="org-collapse">
-
-                    <div class="employee-wrapper"></div>
-
-                    <div class="org-children"></div>
-
-                </div>
-
             </div>
-        `;
-        }
 
+            <div class="org-actions">
+                <button type="button" class="btn-icon manage-employee" title="Manage Employees"><i class="fe fe-users"></i></button>
+                ${type !== 'sub_unit' ? `<button type="button" class="btn-icon add-child primary-soft" title="Add Child"><i class="fe fe-plus"></i></button>` : ''}
+                <button type="button" class="btn-icon edit-node d-none" title="Edit"><i class="fe fe-edit-2"></i></button>
+                <button type="button" class="btn-icon save-node success-soft" title="Save"><i class="fe fe-check"></i></button>
+                <button type="button" class="btn-icon cancel-edit secondary-soft" title="Cancel"><i class="fe fe-x"></i></button>
+                <button type="button" class="btn-icon danger delete-node" title="Delete"><i class="fe fe-trash-2"></i></button>
+            </div>
+        </div>
+
+        <div class="org-collapse">
+            <div class="employee-wrapper"></div>
+            <div class="org-children"></div>
+        </div>
+    </div>`;
+        }
         // =========================
         // Accordion
         // =========================

@@ -128,4 +128,13 @@ Route::middleware('role:pegawai,spv,manager,direksi')->group(function () {
     Route::post('/task/kpi/realization', [UserKpiRealizationController::class, 'store'])->name('kpi.realization.store');
 
     Route::get('/task/idp', [TaskIdpController::class, 'index'])->name('task.idp');
+
+    // Endpoint untuk Fetch Server Time (Untuk validasi Shalat)
+    Route::get('/api/server-time', [TaskIdpController::class, 'getServerTime'])->name('api.server-time');
+
+    // AJAX Endpoints untuk submit data IDP
+    Route::post('/task/idp/jogging', [TaskIdpController::class, 'storeJogging'])->name('task.idp.jogging.store');
+    Route::post('/task/idp/prayer', [TaskIdpController::class, 'storePrayer'])->name('task.idp.prayer.store');
+    Route::post('/task/idp/book-proposal', [TaskIdpController::class, 'storeBookProposal'])->name('task.idp.book-proposal.store');
+    Route::post('/task/idp/book-log', [TaskIdpController::class, 'storeBookLog'])->name('task.idp.book-log.store');
 });

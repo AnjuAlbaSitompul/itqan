@@ -126,6 +126,8 @@ class KpiTeamController extends Controller
     public function index()
     {
         $subordinates = Auth::user()->subordinates()->get();
+        $allSubordinate = Auth::user()->getAllSubordinates();
+        $allSubordinate->load(['profile.jabatan', 'profile.organizationalUnit']);
         $superior = Auth::user()->superior()->get();
 
         $kpiperiod = KpiPeriod::where('status', 'open')->first();
@@ -174,7 +176,7 @@ class KpiTeamController extends Controller
                 ->get();
         }
 
-        return view('team.kpi.index', compact('kpiperiod', 'isTeamSet', 'isExists', 'subordinates', 'superior', 'assignedKpis', 'unregisteredMembers', 'periods'));
+        return view('team.kpi.index', compact('kpiperiod', 'isTeamSet', 'isExists', 'subordinates', 'superior', 'assignedKpis', 'unregisteredMembers', 'periods', 'allSubordinate'));
     }
 
     public function assignKpi(Request $request)

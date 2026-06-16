@@ -32,7 +32,7 @@ class MenuSeeder extends Seeder
 
         // KPI
         $kpi = Menu::create([
-            'name' => 'KPI',
+            'name' => 'Performance Management',
             'icon' => 'fe fe-clipboard',
             'route' => null,
             'parent_id' => null,
@@ -187,7 +187,7 @@ class MenuSeeder extends Seeder
         ]);
 
         $team = Menu::create([
-            'name' => 'Team',
+            'name' => 'Team Management',
             'icon' => 'fe fe-users',
             'route' => null,
             'parent_id' => null,
@@ -210,6 +210,15 @@ class MenuSeeder extends Seeder
             'route' => 'team.idp',
             'parent_id' => $team->id,
             'sort' => 2,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Request Man Power',
+            'icon' => 'fe fe-users',
+            'route' => 'team.approval',
+            'parent_id' => $team->id,
+            'sort' => 4,
             'is_active' => 1,
         ]);
 
