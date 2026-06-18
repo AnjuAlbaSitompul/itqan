@@ -540,6 +540,47 @@
             $('input[name="prayerType"]').change(function () { startTimeSync(); });
             $('#prayer-tab').on('hidden.bs.tab', function (e) { clearInterval(clockInterval); });
 
+            // ---> TAMBAHKAN KODE AJAX INI DI SINI <---
+
+            // AJAX Submit Laporan Shalat
+            $('#prayerForm').submit(function (e) {
+                e.preventDefault();
+                let btn = $('#submitPrayerBtn');
+                let originalText = btn.html();
+
+                // Ubah state tombol saat proses loading
+                btn.html('<span class="spinner-border spinner-border-sm me-2"></span> Menyimpan...').prop('disabled', true);
+
+                let selectedType = $('input[name="prayerType"]:checked').val();
+
+                // Format waktu device saat tombol submit ditekan untuk dikirim ke backend 
+                // .toISOString() menghasilkan format standar yang bisa di-parse oleh Carbon
+                let currentDeviceTime = new Date().toISOString();
+
+                $.post("/task/idp/prayer", {
+                    // Gunakan _token jika CSRF token tidak di-setup secara global di $.ajaxSetup
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    prayer_type: selectedType,
+                    device_time: currentDeviceTime
+                }).done(function (res) {
+                    // Tampilkan pesan sukses dari server
+                    alert(res.message);
+
+                    // Reload halaman agar daftar "Riwayat Laporan" dan variabel todaySubmissions ter-update
+                    location.reload();
+                }).fail(function (err) {
+                    // Tampilkan pesan error dari throw 422 di controller
+                    let errorMsg = "Gagal mengirim laporan shalat.";
+                    if (err.responseJSON && err.responseJSON.message) {
+                        errorMsg = err.responseJSON.message;
+                    }
+                    alert(errorMsg);
+
+                    // Kembalikan tombol ke kondisi semula jika gagal
+                    btn.html(originalText).prop('disabled', false);
+                });
+            });
+
             // ==========================================
             // 3. BOOK REPORT / READING
             // ==========================================

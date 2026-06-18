@@ -1,16 +1,21 @@
 <?php
 
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\IdpMasterController;
+use App\Http\Controllers\IdpTeamController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\KpiMasterController;
+use App\Http\Controllers\KpiReportController;
 use App\Http\Controllers\KpiTeamController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationalUnitController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\TaskIdpController;
+use App\Http\Controllers\TeamRequestController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserKpiApprovalController;
@@ -92,6 +97,16 @@ Route::middleware(['role:admin'])->group(function () {
         ->name('idp');
 
 
+    Route::get('/kpi/report', [KpiReportController::class, 'kpiReport'])->name('kpi.report');
+    Route::get('/reports/kpi/data', [KpiReportController::class, 'getData'])->name('reports.kpi.data');
+
+
+    Route::get('/idp/shalat-schedule', [IdpMasterController::class, 'shalatSchedule'])->name('sholat.schedule');
+    Route::post('/idp/shalat-schedule', [IdpMasterController::class, 'store'])->name('sholat.schedule.store');
+    Route::put('/idp/shalat-schedule/{id}', [IdpMasterController::class, 'update'])->name('sholat.schedule.update');
+    Route::get('/idp/shalat-schedule/list', [IdpMasterController::class, 'shalatScheduleList'])->name('sholat.schedule.list');
+
+
     Route::get('/users/request', [UserManagementController::class, 'userRequest'])->name('user.request');
     Route::get('/request', [UserManagementController::class, 'request'])->name('request');
     Route::post('/request/approve/{id}', [UserManagementController::class, 'approveRequest'])->name('request.approve');
@@ -103,7 +118,7 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/attendance', [MasterController::class, 'attendance'])->name('attendance');
 });
 
-Route::middleware(['role:spv,manager'])->group(function () {
+Route::middleware(['role:spv,manager,direksi'])->group(function () {
 
 
     Route::get('/team/approval', [UserKpiApprovalController::class, 'teamApprovalList'])->name('team.approval');
@@ -113,15 +128,30 @@ Route::middleware(['role:spv,manager'])->group(function () {
 
     Route::get('/team/kpi/approval', [KpiTeamController::class, 'approvalList'])->name('team.kpi.approval');
     Route::get('/team/kpi/report', [KpiTeamController::class, 'report'])->name('team.kpi.report');
-    Route::get('/team/idp', [MasterController::class, 'teamIdp'])->name('team.idp');
+
+    Route::get('/team/idp', [IdpTeamController::class, 'teamIdp'])->name('team.idp');
+    Route::post('/team/idp/book-proposal/{id}/approve', [IdpTeamController::class, 'approveBookProposal'])->name('team.idp.approve-book');
+    Route::get('/team/idp/get-data', [IdpTeamController::class, 'getUserData'])->name('team.idp.get-data');
+
+    Route::get('/team/request', [TeamRequestController::class, 'index'])->name('team.request');
+    Route::post('/team/request/peringatan', [TeamRequestController::class, 'storePeringatan'])->name('team.request.peringatan.store');
+    Route::post('/team/request/mutasi', [TeamRequestController::class, 'storeMutasi'])->name('team.request.mutasi.store');
+    Route::post('/team/request/man-power', [TeamRequestController::class, 'storeManPower'])->name('team.request.manpower.store');
+
+
     Route::get('/kpi/master/me', [KpiMasterController::class, 'myKpi'])->name('kpi.master.me');
     Route::post('/kpi/master/me', [KpiMasterController::class, 'storeMyKpi'])->name('kpi.master.me.store');
 });
 
-Route::middleware(['role:manager,direksi'])->group(function () {
+Route::middleware(['role:spv,manager'])->group(function () {
     Route::get('/approval/kpi', [UserKpiApprovalController::class, 'index'])->name('approval.kpi');
     Route::get('/approval/kpi/list', [UserKpiApprovalController::class, 'list'])->name('approval.kpi.list');
     Route::post('/approval/kpi/{id}/{action}', [UserKpiApprovalController::class, 'approval'])->name('approval.kpi');
+
+    Route::get('/approval/request', [ApprovalController::class, 'approvalRequest'])->name('approval.request');
+    Route::get('/approval/request/list', [ApprovalController::class, 'list'])->name('approval.request.list');
+    Route::post('/approval/request/{type}/{id}/approve', [ApprovalController::class, 'approve'])->name('approval.request.approve');
+    Route::post('/approval/request/{type}/{id}/reject', [ApprovalController::class, 'reject'])->name('approval.request.reject');
 });
 
 

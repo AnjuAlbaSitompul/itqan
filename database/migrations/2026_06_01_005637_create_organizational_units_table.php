@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('organizational_units')
                 ->nullOnDelete();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->enum('type', ['division', 'department', 'unit', 'sub_unit']);
             $table->boolean('is_active')->default(true);
             $table->foreignId('outlet_id')

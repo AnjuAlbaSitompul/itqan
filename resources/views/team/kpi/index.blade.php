@@ -349,18 +349,31 @@
                     </div>
                 </div>
 
-                <h6 class="fw-bold mb-3">Formula (Penilaian)</h6>
+                <h6 class="fw-bold mb-2">Formula (Penilaian)</h6>
+                <div class="row g-2 mb-1 text-muted small fw-semibold text-center">
+                    <div class="col-4 text-start">Dari (From)</div>
+                    <div class="col-4 text-start">Sampai (To)</div>
+                    <div class="col-3 text-start">Hasil (%)</div>
+                    <div class="col-1"></div>
+                </div>
+
                 <div id="formula-container-offcanvas">
                     <div class="row g-2 mb-2 formula-row">
-                        <div class="col-5">
+                        <div class="col-4">
                             <input type="number" step="0.01" class="form-control" name="formulas[0][from]"
-                                placeholder="From">
+                                placeholder="Misal: 1">
                         </div>
-                        <div class="col-5">
-                            <input type="number" step="0.01" class="form-control" name="formulas[0][to]" placeholder="To">
+                        <div class="col-4">
+                            <input type="number" step="0.01" class="form-control" name="formulas[0][to]"
+                                placeholder="Misal: 5">
                         </div>
-                        <div class="col-2">
-                            <button type="button" class="btn btn-outline-success w-100 add-formula-btn">+</button>
+                        <div class="col-3">
+                            <input type="number" step="0.01" class="form-control" name="formulas[0][progress]"
+                                placeholder="100">
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-outline-success w-100 add-formula-btn px-0"
+                                title="Tambah Row">+</button>
                         </div>
                     </div>
                 </div>

@@ -80,6 +80,7 @@ class KpiTeamController extends Controller
                                 'id' => $formula->id,
                                 'from' => $formula->from ?? null,
                                 'to' => $formula->to ?? null, // <-- Typo 't00' diperbaiki di sini
+                                'progress' => $formula->progress ?? null,
                             ];
                         })->values(),
 
@@ -125,10 +126,15 @@ class KpiTeamController extends Controller
 
     public function index()
     {
-        $subordinates = Auth::user()->subordinates()->get();
-        $allSubordinate = Auth::user()->getAllSubordinates();
+        $user = Auth::user();
+
+        // 1. Fetch subordinates once and eager load relations to prevent N+1
+        $subordinates = $user->subordinates()->with(['profile.jabatan', 'profile.organizationalUnit'])->get();
+
+        $allSubordinate = $user->getAllSubordinates();
         $allSubordinate->load(['profile.jabatan', 'profile.organizationalUnit']);
-        $superior = Auth::user()->superior()->get();
+
+        $superior = $user->superior()->get();
 
         $kpiperiod = KpiPeriod::where('status', 'open')->first();
         $unregisteredMembers = collect();
@@ -142,44 +148,56 @@ class KpiTeamController extends Controller
         $isExists = false;
         $assignedKpis = [];
 
-        // Pastikan kpiperiod ada (tidak null) sebelum cek ke database lain
         if ($kpiperiod) {
-            $isTeamSet = UserKpiApproval::where('kpi_period_id', $kpiperiod->id)->exists();
+            // FIX: Scope the existence check to the currently authenticated user!
+            $isTeamSet = $user->createdKpiApprovals()
+                ->where('kpi_period_id', $kpiperiod->id)
+                ->exists();
+
             $isExists = $isTeamSet;
 
-            $subordinateIds = Auth::user()->subordinates()->pluck('users.id')->toArray();
+            // FIX: Use the already fetched collection instead of querying the DB again
+            $subordinateIds = $subordinates->pluck('id')->toArray();
 
-            $registeredIds = UserKpi::whereHas('kpiApproval', function ($q) use ($kpiperiod) {
-                $q->where('kpi_period_id', $kpiperiod->id);
-            })
-                ->whereIn('user_id', $subordinateIds)
-                ->pluck('user_id')
-                ->unique();
+            if (!empty($subordinateIds)) {
+                $registeredIds = UserKpi::whereHas('kpiApproval', function ($q) use ($kpiperiod) {
+                    $q->where('kpi_period_id', $kpiperiod->id);
+                })
+                    ->whereIn('user_id', $subordinateIds)
+                    ->pluck('user_id');
 
-            $unregisteredMembers = Auth::user()
-                ->subordinates()
-                ->whereNotIn('users.id', $registeredIds)
-                ->get();
+                // FIX: Filter the collection in-memory to get unregistered members
+                $unregisteredMembers = $subordinates->whereNotIn('id', $registeredIds)->values();
+            }
         }
 
         if ($superior->isEmpty()) {
-            $superior = User::whereHas('role', function ($q) { // Perbaikan "user" menjadi "User"
-                $q->whereIn('name', ['direksi']);
+            $superior = User::whereHas('role', function ($q) {
+                $q->where('name', 'direksi'); // Simplified from whereIn
             })->get();
         }
 
-
         if ($isTeamSet) {
-            $assignedKpis = Auth::user()->createdKpiApprovals()
+            $assignedKpis = $user->createdKpiApprovals()
                 ->where('kpi_period_id', $kpiperiod->id)
                 ->with(['userKpis.user', 'kpiDetails.masterKpi'])
                 ->get();
         }
 
-        return view('team.kpi.index', compact('kpiperiod', 'isTeamSet', 'isExists', 'subordinates', 'superior', 'assignedKpis', 'unregisteredMembers', 'periods', 'allSubordinate'));
+        return view('team.kpi.index', compact(
+            'kpiperiod',
+            'isTeamSet',
+            'isExists',
+            'subordinates',
+            'superior',
+            'assignedKpis',
+            'unregisteredMembers',
+            'periods',
+            'allSubordinate'
+        ));
     }
 
-    public function assignKpi(Request $request)
+    public function assignKpi(Request $request, $id = null)
     {
         $request->validate([
             'team_members' => 'required|array|min:1',
@@ -199,32 +217,52 @@ class KpiTeamController extends Controller
             ], 400);
         }
 
-        $teamAssigned = UserKpi::with('kpiApproval')
+        // Cek apakah tim sudah punya KPI KECUALI jika sedang mengedit pengajuan yang sama
+        $teamAssignedQuery = UserKpi::with('kpiApproval')
             ->whereHas('kpiApproval', function ($query) use ($activePeriod) {
                 $query->where('kpi_period_id', $activePeriod->id);
             })
-            ->whereIn('user_id', $request->team_members)
-            ->exists();
+            ->whereIn('user_id', $request->team_members);
 
-        if ($teamAssigned) {
+        if ($id) {
+            $teamAssignedQuery->where('kpi_approval_id', '!=', $id);
+        }
+
+        if ($teamAssignedQuery->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Salah satu atau beberapa anggota tim sudah memiliki penugasan KPI untuk periode ini.'
+                'message' => 'Salah satu anggota tim sudah memiliki penugasan KPI untuk periode ini.'
             ], 422);
         }
 
         DB::beginTransaction();
 
         try {
-            $approval = UserKpiApproval::create([
-                'level' => 1,
-                'kpi_period_id' => $activePeriod->id,
-                'approver_id' => $request->approver_id,
-                'created_by' => Auth::id(),
-                'status' => 'pending',
-                'notes' => $request->notes,
-            ]);
+            if ($id) {
+                // Mode UPDATE (Revisi / Review Rejected)
+                $approval = UserKpiApproval::findOrFail($id);
+                $approval->update([
+                    'approver_id' => $request->approver_id,
+                    'notes' => $request->notes,
+                    'status' => 'pending', // Kembalikan ke pending saat disubmit ulang
+                ]);
 
+                // Bersihkan relasi lama, ganti dengan yang baru dari request
+                UserKpi::where('kpi_approval_id', $approval->id)->delete();
+                UserKpiDetail::where('kpi_approval_id', $approval->id)->delete();
+            } else {
+                // Mode CREATE
+                $approval = UserKpiApproval::create([
+                    'level' => 1,
+                    'kpi_period_id' => $activePeriod->id,
+                    'approver_id' => $request->approver_id,
+                    'created_by' => Auth::id(),
+                    'status' => 'pending',
+                    'notes' => $request->notes,
+                ]);
+            }
+
+            // Insert mapping User ke Approval
             $userKpisData = [];
             foreach ($request->team_members as $userId) {
                 $userKpisData[] = [
@@ -236,6 +274,7 @@ class KpiTeamController extends Controller
             }
             UserKpi::insert($userKpisData);
 
+            // Insert mapping KPI Master ke Approval
             $kpiDetailsData = [];
             foreach ($request->kpi_masters as $masterId) {
                 $kpiDetailsData[] = [
@@ -249,19 +288,20 @@ class KpiTeamController extends Controller
 
             DB::commit();
 
+            // Notifikasi (opsional: bisa di set hanya jika Create baru saja)
             $UserSuperior = User::where('id', $request->approver_id)->first();
             if ($UserSuperior) {
                 $UserSuperior->notify(
                     new KpiApprovalNotification(
-                        'Approval KPI Menunggu' . ' ' . $activePeriod->name,
-                        Auth::user()->name,
+                        'Approval KPI Menunggu: ' . $activePeriod->name,
+                        Auth::user()->name
                     )
                 );
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Penugasan KPI berhasil disimpan dan dikirim ke atasan untuk Approval.'
+                'message' => $id ? 'Penugasan KPI berhasil diperbarui!' : 'Penugasan KPI berhasil disimpan dan dikirim ke atasan.'
             ]);
 
         } catch (\Exception $e) {
@@ -273,7 +313,6 @@ class KpiTeamController extends Controller
             ], 500);
         }
     }
-
     public function updateAssignment(Request $request, $id)
     {
         $request->validate([

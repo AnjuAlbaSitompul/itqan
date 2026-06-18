@@ -13,13 +13,10 @@ return new class extends Migration {
         Schema::create('book_proposals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-
-            // ID Atasan yang akan melakukan approval (merujuk ke tabel users)
-            $table->foreignId('superior_id')->nullable()->constrained('users')->nullOnDelete();
-
             $table->string('title');
             $table->string('author');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->date('due_date')->nullable(); // Diisi oleh atasan saat approve
 
             $table->timestamps();

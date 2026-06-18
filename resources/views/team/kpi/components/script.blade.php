@@ -24,11 +24,18 @@
 
         function renderFormulaBadges(formulas) {
             if (!formulas || formulas.length === 0) return '<span class="text-muted fst-italic small">Belum ada formula</span>';
-            return formulas.map(f =>
-                `<span class="badge bg-white text-dark border border-success px-2 py-1 me-1 mb-1 fw-medium shadow-sm" style="font-size: 0.75rem;">
-                                                        ${parseFloat(f.from)} <span class="text-muted mx-1">s/d</span> ${parseFloat(f.to)}
-                                                    </span>`
-            ).join('');
+            return formulas.map(f => {
+                // Konversi aman untuk memastikan angka tertampil dengan baik
+                let fromVal = f.from !== null ? parseFloat(f.from) : '-';
+                let toVal = f.to !== null ? parseFloat(f.to) : '-';
+                let progVal = f.progress !== null && f.progress !== undefined ? parseFloat(f.progress) : '0';
+
+                return `
+                    <span class="badge bg-white text-dark border border-success px-2 py-1 me-1 mb-1 fw-medium shadow-sm d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                        ${fromVal} <span class="text-muted">s/d</span> ${toVal} 
+                        <span class="badge bg-success-subtle text-success ms-1 px-1 py-0 rounded-1" style="font-size: 0.7rem;">= ${progVal}%</span>
+                    </span>`;
+            }).join('');
         }
 
         function renderActionButtons(item) {
@@ -259,11 +266,20 @@
         $(document).on('click', '.add-formula-btn', function () {
             fIndex++;
             let newRow = `
-                                                    <div class="row g-2 mb-2 formula-row" style="display:none;">
-                                                        <div class="col-5"><input type="number" step="0.01" class="form-control" name="formulas[${fIndex}][from]" placeholder="From"></div>
-                                                        <div class="col-5"><input type="number" step="0.01" class="form-control" name="formulas[${fIndex}][to]" placeholder="To"></div>
-                                                        <div class="col-2"><button type="button" class="btn btn-outline-danger w-100 remove-formula-btn"><i class="bi bi-trash"></i> X</button></div>
-                                                    </div>`;
+                <div class="row g-2 mb-2 formula-row" style="display:none;">
+                    <div class="col-4">
+                        <input type="number" step="0.01" class="form-control" name="formulas[${fIndex}][from]" placeholder="From">
+                    </div>
+                    <div class="col-4">
+                        <input type="number" step="0.01" class="form-control" name="formulas[${fIndex}][to]" placeholder="To">
+                    </div>
+                    <div class="col-3">
+                        <input type="number" step="0.01" class="form-control" name="formulas[${fIndex}][progress]" placeholder="Progress">
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-outline-danger w-100 remove-formula-btn px-0"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>`;
             $('#formula-container-offcanvas').append(newRow);
             $('#formula-container-offcanvas .formula-row:last').slideDown('fast');
         });
@@ -301,70 +317,94 @@
 
         // ==========================================
         // SUBMIT FORM PENUGASAN (CREATE / UPDATE)
-        // ==========================================
         $('#assignmentForm').on('submit', function (e) {
             e.preventDefault();
 
+            // Validasi frontend: Pastikan minimal 1 metrik KPI sudah masuk kotak
             if ($('input[name="kpi_masters[]"]').length === 0) {
-                alert('Silakan pilih minimal 1 Master KPI terlebih dahulu!');
+                swal("Peringatan", "Silakan pilih minimal 1 Master KPI dari Cari & Pilih KPI terlebih dahulu!", "warning");
                 return;
             }
 
             let form = $(this);
-            let btn = form.find('button[type="submit"]');
+            let btn = $('#submitAssignmentBtn');
             let originalText = btn.html();
 
-            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Mengirim...');
+            // Set loading button
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...');
 
             let approvalId = $('#approval_id').val();
             let url = '/team/kpi/assign';
-            let method = 'POST';
 
+            // Trik Laravel: Karena form.serialize() susah mengirim PUT murni, 
+            // gunakan metode spoofing dari Laravel.
             if (approvalId) {
-                url = `/team/kpi/assign/${approvalId}`;
-                method = 'PUT';
+                url = `/team/kpi/assign/${approvalId}?_method=PUT`;
             }
 
             $.ajax({
                 url: url,
-                type: method,
+                type: 'POST', // Selalu pakai POST, biarkan ?_method=PUT yang bekerja
                 data: form.serialize(),
                 success: function (response) {
-                    swal({
-                        title: 'Berhasil',
-                        text: response.message,
-                        type: 'success'
-                    }, function () {
-                        // Reset Form
-                        $('#assignmentForm')[0].reset();
-                        $('#approval_id').val('');
-                        $('#team_members').val(null).trigger('change');
-                        $('#approver_id').val(null).trigger('change');
+                    if (response.success) {
+                        swal({
+                            title: 'Berhasil!',
+                            text: response.message,
+                            type: 'success'
+                        }, function () {
+                            // 1. Reset Form
+                            form[0].reset();
+                            $('#approval_id').val('');
+                            $('#team_members').val(null).trigger('change');
+                            $('#approver_id').val(null).trigger('change');
 
-                        selectedKpis = [];
-                        $('#selected-kpis-container').html('');
-                        $('.empty-state').show();
+                            // 2. Kosongkan KPI yang dipilih
+                            selectedKpis = [];
+                            $('#selected-kpis-container').html('');
+                            $('.empty-state').show();
 
-                        reviewMode = false;
-                        $('#submitAssignmentBtn')
-                            .removeClass('btn-warning btn-info text-white')
-                            .addClass('btn-success')
-                            .html('Kirim Penugasan & Minta Approval');
+                            // 3. Kembalikan state tombol
+                            reviewMode = false;
+                            btn.removeClass('btn-warning btn-info text-white')
+                                .addClass('btn-success')
+                                .html('Kirim Penugasan & Minta Approval')
+                                .prop('disabled', false); // re-enable
 
-                        // Update list
-                        loadApprovalList();
+                            // 4. Update data list approval
+                            loadApprovalList();
 
-                        // Pindah tab ke list
-                        $('.panel-tabs a[href="#tab18"]').tab('show');
-                    });
+                            // 5. Pindah ke tab approval
+                            $('.panel-tabs a[href="#tab18"]').tab('show');
+                        });
+                    }
                 },
                 error: function (xhr) {
+                    // Kembalikan tombol seperti semula
                     btn.prop('disabled', false).html(originalText);
-                    swal('Error', xhr.responseJSON?.error ?? 'Terjadi kesalahan', 'error');
+
+                    let errorMsg = 'Terjadi kesalahan pada koneksi server.';
+
+                    // Jika ada error response dari fungsi JSON Anda di controller
+                    if (xhr.status === 400 || xhr.status === 422 || xhr.status === 500) {
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+
+                        // Menangkap error validasi bawaan object 'errors' Laravel
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            let errors = Object.values(xhr.responseJSON.errors);
+                            if (errors.length > 0) {
+                                errorMsg = errors[0][0]; // Ambil rule validasi pertama yang gagal
+                            }
+                        }
+                    }
+
+                    // Tampilkan SweetAlert error
+                    swal('Gagal!', errorMsg, 'error');
                 }
             });
         });
-
         // ==========================================
         // EDIT / REVIEW ASSIGNMENT
         // ==========================================

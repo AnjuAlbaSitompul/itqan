@@ -32,7 +32,7 @@ class MenuSeeder extends Seeder
 
         // KPI
         $kpi = Menu::create([
-            'name' => 'Performance Management',
+            'name' => 'Performance',
             'icon' => 'fe fe-clipboard',
             'route' => null,
             'parent_id' => null,
@@ -46,6 +46,24 @@ class MenuSeeder extends Seeder
             'route' => 'key.performance.indicator',
             'parent_id' => $kpi->id,
             'sort' => 1,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'KPI Laporan',
+            'icon' => 'fe fe-target',
+            'route' => 'kpi.report',
+            'parent_id' => $kpi->id,
+            'sort' => 1,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Jadwal Sholat',
+            'icon' => 'fe fe-target',
+            'route' => 'sholat.schedule',
+            'parent_id' => $kpi->id,
+            'sort' => 2,
             'is_active' => 1,
         ]);
 
@@ -214,9 +232,9 @@ class MenuSeeder extends Seeder
         ]);
 
         Menu::create([
-            'name' => 'Request Man Power',
+            'name' => 'Request',
             'icon' => 'fe fe-users',
-            'route' => 'team.approval',
+            'route' => 'team.request',
             'parent_id' => $team->id,
             'sort' => 4,
             'is_active' => 1,
@@ -237,6 +255,14 @@ class MenuSeeder extends Seeder
             'route' => 'approval.kpi',
             'parent_id' => $approval->id,
             'sort' => 1,
+            'is_active' => 1,
+        ]);
+        Menu::create([
+            'name' => 'Approval Request',
+            'icon' => 'fe fe-check',
+            'route' => 'approval.request',
+            'parent_id' => $approval->id,
+            'sort' => 2,
             'is_active' => 1,
         ]);
 

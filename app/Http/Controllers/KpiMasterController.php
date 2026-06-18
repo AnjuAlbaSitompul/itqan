@@ -18,8 +18,6 @@ use Illuminate\Support\Facades\Notification;
 class KpiMasterController extends Controller
 {
 
-
-
     public function storeMyKpi(Request $request)
     {
         // 1. Validasi
@@ -28,11 +26,16 @@ class KpiMasterController extends Controller
             'definition_of_done' => 'nullable|string',
             'guard_rail' => 'nullable|string',
             'satuan' => 'required|in:percentage,number,currency',
-            'bobot' => 'required|numeric|min:0', // <-- Tambahkan validasi bobot
+            'bobot' => 'required|numeric|min:0',
             'target' => 'required|numeric',
-            'formulas' => 'required|array',
+            'formulas' => 'required|array|min:1',
             'formulas.*.from' => 'required|numeric',
             'formulas.*.to' => 'required|numeric|gt:formulas.*.from',
+            'formulas.*.progress' => 'required|numeric|min:0', // <-- Tambahkan validasi progress
+        ], [
+            // Kustomisasi pesan error (opsional) agar lebih ramah dibaca pengguna
+            'formulas.*.to.gt' => 'Nilai "Sampai (To)" harus lebih besar dari nilai "Dari (From)".',
+            'formulas.*.progress.required' => 'Kolom "Hasil (%)" wajib diisi pada setiap baris formula.',
         ]);
 
         DB::beginTransaction();
@@ -44,7 +47,7 @@ class KpiMasterController extends Controller
                 'definition_of_done' => $validated['definition_of_done'] ?? null,
                 'guard_rail' => $validated['guard_rail'] ?? null,
                 'satuan' => $validated['satuan'],
-                'bobot' => $validated['bobot'], // <-- Simpan bobot ke DB
+                'bobot' => $validated['bobot'],
                 'target' => $validated['target'],
                 'created_by' => Auth::id(),
                 'is_active' => true,
@@ -55,6 +58,7 @@ class KpiMasterController extends Controller
                 $kpimaster->formulas()->create([
                     'from' => $formula['from'],
                     'to' => $formula['to'],
+                    'progress' => $formula['progress'], // <-- Masukkan progress ke database
                 ]);
             }
 
@@ -67,7 +71,7 @@ class KpiMasterController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'KPI Master berhasil dibuat.',
-                'data' => $kpimaster // <-- Kirim seluruh objek
+                'data' => $kpimaster
             ]);
 
         } catch (\Exception $e) {

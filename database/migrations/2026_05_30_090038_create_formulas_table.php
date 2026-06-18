@@ -13,8 +13,9 @@ return new class extends Migration {
         Schema::create('formulas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kpi_master_id')->constrained('kpi_masters')->onDelete('cascade');
-            $table->decimal('from', 10, 2)->nullable();
-            $table->decimal('to', 10, 2)->nullable();
+            $table->decimal('from', 10, 2);
+            $table->decimal('to', 10, 2);
+            $table->decimal('progress', 10, 2);
             $table->timestamps();
         });
     }

@@ -42,90 +42,114 @@ class User extends Authenticatable
     }
 
     // ==========================================
-    // RELASI HIERARKI ATASAN & BAWAHAN
+    // RELASI HIERARKI ATASAN & BAWAHAN BERDASARKAN UNIT
     // ==========================================
 
     /**
-     * Mendapatkan data langsung dari Atasan / Supervisor
-     * Cara memanggil: $user->superior
+     * Mendapatkan data Atasan (1 Level di atas)
+     * - Mengambil semua user dari parent unit tanpa mempedulikan status is_head.
+     * - Jika user berada di puncak struktur (parent_id null), tampilkan user dengan role direksi & owner.
+     */
+    // ==========================================
+    // RELASI HIERARKI ATASAN & BAWAHAN BERDASARKAN UNIT
+    // ==========================================
+
+    /**
+     * Mendapatkan data Atasan (1 Level di atas)
      */
     public function superior()
     {
-        return $this->hasOneThrough(
-            User::class,            // Model target (Atasan)
-            EmployeeProfile::class, // Model perantara (Profile kita)
-            'user_id',              // Foreign key pada tabel perantara
-            'id',                   // Foreign key pada tabel target
-            'id',                   // Local key pada tabel kita
-            'supervisor_id'         // Local key pada tabel perantara yang menuju ke target
-        );
+        $profile = $this->profile;
+
+        if (!$profile || !$profile->organizational_unit_id) {
+            return User::whereRaw('1 = 0');
+        }
+
+        $unit = OrganizationalUnit::find($profile->organizational_unit_id);
+
+        // Jika dia BUKAN PUNCAK (punya parent_id)
+        if ($unit && $unit->parent_id) {
+            return User::whereHas('profile', function ($query) use ($unit) {
+                $query->where('organizational_unit_id', $unit->parent_id);
+            });
+        }
+
+        // Jika dia PUNCAK (tidak punya parent_id): Mengembalikan diri dia sendiri
+        return User::where('id', $this->id);
     }
 
     /**
-     * Mendapatkan list data seluruh bawahan langsung
-     * Cara memanggil: $user->subordinates
+     * Mendapatkan list data bawahan langsung (1 Level di bawah)
      */
     public function subordinates()
     {
-        return $this->hasManyThrough(
-            User::class,            // Model target (Bawahan)
-            EmployeeProfile::class, // Model perantara (Profile bawahan)
-            'supervisor_id',        // Foreign key pada tabel perantara (Menunjuk ke ID kita)
-            'id',                   // Foreign key pada tabel target
-            'id',                   // Local key pada tabel kita
-            'user_id'               // Local key pada tabel perantara yang menuju target
-        );
-    }
+        $profile = $this->profile;
 
-    // ==========================================
+        if (!$profile || !$profile->organizational_unit_id) {
+            return User::whereRaw('1 = 0');
+        }
+
+        $unitId = $profile->organizational_unit_id;
+        $unit = OrganizationalUnit::find($unitId);
+
+        // 1. Jika dia PUNCAK (tidak punya parent_id)
+        if ($unit && is_null($unit->parent_id)) {
+            return User::where(function ($query) use ($unitId) {
+                // Ambil diri dia sendiri
+                $query->where('id', $this->id)
+                    // Gabungkan dengan bawahan langsung
+                    ->orWhereHas('profile', function ($q) use ($unitId) {
+                        $q->whereIn('organizational_unit_id', function ($sub) use ($unitId) {
+                            $sub->select('id')
+                                ->from('organizational_units')
+                                ->where('parent_id', $unitId);
+                        });
+                    });
+            });
+        }
+
+        // 2. Jika dia BUKAN PUNCAK: Ambil bawahan langsung saja
+        return User::whereHas('profile', function ($query) use ($unitId) {
+            $query->whereIn('organizational_unit_id', function ($subQuery) use ($unitId) {
+                $subQuery->select('id')
+                    ->from('organizational_units')
+                    ->where('parent_id', $unitId);
+            });
+        });
+    }
 
     // ==========================================
     // MENGAMBIL SELURUH BAWAHAN (REKURSIF)
     // ==========================================
 
     /**
-     * 1. Relasi Eager Load untuk bawahan rekursif (nested)
-     * Cara memanggil: $user->subordinatesRecursive
-     */
-    public function subordinatesRecursive()
-    {
-        return $this->subordinates()->with('subordinatesRecursive');
-    }
-
-    /**
-     * 2. Fungsi helper untuk mendapatkan semua bawahan dalam bentuk 1 list datar (Flat Collection)
-     * Cara memanggil: $user->getAllSubordinates()
+     * Fungsi helper untuk mendapatkan semua bawahan dalam bentuk 1 list datar
+     * (Menggunakan rekursi murni dari relasi builder)
      */
     public function getAllSubordinates()
     {
-        // Panggil relasi rekursif di atas
-        $subordinates = $this->subordinatesRecursive;
-
         $allSubordinates = new Collection();
 
-        // Buat fungsi closure untuk meratakan (flatten) data dari tree ke dalam satu array/collection
-        $flattenSubordinates = function ($users) use (&$flattenSubordinates, &$allSubordinates) {
-            foreach ($users as $user) {
-                // Masukkan user ke dalam list
-                $allSubordinates->push($user);
+        $directSubordinates = $this->subordinates()->with('profile')->get();
 
-                // Jika user ini punya bawahan lagi, panggil fungsi ini lagi secara rekursif
-                if ($user->subordinatesRecursive->isNotEmpty()) {
-                    $flattenSubordinates($user->subordinatesRecursive);
-                }
+        foreach ($directSubordinates as $subordinate) {
+            $allSubordinates->push($subordinate);
+
+            // CEGAH INFINITE LOOP: 
+            // Jangan lakukan rekursi jika subordinate adalah diri dia sendiri
+            if ($subordinate->id !== $this->id) {
+                $allSubordinates = $allSubordinates->merge($subordinate->getAllSubordinates());
             }
-        };
+        }
 
-        $flattenSubordinates($subordinates);
-
-        return $allSubordinates;
+        return $allSubordinates->unique('id')->values();
     }
 
     public function getAllUsersInOrgStructure()
     {
         // Cek apakah user punya profil dan terikat dengan sebuah unit organisasi
         if (!$this->profile || !$this->profile->organizational_unit_id) {
-            return collect();
+            return new Collection();
         }
 
         // Ambil unit organisasi user ini beserta seluruh anak-anaknya secara rekursif
@@ -134,7 +158,7 @@ class User extends Authenticatable
             'employees.user'
         ])->find($this->profile->organizational_unit_id);
 
-        $allUsers = collect();
+        $allUsers = new Collection();
 
         // Fungsi closure untuk mengekstrak user dari tiap level unit
         $extractUsers = function ($unit) use (&$extractUsers, &$allUsers) {
@@ -193,4 +217,33 @@ class User extends Authenticatable
         return $this->hasMany(BookProposal::class);
     }
 
+    public function mutasis()
+    {
+        return $this->hasMany(Mutasi::class);
+    }
+
+    public function requestedMutasis()
+    {
+        return $this->hasMany(Mutasi::class, 'requested_by');
+    }
+
+    public function approvedMutasis()
+    {
+        return $this->hasMany(Mutasi::class, 'approved_by');
+    }
+
+    public function peringatans()
+    {
+        return $this->hasMany(Peringatan::class);
+    }
+
+    public function requestedPeringatans()
+    {
+        return $this->hasMany(Peringatan::class, 'requested_by');
+    }
+
+    public function approvedPeringatans()
+    {
+        return $this->hasMany(Peringatan::class, 'approved_by');
+    }
 }

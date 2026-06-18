@@ -23,9 +23,9 @@ class OrganizationalUnitController extends Controller
             ->whereNull('parent_id')
             ->get();
 
-        $users = User::orderBy('name')->get();
-        $jabatans = Jabatan::orderBy('name')->get();
-        $outlets = Outlet::orderBy('name')->get();
+        $users = User::where('is_active', true)->orderBy('name')->get();
+        $jabatans = Jabatan::where('is_active', true)->orderBy('name')->get();
+        $outlets = Outlet::where('is_active', true)->orderBy('name')->get();
 
         return view('organization.structure.index', compact(
             'organizations',
@@ -47,7 +47,7 @@ class OrganizationalUnitController extends Controller
             $savedIds = [];
 
             foreach ($request->tree as $node) {
-                // Memanggil saveNode dengan parameter awal supervisorId = null
+                // Panggil saveNode dengan inheritedOutletId null di level paling atas
                 $this->saveNode($node, null, $savedIds, null);
             }
 
@@ -76,8 +76,11 @@ class OrganizationalUnitController extends Controller
         array $node,
         ?int $parentId,
         array &$savedIds,
-        ?int $supervisorId = null // <--- Tambahkan parameter ini
+        ?int $inheritedOutletId = null // <--- Parameter pewarisan outlet
     ): OrganizationalUnit {
+
+        // Jika node saat ini punya outlet_id, pakai itu. Jika tidak, warisi dari atasannya.
+        $currentOutletId = !empty($node['outlet_id']) ? $node['outlet_id'] : $inheritedOutletId;
 
         $isNew = !isset($node['id']) || Str::startsWith((string) $node['id'], 'tmp_');
 
@@ -86,8 +89,8 @@ class OrganizationalUnitController extends Controller
                 'parent_id' => $parentId,
                 'name' => $node['name'],
                 'type' => $node['type'],
-                'outlet_id' => $node['outlet_id'] ?: null,
-                'man_power' => $node['man_power'] ?: 0,
+                'outlet_id' => $currentOutletId,
+                'man_power' => !empty($node['man_power']) ? $node['man_power'] : 0,
                 'is_active' => true,
             ]);
         } else {
@@ -96,8 +99,8 @@ class OrganizationalUnitController extends Controller
                 'parent_id' => $parentId,
                 'name' => $node['name'],
                 'type' => $node['type'],
-                'outlet_id' => $node['outlet_id'] ?: null,
-                'man_power' => $node['man_power'] ?: 0,
+                'outlet_id' => $currentOutletId,
+                'man_power' => !empty($node['man_power']) ? $node['man_power'] : 0,
             ]);
         }
 
@@ -108,29 +111,26 @@ class OrganizationalUnitController extends Controller
         // ======================
         $employeeIds = collect($node['employees'] ?? [])->pluck('user_id')->toArray();
 
+        // Kosongkan atribut employee jika dikeluarkan dari unit ini
         EmployeeProfile::where('organizational_unit_id', $unit->id)
             ->whereNotIn('user_id', $employeeIds)
             ->update([
                 'organizational_unit_id' => null,
-                'supervisor_id' => null // Optional: clear supervisor jika di-remove
+                'is_head' => false,
+                'outlet_id' => null
             ]);
 
-        // Simpan id user pertama di node ini untuk dijadikan atasan node child
-        $currentUnitHeadId = null;
-
         foreach ($node['employees'] ?? [] as $index => $employee) {
-
-            // Jadikan user pertama di array ini sebagai kepala dari unit tersebut
-            if ($index === 0) {
-                $currentUnitHeadId = $employee['user_id'];
-            }
+            // User pertama di array otomatis diset sebagai Head dari unit ini
+            $isHead = ($index === 0);
 
             EmployeeProfile::updateOrCreate(
                 ['user_id' => $employee['user_id']],
                 [
                     'organizational_unit_id' => $unit->id,
                     'jabatan_id' => $employee['jabatan_id'] ?? null,
-                    'supervisor_id' => $supervisorId // <--- Set ke atasan yang diturunkan
+                    'outlet_id' => $currentOutletId, // <--- Simpan outlet warisan ke employee
+                    'is_head' => $isHead           // <--- Cuma 1 is_head per unit
                 ]
             );
         }
@@ -138,14 +138,9 @@ class OrganizationalUnitController extends Controller
         // ======================
         // Children Recursive
         // ======================
-
-        // Siapa atasan untuk node di bawahnya? 
-        // Jika unit ini punya head, gunakan id head tersebut. 
-        // Jika kosong, teruskan atasan dari unit sebelumnya
-        $nextSupervisorId = $currentUnitHeadId ?? $supervisorId;
-
         foreach ($node['children'] ?? [] as $child) {
-            $this->saveNode($child, $unit->id, $savedIds, $nextSupervisorId);
+            // Lempar $currentOutletId ke child di bawahnya
+            $this->saveNode($child, $unit->id, $savedIds, $currentOutletId);
         }
 
         return $unit;

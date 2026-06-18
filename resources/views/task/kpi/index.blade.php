@@ -88,7 +88,7 @@
                                             <span class="badge bg-light text-secondary border fw-medium" style="font-size: 0.7rem;">Formula Acuan:</span>
                                             @forelse($detail->masterKpi?->formulas ?? [] as $formula)
                                                 <span class="badge bg-light text-dark border border-success-subtle px-2 py-1 shadow-sm" style="font-size: 0.75rem;">
-                                                    {{ floatval($formula->from) }} <span class="text-muted mx-1">s/d</span> {{ floatval($formula->to) }}
+                                                    {{ floatval($formula->from) }} <span class="text-muted mx-1">s/d</span> {{ floatval($formula->to)  }} <span class="text-success fw-semibold">({{ floatval($formula->progress) }}%)</span>
                                                 </span>
                                             @empty
                                                 <span class="text-muted small fst-italic">Belum ada formula acuan</span>
@@ -118,6 +118,7 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-semibold text-dark small mb-1">Nilai Realisasi</label>
                                             <div class="input-group group-clean">
+                                                {{-- Menambahkan data-formulas ke dalam input --}}
                                                 <input type="number" 
                                                        step="0.01" 
                                                        name="realizations[{{ $index }}][value]" 
@@ -126,6 +127,7 @@
                                                        placeholder="0.00"
                                                        data-target="{{ $target }}"
                                                        data-bobot="{{ $bobot }}"
+                                                       data-formulas="{{ json_encode($detail->masterKpi?->formulas ?? []) }}"
                                                        required
                                                        {{ $isExpired ? 'disabled' : '' }}>
                                                 <span class="input-group-text bg-white text-muted border-start-0">{{ $detail->masterKpi?->satuan }}</span>
@@ -247,10 +249,36 @@
                 let val = parseFloat(input.val()) || 0;
                 let target = parseFloat(input.data('target')) || 1; 
                 let bobot = parseFloat(input.data('bobot')) || 0;
+                
+                // Ambil data formulas dari atribut data
+                let rawFormulas = input.attr('data-formulas');
+                let formulas = [];
+                try {
+                    if(rawFormulas) {
+                        formulas = JSON.parse(rawFormulas);
+                    }
+                } catch(e) {
+                    console.error("Gagal parsing formula:", e);
+                }
 
-                // Perhitungan Capaian Item
-                let achievement = target > 0 ? (val / target) * 100 : 0;
-                // Perhitungan Skor Item
+                let achievement = 0;
+
+                // Hitung Achievement berdasarkan Range Formula
+                if (formulas && formulas.length > 0) {
+                    let matchedFormula = formulas.find(f => val >= parseFloat(f.from) && val <= parseFloat(f.to));
+                    
+                    if (matchedFormula) {
+                        achievement = parseFloat(matchedFormula.progress) || 0;
+                    } else {
+                        // Jika di luar semua range formula, set ke 0
+                        achievement = 0;
+                    }
+                } else {
+                    // Fallback calculation jika KPI tidak memiliki spesifik formula
+                    achievement = target > 0 ? (val / target) * 100 : 0;
+                }
+
+                // Perhitungan Skor Item: Progress * Bobot
                 let score = (achievement / 100) * bobot;
 
                 // Akumulasi data untuk panel global di paling bawah
@@ -297,8 +325,7 @@
             btnIcon.attr('class', 'fe fe-loader spinner-border spinner-border-sm border-0 m-0');
 
             $.ajax({
-                url: // Assuming the route is defined as 'kpi.realization.store'
-                    '{{ route('kpi.realization.store') }}',
+                url: '{{ route('kpi.realization.store') }}',
                 type: 'POST',
                 data: form.serialize(),
                 dataType: 'json',

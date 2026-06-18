@@ -76,13 +76,22 @@ class TaskIdpController extends Controller
         ]);
 
         $user = auth()->user();
-        $serverTime = now();
         $prayerType = $request->prayer_type;
 
+        // 1. Tentukan Zona Waktu Lokal (Bisa juga pakai config('app.timezone') jika sudah diset 'Asia/Jakarta')
+        $tz = 'Asia/Jakarta';
+
+        // 2. Ambil waktu server saat ini, set eksplisit ke zona waktu lokal
+        $serverTime = now($tz);
+
+        // 3. Parse waktu dari frontend (yang berbentuk UTC ISO) dan konversi ke zona waktu lokal
+        $deviceTime = \Carbon\Carbon::parse($request->device_time)->setTimezone($tz);
+
         // Validasi 1: Apakah sudah submit hari ini?
+        // GANTI Carbon::today() dengan $serverTime->toDateString() agar tanggal mengikuti zona waktu lokal
         $alreadySubmitted = $user->prayerReports()
             ->where('prayer_type', $prayerType)
-            ->whereDate('reported_at', Carbon::today())
+            ->whereDate('reported_at', $serverTime->toDateString())
             ->exists();
 
         if ($alreadySubmitted) {
@@ -92,24 +101,26 @@ class TaskIdpController extends Controller
         // Validasi 2: Cek Jadwal dari Database
         $schedule = PrayerSchedule::where('prayer_name', $prayerType)->first();
         if ($schedule) {
-            $startTime = Carbon::parse($schedule->start_time);
-            $endTime = Carbon::parse($schedule->end_time);
+            // Gunakan createFromTimeString agar jam dari database (misal: 04:30:00) 
+            // ditempelkan ke tanggal hari ini secara lokal.
+            $startTime = \Carbon\Carbon::createFromTimeString($schedule->start_time, $tz);
+            $endTime = \Carbon\Carbon::createFromTimeString($schedule->end_time, $tz);
 
             // Cek apakah waktu server saat ini berada di dalam rentang waktu jadwal
             if (!$serverTime->between($startTime, $endTime)) {
-                return response()->json(['success' => false, 'message' => "Saat ini bukan waktu untuk melaporkan shalat {$prayerType}. Waktu: {$schedule->start_time} - {$schedule->end_time}"], 422);
+                return response()->json(['success' => false, 'message' => "Saat ini bukan waktu untuk melaporkan shalat {$prayerType}. Waktu: {$startTime->format('H:i')} - {$endTime->format('H:i')}"], 422);
             }
         } else {
             return response()->json(['success' => false, 'message' => "Jadwal untuk {$prayerType} belum diatur di database."], 422);
         }
 
         // Validasi 3: Cek sinkronisasi waktu device & server (Toleransi 60 detik)
-        $deviceTime = Carbon::parse($request->device_time);
+        // Karena keduanya sudah direpresentasikan dalam Carbon instance dengan zona waktu yang benar, diffInSeconds akan akurat.
         if ($serverTime->diffInSeconds($deviceTime) > 60) {
             return response()->json(['success' => false, 'message' => 'Gagal submit. Waktu perangkat Anda tidak sinkron dengan server.'], 422);
         }
 
-        // Simpan menggunakan waktu SERVER (now)
+        // Simpan ke database (Laravel akan otomatis menyimpannya dengan format standar DB)
         $prayer = $user->prayerReports()->create([
             'prayer_type' => $prayerType,
             'reported_at' => $serverTime,
@@ -140,14 +151,10 @@ class TaskIdpController extends Controller
             ], 422);
         }
 
-        // Gunakan relasi superior() yang ada di model User untuk mencari atasan
-        $superior = $user->superior;
-
         $proposal = $user->bookProposals()->create([
             'title' => $request->title,
             'author' => $request->author,
             'status' => 'pending',
-            'superior_id' => $superior ? $superior->id : null,
         ]);
 
         return response()->json([

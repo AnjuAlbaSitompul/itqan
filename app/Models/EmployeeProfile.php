@@ -10,7 +10,8 @@ class EmployeeProfile extends Model
         'user_id',
         'organizational_unit_id',
         'jabatan_id',
-        'supervisor_id'
+        'is_head',
+        'outlet_id'
     ];
 
     public function user()

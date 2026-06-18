@@ -325,11 +325,11 @@
 
             // Tampilkan loading spinner & nonaktifkan filter sementara
             container.html(`
-                <div class="text-center text-muted mt-5 pt-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2">Memuat data pengajuan...</p>
-                </div>
-            `);
+                    <div class="text-center text-muted mt-5 pt-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Memuat data pengajuan...</p>
+                    </div>
+                `);
             $('#periode-filter, #status-filter').prop('disabled', true);
 
             $.ajax({
@@ -389,30 +389,30 @@
                         let formulaText = [];
                         if (master.formulas && master.formulas.length > 0) {
                             master.formulas.forEach(f => {
-                                formulaText.push(`${parseFloat(f.from)} - ${parseFloat(f.to)}`);
+                                formulaText.push(`${parseFloat(f.from)} - ${parseFloat(f.to)} (${parseFloat(f.progress)}%)`);
                             });
                         }
                         const formulaString = formulaText.length > 0 ? formulaText.join(', ') : '-';
                         const satuanText = master.satuan === 'percentage' ? '%' : (master.satuan === 'number' ? 'Poin' : master.satuan);
 
                         kpiDetailsHTML += `
-                                            <div class="kpi-item-box">
-                                                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
-                                                    <div class="fw-bold text-dark" style="font-size: 1.1rem;">${master.title}</div>
-                                                    <div class="text-end small">
-                                                        <span class="badge bg-light text-dark border px-2 py-1 me-1">Target: ${parseFloat(master.target)}${satuanText}</span>
-                                                        <span class="badge bg-light text-dark border px-2 py-1">Bobot: ${parseFloat(master.bobot)}</span>
+                                                <div class="kpi-item-box">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                                        <div class="fw-bold text-dark" style="font-size: 1.1rem;">${master.title}</div>
+                                                        <div class="text-end small">
+                                                            <span class="badge bg-light text-dark border px-2 py-1 me-1">Target: ${parseFloat(master.target)}${satuanText}</span>
+                                                            <span class="badge bg-light text-dark border px-2 py-1">Bobot: ${parseFloat(master.bobot)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="small text-muted mb-2 lh-base">
+                                                        <strong class="text-dark">Definition of Done:</strong><br> ${master.definition_of_done} <br>
+                                                        <strong class="text-dark">Guard Rail:</strong><br> ${master.guard_rail || '-'}
+                                                    </div>
+                                                    <div class="small text-muted border-top pt-2 mt-2" style="font-size: 0.8rem;">
+                                                        <strong>Skala:</strong> ${formulaString}
                                                     </div>
                                                 </div>
-                                                <div class="small text-muted mb-2 lh-base">
-                                                    <strong class="text-dark">Definition of Done:</strong><br> ${master.definition_of_done} <br>
-                                                    <strong class="text-dark">Guard Rail:</strong><br> ${master.guard_rail || '-'}
-                                                </div>
-                                                <div class="small text-muted border-top pt-2 mt-2" style="font-size: 0.8rem;">
-                                                    <strong>Skala:</strong> ${formulaString}
-                                                </div>
-                                            </div>
-                                        `;
+                                            `;
                     });
                 } else {
                     kpiDetailsHTML = '<div class="text-muted small py-3 text-center">Tidak ada detail KPI.</div>';
@@ -421,46 +421,46 @@
                 const statuscardColor = item.status === 'approved' ? 'success' : (item.status === 'rejected' ? 'danger' : 'warning');
 
                 const card = `
-                                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4" id="card-${item.id}">
-                                        <div class="card-header border-0 p-4 bg-primary">
-                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div class="request-avatar">
-                                                        <i class="fe fe-target"></i>
+                                        <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4" id="card-${item.id}">
+                                            <div class="card-header border-0 p-4 bg-primary">
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="request-avatar">
+                                                            <i class="fe fe-target"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="fw-bold text-white mb-1">${subordinateName}</h4>
+                                                            <p class="text-white-50 mb-0">Diajukan oleh: ${creatorName}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h4 class="fw-bold text-white mb-1">${subordinateName}</h4>
-                                                        <p class="text-white-50 mb-0">Diajukan oleh: ${creatorName}</p>
+                                                    <div class="text-end">
+                                                        <div class="fw-bold text-white mb-1">#REQ-${item.id}</div>
+                                                        <span class="badge rounded-pill bg-${statuscardColor} text-dark px-3 py-1 text-uppercase">${item.status}</span>
                                                     </div>
                                                 </div>
-                                                <div class="text-end">
-                                                    <div class="fw-bold text-white mb-1">#REQ-${item.id}</div>
-                                                    <span class="badge rounded-pill bg-${statuscardColor} text-dark px-3 py-1 text-uppercase">${item.status}</span>
+                                            </div>
+
+                                            <div class="card-body p-4">
+                                                <div class="kpi-details-scroll-area custom-scrollbar">
+                                                    ${kpiDetailsHTML}
+                                                </div>
+
+                                                <div class="mt-2 pt-3 border-top">
+                                                    <label class="form-label fw-semibold">Catatan Evaluasi</label>
+                                                    <textarea id="notes-${item.id}" class="form-control modern-textarea mb-3" value="${item.notes || ''}" placeholder="Tambahkan catatan (wajib diisi jika menolak pengajuan)..." ${item.status === 'rejected' ? 'disabled' : ''}></textarea>
+
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="processAction(${item.id}, 'reject')">
+                                                            <i class="fe fe-slash me-1"></i> Reject
+                                                        </button>
+                                                        <button type="button" class="btn btn-success rounded-pill px-4" onclick="processAction(${item.id}, 'approve')">
+                                                            <i class="fe fe-check me-1"></i> Approve
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div class="card-body p-4">
-                                            <div class="kpi-details-scroll-area custom-scrollbar">
-                                                ${kpiDetailsHTML}
-                                            </div>
-
-                                            <div class="mt-2 pt-3 border-top">
-                                                <label class="form-label fw-semibold">Catatan Evaluasi</label>
-                                                <textarea id="notes-${item.id}" class="form-control modern-textarea mb-3" value="${item.notes || ''}" placeholder="Tambahkan catatan (wajib diisi jika menolak pengajuan)..." ${item.status === 'rejected' ? 'disabled' : ''}></textarea>
-
-                                                <div class="d-flex justify-content-end gap-2">
-                                                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="processAction(${item.id}, 'reject')">
-                                                        <i class="fe fe-slash me-1"></i> Reject
-                                                    </button>
-                                                    <button type="button" class="btn btn-success rounded-pill px-4" onclick="processAction(${item.id}, 'approve')">
-                                                        <i class="fe fe-check me-1"></i> Approve
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
+                                    `;
                 container.append(card);
             });
         }
@@ -473,18 +473,18 @@
 
             // Render ulang chip 'Semua Pengajuan' agar tidak hilang setelah di-empty
             container.append(`
-                                <div class="bottom-chip active" id="creator-chip-all" onclick="filterByCreator('all')">
-                                    <i class="fe fe-users me-1"></i> Semua Pengajuan
-                                </div>
-                            `);
+                                    <div class="bottom-chip active" id="creator-chip-all" onclick="filterByCreator('all')">
+                                        <i class="fe fe-users me-1"></i> Semua Pengajuan
+                                    </div>
+                                `);
 
             // Looping dan append daftar creator unik yang baru didapatkan
             creators.forEach(creator => {
                 const chip = `
-                                    <div class="bottom-chip" id="creator-chip-${creator.id}" onclick="filterByCreator(${creator.id})">
-                                        <i class="fe fe-user me-1"></i> ${creator.name}
-                                    </div>
-                                `;
+                                        <div class="bottom-chip" id="creator-chip-${creator.id}" onclick="filterByCreator(${creator.id})">
+                                            <i class="fe fe-user me-1"></i> ${creator.name}
+                                        </div>
+                                    `;
                 container.append(chip);
             });
         }
@@ -498,16 +498,16 @@
                 const kpiCount = item.kpi_details ? item.kpi_details.length : 0;
 
                 const tickerItem = `
-                                    <div class="ticker-item" onclick="filterByApprovalId(${item.id})">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">${subName}</span>
-                                            <span class="badge bg-light text-primary border">#REQ-${item.id}</span>
+                                        <div class="ticker-item" onclick="filterByApprovalId(${item.id})">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="fw-bold text-dark" style="font-size: 0.9rem;">${subName}</span>
+                                                <span class="badge bg-light text-primary border">#REQ-${item.id}</span>
+                                            </div>
+                                            <div class="text-muted small">
+                                                <i class="fe fe-layers me-1"></i> ${kpiCount} Item KPI
+                                            </div>
                                         </div>
-                                        <div class="text-muted small">
-                                            <i class="fe fe-layers me-1"></i> ${kpiCount} Item KPI
-                                        </div>
-                                    </div>
-                                `;
+                                    `;
                 container.append(tickerItem);
             });
         }

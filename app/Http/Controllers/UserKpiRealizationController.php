@@ -56,7 +56,11 @@ class UserKpiRealizationController extends Controller
             'realizations.*.notes' => 'nullable|string|max:500',
         ]);
 
-        $userKpi = UserKpi::with('kpiApproval.kpiPeriod')->findOrFail($request->user_kpi_id);
+        // Eager load formulas untuk menghindari N+1 query problem
+        $userKpi = UserKpi::with([
+            'kpiApproval.kpiPeriod',
+            'kpiApproval.kpiDetails.masterKpi.formulas'
+        ])->findOrFail($request->user_kpi_id);
 
         if (!$userKpi->kpiApproval || $userKpi->kpiApproval->status !== 'approved') {
             return response()->json(['success' => false, 'message' => 'Gagal! Target KPI Anda belum disetujui oleh atasan.'], 403);
@@ -68,16 +72,32 @@ class UserKpiRealizationController extends Controller
         }
 
         foreach ($request->realizations as $item) {
-            $detail = $userKpi->kpiApproval->kpiDetails()->find($item['user_kpi_detail_id']);
+            // Ambil data detail menggunakan collection filter agar lebih efisien (tidak query ke DB lagi)
+            $detail = $userKpi->kpiApproval->kpiDetails->find($item['user_kpi_detail_id']);
 
+            $formulas = $detail?->masterKpi?->formulas ?? collect();
             $target = floatval($detail?->masterKpi?->target ?? 1);
             $bobot = floatval($detail?->masterKpi?->bobot ?? 0);
             $value = floatval($item['value']);
 
-            // 1. Hitung persentase pencapaian dasar
-            $achievementPercent = $target > 0 ? ($value / $target) * 100 : 0;
+            $achievementPercent = 0;
 
-            // 2. Hitung nilai/skor riil berdasarkan bobot (Aman kalkulasi di backend)
+            // Logika Pencarian Range Formula
+            if ($formulas->count() > 0) {
+                $matchedFormula = $formulas->first(function ($formula) use ($value) {
+                    return $value >= floatval($formula->from) && $value <= floatval($formula->to);
+                });
+
+                if ($matchedFormula) {
+                    $achievementPercent = floatval($matchedFormula->progress);
+                }
+            } else {
+                // Fallback otomatis jika tidak ada formula acuan pada Master KPI
+                $achievementPercent = $target > 0 ? ($value / $target) * 100 : 0;
+            }
+
+            // Perhitungan nilai (Capaian % * Bobot)
+            // Rumusnya: (Achievement / 100) * Bobot
             $nilai = ($achievementPercent / 100) * $bobot;
 
             UserKpiRealization::updateOrCreate(
@@ -88,16 +108,17 @@ class UserKpiRealizationController extends Controller
                 [
                     'realization' => $value,
                     'achievement_percent' => $achievementPercent,
-                    'nilai' => $nilai, // <-- Kolom nilai diisi otomatis di backend
+                    'nilai' => $nilai, // <-- Kolom nilai terisi hasil ekstraksi formula
                     'notes' => $item['notes'],
                     'created_by' => Auth::id(),
                 ]
             );
         }
 
+        // Jangan lupa kembalikan response success
         return response()->json([
             'success' => true,
-            'message' => 'Realisasi capaian KPI Anda berhasil disimpan.'
+            'message' => 'Seluruh Realisasi KPI berhasil disimpan dan dikalkulasi!'
         ]);
     }
 }

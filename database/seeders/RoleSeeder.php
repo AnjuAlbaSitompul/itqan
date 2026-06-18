@@ -18,8 +18,9 @@ class RoleSeeder extends Seeder
             'spv',
             'manager',
             'admin',
-            'admin_HO',
-            'manager_HO',
+            'admin_hc',
+            'spv_hc',
+            'manager_hc',
             'direksi',
         ];
 

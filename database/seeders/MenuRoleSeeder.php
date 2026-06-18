@@ -17,7 +17,7 @@ class MenuRoleSeeder extends Seeder
         $roleMenus = [
             'admin' => [
                 'Dashboard',
-                'Performance Management',
+                'Performance',
                 'Organization',
                 'Karyawan',
                 'Kehadiran',
@@ -30,13 +30,13 @@ class MenuRoleSeeder extends Seeder
             'manager' => [
                 'Dashboard',
                 'Task',
-                'Team',
+                'Team Management',
                 'Approval',
             ],
             'direksi' => [
                 'Dashboard',
                 'Task',
-                'Team',
+                'Team Management',
                 'Approval',
             ],
             'pegawai' => [

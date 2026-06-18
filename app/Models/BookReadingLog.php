@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class BookReadingLog extends Model
 {
     protected $fillable = [
-        'user_id',
+
         'book_proposal_id',
-        'pages_read',
-        'reading_date',
+        'page_from',
+        'page_to',
+        'summary',
+        'log_date',
     ];
 
     public function user()

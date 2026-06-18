@@ -10,6 +10,7 @@ class Formula extends Model
         'kpi_master_id',
         'from',
         'to',
+        'progress'
     ];
 
     public function kpiMaster()
