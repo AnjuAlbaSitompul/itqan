@@ -6,12 +6,11 @@
         <!-- LEFT SIDE -->
         <div class="col-xl-5 h-100">
 
-            <div
-                class="signup-scroll-container
-            bg-body-secondary
-            position-relative
-            h-100
-            overflow-auto">
+            <div class="signup-scroll-container
+                        bg-body-secondary
+                        position-relative
+                        h-100
+                        overflow-auto">
 
                 <div class="row justify-content-center py-5 px-4">
 
@@ -20,8 +19,7 @@
                         <!-- LOGO -->
                         <a href="/" class="text-nowrap d-block mb-4">
 
-                            <img src="{{ asset('assetsSignIn/images/logo-sm.png') }}" class="dark-logo" height="38"
-                                alt="Logo">
+                            <img src="{{ asset('assets/itqanicon.png') }}" class="dark-logo" height="38" alt="Logo">
 
                         </a>
 
@@ -80,8 +78,7 @@
                                         <i class="far fa-user"></i>
                                     </span>
 
-                                    <input type="text" class="form-control" name="name"
-                                        placeholder="Masukkan nama lengkap">
+                                    <input type="text" class="form-control" name="name" placeholder="Masukkan nama lengkap">
 
                                 </div>
 
@@ -100,8 +97,7 @@
                                         @
                                     </span>
 
-                                    <input type="text" class="form-control" name="username"
-                                        placeholder="Masukkan username">
+                                    <input type="text" class="form-control" name="username" placeholder="Masukkan username">
 
                                 </div>
 
@@ -288,8 +284,7 @@
                                         <i class="far fa-map"></i>
                                     </span>
 
-                                    <input type="text" class="form-control" name="domisili"
-                                        placeholder="Masukkan domisili">
+                                    <input type="text" class="form-control" name="domisili" placeholder="Masukkan domisili">
 
                                 </div>
 
@@ -333,8 +328,7 @@
                                         <i class="far fa-id-card"></i>
                                     </span>
 
-                                    <input type="text" class="form-control" name="golongan"
-                                        placeholder="Masukkan golongan">
+                                    <input type="text" class="form-control" name="golongan" placeholder="Masukkan golongan">
 
                                 </div>
 
@@ -347,15 +341,15 @@
                                     Alamat
                                 </label>
 
-                                <textarea class="form-control modern-textarea" rows="4" name="alamat" placeholder="Masukkan alamat lengkap"></textarea>
+                                <textarea class="form-control modern-textarea" rows="4" name="alamat"
+                                    placeholder="Masukkan alamat lengkap"></textarea>
 
                             </div>
 
                             <!-- SUBMIT -->
                             <div class="col-12 mt-3">
 
-                                <button type="submit"
-                                    class="btn btn-primary w-100 py-3 rounded-pill fw-semibold shadow-sm">
+                                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-semibold shadow-sm">
 
                                     <i class="far fa-user-plus me-2"></i>
 
@@ -453,9 +447,9 @@
                     </div>
                 </div>
                 <div class="text-center z-index-2 position-relative">
+                    <img src="{{ asset('assets/itqanicon.png') }}" alt="Logo" class="mb-4" height="50">
                     <p class="display-5 text-body fw-normal mb-6">
                         ITQAN<br>
-                        <span class="text-primary display-6 fw-normal">ITQAN App</span>
                     </p>
                     <p class="mb-14 px-4 fs-14 max-w-75 mx-auto">Management Perkembangan Pekerjaan Anda.</p>
                 </div>
@@ -483,8 +477,8 @@
         </div>
     </div>
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="toast1" class="toast align-items-center text-white bg-primary border-0" role="alert"
-            aria-live="assertive" aria-atomic="true">
+        <div id="toast1" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">Hello, world! This is a toast message.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
@@ -662,7 +656,7 @@
     </style>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             // $('.select2').select2({
             //     width: '100%'
@@ -675,14 +669,14 @@
             function toast(message, type = 'primary') {
                 var toastEl = $('#toast1');
                 toastEl.removeClass(
-                        'bg-primary bg-secondary bg-success bg-danger bg-warning bg-info bg-light bg-dark')
+                    'bg-primary bg-secondary bg-success bg-danger bg-warning bg-info bg-light bg-dark')
                     .addClass('bg-' + type);
                 toastEl.find('.toast-body').text(message);
                 var toast = new bootstrap.Toast(toastEl[0]);
                 toast.show();
             }
 
-            $('#signup-form').submit(function(e) {
+            $('#signup-form').submit(function (e) {
 
                 e.preventDefault();
 
@@ -694,14 +688,14 @@
                     url: '/signup',
                     method: 'POST',
                     data: $(this).serialize(),
-                    success: function(res) {
+                    success: function (res) {
                         toast(
                             res.message ||
                             'Account created successfully'
                         );
                         resetForm();
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         resetForm();
                         toast(
                             xhr.responseJSON?.message ||
@@ -710,7 +704,7 @@
                         );
                     },
 
-                    complete: function() {
+                    complete: function () {
 
                         button.prop('disabled', false);
                     }

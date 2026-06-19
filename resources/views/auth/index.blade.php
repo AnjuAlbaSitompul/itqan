@@ -7,7 +7,7 @@
                     class="row justify-content-center align-items-center p-10 min-vh-100 bg-body-secondary position-relative">
                     <div class="col-md-7 col-lg-6 col-xl-8 col-xxl-7">
                         <a href="index-2.html" class="text-nowrap d-block w-100">
-                            <img src="assetsSignIn/images/logo-sm.png" class="dark-logo" height="30" alt="Logo-Dark">
+                            <img src="{{ asset('assets/itqanicon.png') }}" class="dark-logo" height="30" alt="Logo-Dark">
                         </a>
                         <h3 class="mb-3 mt-8">Sign In</h3>
                         <p class="text-muted mb-8">Access aplikasi untuk monitoring perkembangan pekerjaan anda</p>
@@ -35,8 +35,8 @@
                                 <p>©
                                     <script>
                                         document.write(new Date().getFullYear())
-                                    </script> Aquiry. Crafted with <i class="mdi mdi-heart text-danger"></i>
-                                    by Codubucks
+                                    </script> ITQAN. Crafted with <i class="mdi mdi-heart text-danger"></i>
+                                    by Haritsa
                                 </p>
                             </div>
                         </form>
@@ -121,9 +121,9 @@
                         </div>
                     </div>
                     <div class="text-center z-index-2 position-relative">
+                        <img src="{{ asset('assets/itqanicon.png') }}" alt="Logo" class="mb-4" height="50">
                         <p class="display-5 text-body fw-normal mb-6">
                             ITQAN<br>
-                            <span class="text-primary display-6 fw-normal">ITQAN App</span>
                         </p>
                         <p class="mb-14 px-4 fs-14 max-w-75 mx-auto">Management Perkembangan Pekerjaan Anda.</p>
                     </div>
