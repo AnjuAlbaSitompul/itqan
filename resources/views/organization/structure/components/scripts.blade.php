@@ -1,9 +1,9 @@
 <script>
     // Global Options
     window.userOptions = `
-            <option value="">Select User</option>
+            <option value="" data-avatar="">Select User</option>
             @foreach($users as $user)
-                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                <option value="{{ $user->id }}" data-avatar="{{ $user->ownProfile?->avatar ? Storage::url($user->ownProfile->avatar) : '' }}">{{ $user->name }}</option>
             @endforeach
         `;
     window.outletOptions = `
@@ -53,7 +53,6 @@
                 });
             });
 
-            // URUTKAN AGAR HEAD SELALU DI INDEX 0 (Menyesuaikan dengan Backend Controller)
             employees.sort((a, b) => b.is_head - a.is_head);
 
             return {
@@ -132,19 +131,16 @@
         </div>`;
         }
 
-        // Accordion Toggle
         $(document).on('click', '.toggle-node', function (e) {
             e.stopPropagation();
             $(this).closest('.org-node').toggleClass('open');
         });
 
-        // Add Root Node
         $('#addRootDivision').click(function () {
             $('#organization-tree').prepend(nodeTemplate(null, 'division'));
             setTimeout(() => { $('.select2-outlet').select2({ width: '100%' }); }, 50);
         });
 
-        // Add Child Node
         $(document).on('click', '.add-child', function () {
             const node = $(this).closest('.org-node');
             const nextType = getNextType(node.data('type'));
@@ -155,12 +151,10 @@
             node.addClass('open');
         });
 
-        // Delete Node
         $(document).on('click', '.delete-node', function () {
             if (confirm('Delete node?')) $(this).closest('.org-node').remove();
         });
 
-        // Edit / Save Node Mode
         $(document).on('click', '.edit-node', function () {
             const card = $(this).closest('.org-item');
             card.find('.node-view, .edit-node').addClass('d-none');
@@ -181,14 +175,10 @@
             card.find('.node-view, .edit-node').removeClass('d-none');
         });
 
-        // =========================
-        // Manage Employee
-        // =========================
         $(document).on('click', '.manage-employee', function () {
             const node = $(this).closest('.org-node');
             const wrapper = node.find('> .org-collapse > .employee-wrapper');
 
-            // Cegah double form
             if (wrapper.find('.employee-form-add').length) return;
 
             wrapper.prepend(`
@@ -231,26 +221,29 @@
             const node = form.closest('.org-node');
             const wrapper = node.find('> .org-collapse > .employee-wrapper');
 
-            const userId = form.find('.employee-user').val();
+            const selectedUser = form.find('.employee-user option:selected');
+            const userId = selectedUser.val();
             const jabatanId = form.find('.employee-jabatan').val();
             if (!userId || !jabatanId) return;
 
-            const userText = form.find('.employee-user option:selected').text();
+            const userText = selectedUser.text().trim();
+            const avatarUrl = selectedUser.attr('data-avatar');
             const jabatanText = form.find('.employee-jabatan option:selected').text();
             const isHead = form.find('.employee-head').is(':checked');
 
-            // Validasi: Jika ini dijadikan head, hapus status head pegawai lain di unit ini
             if (isHead) {
                 wrapper.find('.employee-item').attr('data-is-head', '0');
                 wrapper.find('.head-badge').remove();
             }
 
-            const initials = userText.trim().split(/\s+/).map(x => x.charAt(0)).join('').substring(0, 2).toUpperCase();
+            const avatarHtml = avatarUrl
+                ? `<img src="${avatarUrl}" alt="${userText}">`
+                : userText.split(/\s+/).map(x => x.charAt(0)).join('').substring(0, 2).toUpperCase();
 
             wrapper.append(`
                     <div class="card employee-item flex-row align-items-center mb-2" 
                          data-user-id="${userId}" data-jabatan-id="${jabatanId}" data-is-head="${isHead ? '1' : '0'}">
-                        <div class="employee-avatar">${initials}</div>
+                        <div class="employee-avatar">${avatarHtml}</div>
                         <div class="employee-info ms-2 flex-grow-1">
                             <div class="employee-name">${userText}</div>
                             <div class="employee-position">
@@ -269,9 +262,6 @@
             form.remove();
         });
 
-        // =========================
-        // Edit Existing Employee
-        // =========================
         $(document).on('click', '.edit-employee-btn', function () {
             const item = $(this).closest('.employee-item');
 
@@ -326,27 +316,31 @@
             const node = form.closest('.org-node');
             const wrapper = node.find('> .org-collapse > .employee-wrapper');
 
-            const userId = form.find('.edit-user').val();
+            const selectedUser = form.find('.edit-user option:selected');
+            const userId = selectedUser.val();
             const jabatanId = form.find('.edit-jabatan').val();
             const isHead = form.find('.edit-head').is(':checked');
-            const userText = form.find('.edit-user option:selected').text().trim();
+
+            const userText = selectedUser.text().trim();
+            const avatarUrl = selectedUser.attr('data-avatar');
             const jabatanText = form.find('.edit-jabatan option:selected').text().trim();
 
             if (!userId || !jabatanId) return;
 
-            // Validasi: Jika dicentang sebagai Head, batalkan Head yang lain di wrapper ini
             if (isHead) {
                 wrapper.find('.employee-item').attr('data-is-head', '0');
                 wrapper.find('.head-badge').remove();
             }
 
-            const initials = userText.split(/\s+/).map(x => x.charAt(0)).join('').substring(0, 2).toUpperCase();
+            const avatarHtml = avatarUrl
+                ? `<img src="${avatarUrl}" alt="${userText}">`
+                : userText.split(/\s+/).map(x => x.charAt(0)).join('').substring(0, 2).toUpperCase();
 
             item.attr('data-user-id', userId);
             item.attr('data-jabatan-id', jabatanId);
             item.attr('data-is-head', isHead ? '1' : '0');
 
-            item.find('.employee-avatar').text(initials);
+            item.find('.employee-avatar').html(avatarHtml);
             item.find('.employee-name').text(userText);
             item.find('.employee-position').html(`
                     <span>${jabatanText}</span>
@@ -358,20 +352,14 @@
             updateEmployeeCount(node);
         });
 
-        // Remove Employee
         $(document).on('click', '.remove-employee', function () {
             const node = $(this).closest('.org-node');
             $(this).closest('.employee-item').remove();
             updateEmployeeCount(node);
         });
 
-        // =========================
-        // Save Server AJAX
-        // =========================
         $('#saveTree').click(function () {
             const tree = collectTree();
-            console.log(tree)
-            // Tambahkan loading spinner jika perlu
             const btn = $(this);
             const originalHtml = btn.html();
             btn.html('<i class="spinner-border spinner-border-sm me-1"></i> Saving...').prop('disabled', true);
@@ -387,7 +375,6 @@
                     swal({ type: 'success', title: 'Berhasil', text: res.message });
                 },
                 error: function (xhr) {
-                    console.error(xhr.responseJSON?.error);
                     swal({ type: 'error', title: 'Error', text: xhr.responseJSON?.message });
                 },
                 complete: function () {
@@ -395,6 +382,5 @@
                 }
             });
         });
-
     });
 </script>

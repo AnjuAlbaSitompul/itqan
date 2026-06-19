@@ -4,13 +4,219 @@ namespace App\Http\Controllers;
 
 use App\Models\Jabatan;
 use App\Models\KpiPeriod;
+use App\Models\ManPowerRequest;
+use App\Models\Mutasi;
 use App\Models\OrganizationalUnit;
+use App\Models\Outlet;
+use App\Models\Peringatan;
 use App\Models\Role;
+use App\Models\User;
 use App\Models\UserKpiRealization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KpiReportController extends Controller
 {
+    public function approvalRequest()
+    {
+        // Data untuk Filter Offcanvas
+        $organizationalUnits = \App\Models\OrganizationalUnit::where('is_active', true)->get(['id', 'name']);
+
+        return view('approval.report.index', compact('organizationalUnits'));
+    }
+
+    public function processApproval(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'type' => 'required|in:mutasi,peringatan,manpower',
+            'action' => 'required|in:approve,reject',
+        ]);
+
+        $hrUserId = auth()->id();
+        $status = $request->action === 'approve' ? 'approved' : 'rejected';
+
+        try {
+            DB::beginTransaction();
+
+            switch ($request->type) {
+                case 'mutasi':
+                    $mutasi = Mutasi::findOrFail($request->id);
+                    $mutasi->status = $status;
+                    $mutasi->approved_by = $hrUserId;
+
+                    if ($status === 'approved') {
+                        $request->validate(['effective_date' => 'required|date']);
+                        $mutasi->effective_date = $request->effective_date;
+                    }
+                    $mutasi->save();
+                    break;
+
+                case 'peringatan':
+                    $peringatan = Peringatan::findOrFail($request->id);
+                    $peringatan->status = $status;
+                    $peringatan->approved_by = $hrUserId;
+
+                    if ($status === 'approved') {
+                        $request->validate(['due_date' => 'required|date']);
+                        $peringatan->due_date = $request->due_date;
+                    }
+                    $peringatan->save();
+                    break;
+
+                case 'manpower':
+                    $manpower = ManPowerRequest::findOrFail($request->id);
+                    $manpower->status = $status;
+                    $manpower->approved_by = $hrUserId;
+                    $manpower->save();
+
+                    // Logika ekstra: Jika Man Power disetujui & ada kandidat mutasi yang dipilih HR
+                    if ($status === 'approved' && $request->filled('assigned_user_id')) {
+                        $request->validate(['effective_date_mp' => 'required|date']);
+
+                        $karyawan = User::with('profile')->findOrFail($request->assigned_user_id);
+
+                        // Buat pengajuan Mutasi baru yang statusnya langsung "Approved"
+                        Mutasi::create([
+                            'user_id' => $karyawan->id,
+                            'from_id' => $karyawan->profile->organizational_unit_id,
+                            'to_id' => $manpower->organizational_unit_id,
+                            'jabatan_id' => $karyawan->profile->jabatan_id,
+                            'is_head' => $karyawan->profile->is_head,
+                            'reason' => "Mutasi silang pemenuhan Man Power Request #{$manpower->id}. " . ($request->approval_notes ?? ''),
+                            'effective_date' => $request->effective_date_mp,
+                            'status' => 'approved',
+                            'superior_approval_status' => 'approved',
+                            'approved_by' => $hrUserId,
+                            'superior_approved_by' => $hrUserId,
+                            'requested_by' => $hrUserId,
+                        ]);
+
+                        // Opsional: Update profil karyawan langsung ke unit yang baru
+                        // $karyawan->profile->update(['organizational_unit_id' => $manpower->organizational_unit_id]);
+                    }
+                    break;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Request {$request->type} berhasil di-{$status}.",
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function approvalData(Request $request)
+    {
+        $status = $request->input('status', 'pending');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // 1. Ambil Data Mutasi
+        $mutasi = Mutasi::query()
+            ->with([
+                'user.profile.jabatan',
+                'user.profile.organizationalUnit',
+                'fromUnit',
+                'toUnit',
+                'jabatan',
+                'requestedBy',
+                'superiorApprovedBy'
+            ])
+            ->where('superior_approval_status', 'approved') // Hanya yang sudah di-acc atasan langsung
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($startDate, fn($q) => $q->whereDate('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->whereDate('created_at', '<=', $endDate))
+            ->latest()
+            ->get();
+
+        // 2. Ambil Data Peringatan
+        $peringatan = Peringatan::query()
+            ->with([
+                'user.profile.jabatan',
+                'user.profile.organizationalUnit',
+                'requestedBy',
+                'superiorApprovedBy'
+            ])
+            ->where('superior_approval_status', 'approved')
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($startDate, fn($q) => $q->whereDate('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->whereDate('created_at', '<=', $endDate))
+            ->latest()
+            ->get();
+
+        // 3. Ambil Data Man Power & Proses Kandidat
+        $manPowerQuery = ManPowerRequest::query()
+            ->with([
+                'requestedBy',
+                'organizationalUnit.employees.user.profile',
+                'superiorApprovedBy'
+            ])
+            ->where('superior_approval_status', 'approved')
+            ->when($status !== 'all', fn($q) => $q->where('status', $status))
+            ->when($startDate, fn($q) => $q->whereDate('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->whereDate('created_at', '<=', $endDate))
+            ->latest()
+            ->get();
+
+        $manPower = $manPowerQuery->map(function ($mp) {
+            $unit = $mp->organizationalUnit;
+
+            // Hitung jumlah karyawan saat ini di unit tersebut
+            $currentHeadcount = $unit ? $unit->employees->count() : 0;
+
+            $candidates = [];
+
+            // Cari kandidat dari unit ber-tipe sama untuk dipindahkan
+            if ($unit && $unit->type) {
+                $candidates = User::whereHas('profile.organizationalUnit', function ($q) use ($unit) {
+                    $q->where('type', $unit->type)
+                        ->where('id', '!=', $unit->id);
+                })
+                    ->where('is_active', true)
+                    ->with(['profile.organizationalUnit', 'profile.jabatan'])
+                    ->get()
+                    ->map(function ($u) {
+                        return [
+                            'id' => $u->id,
+                            'name' => $u->name,
+                            'unit_name' => $u->profile->organizationalUnit->name ?? '-',
+                            'jabatan' => $u->profile->jabatan->name ?? '-',
+                        ];
+                    });
+            }
+
+            return [
+                'id' => $mp->id,
+                'requested_by' => $mp->requestedBy->name ?? '-',
+                'unit_id' => $unit->id ?? null,
+                'unit_name' => $unit->name ?? '-',
+                'jumlah_manpower' => $mp->jumlah_manpower,
+                'current_headcount' => $currentHeadcount,
+                'reason' => $mp->reason,
+                'status' => $mp->status,
+                'created_at' => $mp->created_at->format('Y-m-d H:i'),
+                'candidates' => $candidates,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'mutasi' => $mutasi,
+                'peringatan' => $peringatan,
+                'man_power' => $manPower
+            ]
+        ]);
+    }
     public function kpiReport()
     {
         $kpiPeriods = KpiPeriod::orderBy('period_start', 'desc')->get();

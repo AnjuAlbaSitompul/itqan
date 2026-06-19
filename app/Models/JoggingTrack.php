@@ -18,4 +18,9 @@ class JoggingTrack extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function countDistance()
+    {
+        return $this->distance_km;
+    }
 }

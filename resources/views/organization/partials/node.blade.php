@@ -91,8 +91,14 @@
                     data-jabatan-id="{{ $employee->jabatan_id }}" data-is-head="{{ $employee->is_head ? '1' : '0' }}">
 
                     <div class="employee-avatar">
-                        {{ strtoupper(substr($employee->user?->name ?? 'U', 0, 1)) }}
+                        @if($employee->user?->ownProfile?->avatar)
+                            <img src="{{ Storage::url($employee->user->ownProfile->avatar) }}"
+                                alt="{{ $employee->user->name }}">
+                        @else
+                            {{ strtoupper(substr($employee->user?->name ?? 'U', 0, 2)) }}
+                        @endif
                     </div>
+
                     <div class="employee-info ms-2 flex-grow-1">
                         <div class="employee-name">{{ $employee->user?->name }}</div>
                         <div class="employee-position">

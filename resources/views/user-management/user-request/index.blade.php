@@ -237,49 +237,6 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6" id="outletWrapper">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Outlet
-                                </label>
-
-                                <select class="form-select modern-select" id="outlet_id">
-
-                                    <option value="">
-                                        Select Outlet
-                                    </option>
-
-                                    @foreach ($outlets as $outlet)
-                                        <option value="{{ $outlet->id }}">
-                                            {{ $outlet->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Unit
-                                </label>
-
-                                <select class="form-select modern-select" id="unit_id">
-
-                                    <option value="">
-                                        Select Unit
-                                    </option>
-
-                                    @foreach ($units as $unit)
-                                        <option value="{{ $unit->id }}">
-                                            {{ $unit->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-                            </div>
-                        </div>
 
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -520,7 +477,7 @@
 
     <!-- SCRIPT -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             function toggleOutlet() {
 
                 let roleName = $('#role_id option:selected')
@@ -545,7 +502,7 @@
 
             toggleOutlet();
 
-            $('#role_id').on('change', function() {
+            $('#role_id').on('change', function () {
                 toggleOutlet();
             });
             let table = $('#userRequestTable').DataTable({
@@ -565,49 +522,49 @@
                 },
 
                 columns: [{
-                        data: 'no',
-                        render: function(data, type, row, meta) {
-                            return meta.row + 1;
-                        }
-                    },
-                    {
-                        data: 'nip'
-                    },
-                    {
-                        data: 'name',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fe fe-users"></i>
-                                    <span>${data}</span>
-                                </div>
-                            `;
-                        }
-                    },
-                    {
-                        data: 'alamat'
-                    },
-                    {
-                        data: 'action',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return `
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
-                                        <i class="fe fe-check"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
-                                        <i class="fe fe-trash"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }
+                    data: 'no',
+                    render: function (data, type, row, meta) {
+                        return meta.row + 1;
                     }
+                },
+                {
+                    data: 'nip'
+                },
+                {
+                    data: 'name',
+                    render: function (data, type, row) {
+                        return `
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fe fe-users"></i>
+                                                <span>${data}</span>
+                                            </div>
+                                        `;
+                    }
+                },
+                {
+                    data: 'alamat'
+                },
+                {
+                    data: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return `
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
+                                                    <i class="fe fe-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
+                                                    <i class="fe fe-trash"></i>
+                                                </button>
+                                            </div>
+                                        `;
+                    }
+                }
                 ]
 
             });
-            window.openModal = function(requestId) {
+            window.openModal = function (requestId) {
 
                 let request = table
                     .rows()
@@ -634,8 +591,8 @@
 
                 $('#jenis_kelamin').val(
                     request.jenis_kelamin === 'L' ?
-                    'Laki-laki' :
-                    'Perempuan'
+                        'Laki-laki' :
+                        'Perempuan'
                 );
 
                 $('#tanggal_lahir').val(
@@ -652,7 +609,7 @@
                 $('#approveButton').attr('onclick', `approveUserRequest(${request.id})`);
                 $('#scrollingmodal').modal('show');
             };
-            window.deleteUserRequest = function(requestId) {
+            window.deleteUserRequest = function (requestId) {
 
                 swal({
                     title: 'Are you sure?',
@@ -661,7 +618,7 @@
                     showCancelButton: true,
                     confirmButtonText: 'Ya Hapus!',
                     cancelButtonText: 'Cancel'
-                }, function(isConfirm) {
+                }, function (isConfirm) {
 
                     if (isConfirm) {
 
@@ -669,7 +626,7 @@
 
                             url: `/request/reject/${requestId}`,
                             type: 'delete',
-                            success: function(res) {
+                            success: function (res) {
                                 swal({
                                     type: 'success',
                                     title: 'Deleted',
@@ -680,7 +637,7 @@
 
                             },
 
-                            error: function(err) {
+                            error: function (err) {
 
                                 swal({
                                     type: 'error',
@@ -698,21 +655,19 @@
                 });
             };
 
-            window.approveUserRequest = function(requestId) {
+            window.approveUserRequest = function (requestId) {
                 $data = {
                     role_id: $('#role_id').val(),
-                    outlet_id: $('#outlet_id').val(),
-                    unit_id: $('#unit_id').val(),
                     jabatan_id: $('#jabatan_id').val(),
                     tipe_bpjs: $('#tipe_bpjs').val(),
                     golongan: $('input[name="golongan"]').val(),
                 }
                 $.ajax({
-                        url: '/request/approve/' + requestId,
-                        type: 'POST',
-                        data: $data
-                    })
-                    .done(function(res) {
+                    url: '/request/approve/' + requestId,
+                    type: 'POST',
+                    data: $data
+                })
+                    .done(function (res) {
                         $('#scrollingmodal').modal('hide');
                         $('#requestForm')[0].reset();
                         $('#userRequestTable').DataTable().ajax.reload();
@@ -722,7 +677,7 @@
                             text: res.message ?? 'User request approved.'
                         });
                     })
-                    .fail(function(err) {
+                    .fail(function (err) {
                         console.error(err);
                         swal({
                             type: 'error',

@@ -1,656 +1,375 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row">
-
-        <!-- FORM CARD -->
+    <div class="row g-4 mb-4">
         <div class="col-12">
-
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-                <!-- HEADER -->
-                <div class="card-header border-0 p-4 user-header">
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
-                        <div>
-                            <h3 class="fw-bold text-white mb-1">
-                                User Management
-                            </h3>
-
-                            <p class="text-white-50 mb-0">
-                                Kelola data user dan role permissions
-                            </p>
-                        </div>
-
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold" id="btnReset">
-
-                            <i class="fe fe-refresh-ccw me-2"></i>
-                            Reset Form
-
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 class="fw-bold mb-1">User Management</h2>
+                        <p class="mb-0" style="opacity: 0.7;">Kelola data lengkap user, role, dan profile pegawai</p>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button type="button" class="btn btn-outline-secondary shadow-sm rounded-pill px-4 fw-semibold"
+                            data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fe fe-upload me-2 text-primary"></i> Bulk Import
                         </button>
-
+                        <button type="button" class="btn btn-primary shadow-sm rounded-pill px-4 fw-semibold"
+                            id="btnAddUser">
+                            <i class="fe fe-plus me-2"></i> Add New User
+                        </button>
                     </div>
-
                 </div>
-
-                <!-- BODY -->
-                <div class="card-body p-4">
-
-                    <form id="userForm">
-
-                        <!-- FORM -->
-                        <div class="row g-4">
-
-                            <!-- FULL NAME -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Full Name
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-user"></i>
-                                    </span>
-
-                                    <input type="text" id="name" name="name" placeholder="Masukkan nama lengkap">
-
-                                </div>
-
-                            </div>
-
-                            <!-- USERNAME -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Username
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-at-sign"></i>
-                                    </span>
-
-                                    <input type="text" id="username" name="username" placeholder="Masukkan username">
-
-                                </div>
-
-                            </div>
-
-                            <!-- PASSWORD -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Password
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-lock"></i>
-                                    </span>
-
-                                    <input type="password" id="password" name="password" placeholder="Masukkan password">
-
-                                </div>
-
-                            </div>
-
-                            <!-- ROLE -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Role Permissions
-                                </label>
-
-                                <select class="form-select modern-select select2" id="role" name="role">
-
-                                    <option value="">
-                                        Pilih Role
-                                    </option>
-
-                                    @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}" data-name="{{ strtolower($role->name) }}">
-
-                                            {{ Str::of($role->name)->replace('_', ' ')->upper() }}
-
-                                        </option>
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-
-                            <!-- SECTION TITLE -->
-                            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-
-                                <div>
-
-                                    <h4 class="fw-bold mb-1">
-                                        User & Profile Information
-                                    </h4>
-
-                                    <p class="text-muted mb-0">
-                                        Lengkapi data user dan profile pegawai
-                                    </p>
-
-                                </div>
-
-                                <div class="profile-badge">
-
-                                    <i class="fe fe-user-check me-2"></i>
-                                    Employee Form
-
-                                </div>
-
-                            </div>
-
-
-
-                            <!-- NIP -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    NIP
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-credit-card"></i>
-                                    </span>
-
-                                    <input type="text" id="nip" name="nip" placeholder="Masukkan NIP">
-
-                                </div>
-
-                            </div>
-
-                            <!-- JENIS KELAMIN -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Jenis Kelamin
-                                </label>
-
-                                <select class="form-select modern-select select2" id="jenis_kelamin" name="jenis_kelamin">
-
-                                    <option value="">
-                                        Pilih Jenis Kelamin
-                                    </option>
-
-                                    <option value="L">
-                                        Laki-Laki
-                                    </option>
-
-                                    <option value="P">
-                                        Perempuan
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                            <!-- TANGGAL LAHIR -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Tanggal Lahir
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-calendar"></i>
-                                    </span>
-
-                                    <input type="date" id="tanggal_lahir" name="tanggal_lahir">
-
-                                </div>
-
-                            </div>
-
-                            <!-- TANGGAL MASUK -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Tanggal Masuk
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-calendar"></i>
-                                    </span>
-
-                                    <input type="date" id="tanggal_masuk" name="tanggal_masuk">
-
-                                </div>
-
-                            </div>
-
-                            <!-- TAMATAN -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Tamatan
-                                </label>
-
-
-                                <select class="form-select modern-select select2" id="tamatan" name="tamatan">
-
-                                    <option value="">
-                                        Pilih Tamatan
-                                    </option>
-
-                                    <option value="SMA">
-                                        SMA
-                                    </option>
-
-                                    <option value="D3">
-                                        D3
-                                    </option>
-
-                                    <option value="S1">
-                                        S1
-                                    </option>
-
-                                    <option value="S2">
-                                        S2
-                                    </option>
-
-                                    <option value="S3">
-                                        S3
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- DOMISILI -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Domisili
-                                </label>
-
-                                <div class="modern-input">
-
-                                    <span>
-                                        <i class="fe fe-map-pin"></i>
-                                    </span>
-
-                                    <input type="text" id="domisili" name="domisili" placeholder="Masukkan domisili">
-
-                                </div>
-
-                            </div>
-
-                            <!-- TIPE BPJS -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Tipe BPJS
-                                </label>
-
-                                <select class="form-select modern-select select2" id="tipe_bpjs" name="tipe_bpjs">
-
-                                    <option value="">
-                                        Pilih Tipe BPJS
-                                    </option>
-
-                                    <option value="Kesehatan">
-                                        Kesehatan
-                                    </option>
-
-                                    <option value="Ketenagakerjaan">
-                                        Ketenagakerjaan
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                            <!-- GOLONGAN -->
-                            <div class="col-xl-4 col-lg-6">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Golongan
-                                </label>
-
-                                <select class="form-select modern-select select2" id="golongan" name="golongan">
-
-                                    <option value="">
-                                        Pilih Golongan
-                                    </option>
-
-                                    @php
-                                        $golonganRomawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
-                                        $golonganHuruf = ['A', 'B', 'C', 'D', 'E'];
-                                    @endphp
-
-                                    @foreach ($golonganRomawi as $romawi)
-                                        @foreach ($golonganHuruf as $huruf)
-                                            <option value="{{ $romawi . $huruf }}">{{ $romawi . $huruf }}</option>
-                                        @endforeach
-                                    @endforeach
-
-                                </select>
-
-
-                            </div>
-
-                            <!-- ALAMAT -->
-                            <div class="col-12">
-
-                                <label class="form-label fw-semibold mb-2">
-                                    Alamat
-                                </label>
-
-                                <textarea class="form-control modern-textarea" rows="4" id="alamat" name="alamat"
-                                    placeholder="Masukkan alamat lengkap"></textarea>
-
-                            </div>
-
-                        </div>
-
-                        <!-- ACTION -->
-                        <div class="d-flex justify-content-end gap-2 mt-5">
-
-                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold shadow-sm"
-                                id="submitButton">
-
-                                <i class="fe fe-save me-2"></i>
-                                Save User
-
-                            </button>
-
-                            <button type="button" class="btn btn-success rounded-pill px-5 py-2 fw-semibold shadow-sm"
-                                style="display: none;" id="updateButton">
-
-                                <i class="fe fe-check-circle me-2"></i>
-                                Update User
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
             </div>
-
         </div>
 
-        <!-- BULK IMPORT CARD -->
-        <div class="col-12 mt-4">
-
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-                <!-- HEADER -->
-                <div class="card-header bulk-header p-4 border-0">
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
-                        <div>
-                            <h3 class="fw-bold text-white mb-1">
-                                Bulk Import User
-                            </h3>
-
-                            <p class="text-white-50 mb-0">
-                                Upload file Excel (.xlsx) untuk membuat banyak user sekaligus
-                            </p>
-                        </div>
-
-                        <a href="{{ route('user.template') }}" class="btn btn-light rounded-pill px-4 fw-semibold">
-
-                            <i class="fe fe-download me-2"></i>
-                            Download Template
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-                <!-- BODY -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-body p-4">
-
-                    <form id="bulkImportForm" enctype="multipart/form-data">
-
-                        <div class="upload-area" id="uploadArea">
-
-                            <input type="file" id="xlsxFile" name="file" accept=".xlsx,.xls" hidden>
-
-                            <div class="upload-content">
-
-                                <div class="upload-icon">
-                                    <i class="fe fe-upload-cloud"></i>
-                                </div>
-
-                                <h5 class="fw-bold mb-2">
-                                    Drag & Drop File Excel
-                                </h5>
-
-                                <p class="text-muted mb-3">
-                                    atau klik area ini untuk memilih file
-                                </p>
-
-                                <button type="button" class="btn btn-primary rounded-pill px-4" id="chooseFile">
-
-                                    Pilih File
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                        <!-- FILE INFO -->
-                        <div class="selected-file mt-4 d-none">
-
-                            <div class="file-card">
-
-                                <div class="file-icon">
-                                    <i class="fe fe-file-text"></i>
-                                </div>
-
-                                <div class="flex-grow-1">
-
-                                    <h6 class="mb-1 file-name">
-                                        -
-                                    </h6>
-
-                                    <small class="text-muted file-size">
-                                        -
-                                    </small>
-
-                                </div>
-
-                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="removeFile">
-
-                                    Remove
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                        <!-- ACTION -->
-                        <div class="d-flex justify-content-end mt-4">
-
-                            <button type="submit" class="btn btn-success rounded-pill px-5">
-
-                                <i class="fe fe-upload me-2"></i>
-                                Import User
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- TABLE -->
-        <div class="col-12 mt-4">
-
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-                <div class="card-header bg-white border-0 p-4">
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
-                        <div>
-
-                            <h3 class="fw-bold mb-1">
-                                User List
-                            </h3>
-
-                            <p class="text-muted mb-0">
-                                Data seluruh user yang terdaftar di sistem
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="card-body p-4">
-
                     <div class="table-responsive">
-                        <table class="table align-middle table-hover custom-table" id="userTable" width="100%">
-
+                        <table class="table align-middle custom-table dt-responsive nowrap" id="userTable" width="100%">
                             <thead>
-
                                 <tr>
-                                    <th width="5%">#</th>
+                                    <th width="3%"></th>
+                                    <th width="3%">No</th>
+                                    <th>NIP</th>
                                     <th>Full Name</th>
                                     <th>Username</th>
                                     <th>Role</th>
-                                    <th>Outlet</th>
-                                    <th width="15%">Action</th>
+                                    <th>Golongan</th>
+                                    <th>Gender</th>
+                                    <th>Tgl Lahir</th>
+                                    <th>Tgl Masuk</th>
+                                    <th>Pendidikan</th>
+                                    <th>BPJS</th>
+                                    <th>Domisili</th>
+                                    <th>Alamat</th>
+                                    <th width="10%">Action</th>
                                 </tr>
-
                             </thead>
-
                             <tbody></tbody>
-
                         </table>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-    <!-- STYLE -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header user-header border-0 p-4">
+                    <h4 class="modal-title fw-bold text-white mb-0" id="modalTitle">Add New User</h4>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4 p-md-5">
+                    <div class="wizard-progress position-relative mb-5">
+                        <div class="progress position-absolute w-100"
+                            style="height: 4px; top: 50%; transform: translateY(-50%); z-index: 1;">
+                            <div class="progress-bar bg-primary transition-all" id="wizardProgressBar" style="width: 0%">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                            <div class="step-circle active" id="step-circle-1"><i class="fe fe-user"></i></div>
+                            <div class="step-circle" id="step-circle-2"><i class="fe fe-info"></i></div>
+                            <div class="step-circle" id="step-circle-3"><i class="fe fe-map-pin"></i></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 fw-semibold" style="font-size: 12px; opacity: 0.7;">
+                            <span>Account Details</span>
+                            <span>Employee Profile</span>
+                            <span>Additional Info</span>
+                        </div>
+                    </div>
+
+                    <form id="userForm">
+                        <div class="wizard-step" id="step-1">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Full Name</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-user"></i></span>
+                                        <input type="text" id="name" name="name" placeholder="Masukkan nama lengkap">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Username</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-at-sign"></i></span>
+                                        <input type="text" id="username" name="username" placeholder="Masukkan username">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Password</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-lock"></i></span>
+                                        <input type="password" id="password" name="password"
+                                            placeholder="Masukkan password">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Role Permissions</label>
+                                    <select class="form-select modern-select select2" id="role" name="role">
+                                        <option value="">Pilih Role</option>
+                                        @foreach ($roles as $role)
+                                            <option value="{{ $role->id }}">
+                                                {{ Str::of($role->name)->replace('_', ' ')->upper() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-step d-none" id="step-2">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">NIP</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-credit-card"></i></span>
+                                        <input type="text" id="nip" name="nip" placeholder="Masukkan NIP">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Jenis Kelamin</label>
+                                    <select class="form-select modern-select select2" id="jenis_kelamin"
+                                        name="jenis_kelamin">
+                                        <option value="">Pilih Jenis Kelamin</option>
+                                        <option value="L">Laki-Laki</option>
+                                        <option value="P">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Tanggal Lahir</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-calendar"></i></span>
+                                        <input type="date" id="tanggal_lahir" name="tanggal_lahir">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Tanggal Masuk</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-calendar"></i></span>
+                                        <input type="date" id="tanggal_masuk" name="tanggal_masuk">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-step d-none" id="step-3">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Tamatan</label>
+                                    <select class="form-select modern-select select2" id="tamatan" name="tamatan">
+                                        <option value="">Pilih Tamatan</option>
+                                        <option value="SMA">SMA</option>
+                                        <option value="D3">D3</option>
+                                        <option value="S1">S1</option>
+                                        <option value="S2">S2</option>
+                                        <option value="S3">S3</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Domisili</label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-map-pin"></i></span>
+                                        <input type="text" id="domisili" name="domisili" placeholder="Masukkan domisili">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Tipe BPJS</label>
+                                    <select class="form-select modern-select select2" id="tipe_bpjs" name="tipe_bpjs">
+                                        <option value="">Pilih Tipe BPJS</option>
+                                        <option value="Kesehatan">Kesehatan</option>
+                                        <option value="Ketenagakerjaan">Ketenagakerjaan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Golongan</label>
+                                    <select class="form-select modern-select select2" id="golongan" name="golongan">
+                                        <option value="">Pilih Golongan</option>
+                                        @php
+                                            $golonganRomawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+                                            $golonganHuruf = ['A', 'B', 'C', 'D', 'E'];
+                                        @endphp
+                                        @foreach ($golonganRomawi as $romawi)
+                                            @foreach ($golonganHuruf as $huruf)
+                                                <option value="{{ $romawi . $huruf }}">{{ $romawi . $huruf }}</option>
+                                            @endforeach
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold mb-2">Alamat Lengkap</label>
+                                    <textarea class="form-control modern-textarea" rows="3" id="alamat" name="alamat"
+                                        placeholder="Masukkan alamat lengkap"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btnPrev"
+                                style="display: none;">
+                                <i class="fe fe-arrow-left me-2"></i> Previous
+                            </button>
+
+                            <div class="ms-auto d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold"
+                                    data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary shadow-sm rounded-pill px-5 fw-semibold"
+                                    id="btnNext">
+                                    Next <i class="fe fe-arrow-right ms-2"></i>
+                                </button>
+                                <button type="submit" class="btn btn-success shadow-sm rounded-pill px-5 fw-semibold"
+                                    id="submitButton" style="display: none;">
+                                    <i class="fe fe-save me-2"></i> Save User
+                                </button>
+                                <button type="button" class="btn btn-success shadow-sm rounded-pill px-5 fw-semibold"
+                                    id="updateButton" style="display: none;">
+                                    <i class="fe fe-check-circle me-2"></i> Update
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bulk-header border-0 p-4">
+                    <h4 class="modal-title fw-bold text-white mb-0">Bulk Import User</h4>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <p class="mb-0 small" style="opacity: 0.7;">Upload file Excel (.xlsx) untuk import massal.</p>
+                        <a href="{{ route('user.template') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="fe fe-download me-1"></i> Template
+                        </a>
+                    </div>
+                    <form id="bulkImportForm" enctype="multipart/form-data">
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="xlsxFile" name="file" accept=".xlsx,.xls" hidden>
+                            <div class="upload-content">
+                                <div class="upload-icon"><i class="fe fe-upload-cloud"></i></div>
+                                <h6 class="fw-bold mb-1">Drag & Drop File Disini</h6>
+                                <p class="small mb-3" style="opacity: 0.7;">atau klik area ini untuk memilih</p>
+                                <button type="button" class="btn btn-primary rounded-pill px-4 btn-sm" id="chooseFile">Pilih
+                                    File</button>
+                            </div>
+                        </div>
+                        <div class="selected-file mt-3 d-none">
+                            <div class="file-card p-3 border rounded-3 d-flex align-items-center gap-3 bg-body-tertiary">
+                                <div class="file-icon bg-success text-white rounded p-2"><i class="fe fe-file-text"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <h6 class="mb-0 text-truncate file-name">-</h6>
+                                    <small class="file-size" style="opacity: 0.7;">-</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile"><i
+                                        class="fe fe-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success rounded-pill py-2">
+                                <i class="fe fe-upload me-2"></i> Proses Import
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
-        .bulk-header {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-        }
-
-        .upload-area {
-            border: 2px dashed #dbeafe;
-            border-radius: 20px;
-            min-height: 260px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: .3s;
-            background: #f8fbff;
-        }
-
-        .upload-area:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-
-        .upload-area.dragover {
-            border-color: #2563eb;
-            background: #dbeafe;
-        }
-
-        .upload-content {
-            text-align: center;
-        }
-
-        .upload-icon {
-            width: 90px;
-            height: 90px;
-            margin: auto;
-            border-radius: 50%;
-            background: rgba(37, 99, 235, .1);
-            color: #2563eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            margin-bottom: 20px;
-        }
-
-        .file-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: #fff;
-        }
-
-        .file-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
-            background: rgba(16, 185, 129, .12);
-            color: #10b981;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
         .user-header {
             background: linear-gradient(135deg, #6259ca 0%, #867efc 100%);
         }
 
-        .modern-input {
-            height: 52px;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
+        .bulk-header {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        }
+
+        /* ----------------------------------------------------
+               MEMAKSA WARNA TEXT MENGIKUTI TEMPLATE (INHERIT)
+               ---------------------------------------------------- */
+        body,
+        label,
+        h2,
+        h6 {
+            color: inherit;
+        }
+
+        /* Override paksa warna DataTables agar tidak jadi hitam (#333) */
+        table.dataTable,
+        table.dataTable th,
+        table.dataTable td,
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_processing,
+        .dataTables_wrapper .dataTables_paginate {
+            color: inherit !important;
+        }
+
+        /* WIZARD CSS */
+        .step-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 5px var(--bs-body-bg);
+            opacity: 0.6;
+        }
+
+        .step-circle.active {
+            background: #6259ca;
+            color: #fff;
+            box-shadow: 0 0 0 5px rgba(98, 89, 202, 0.2);
+            border-color: #6259ca;
+            opacity: 1;
+        }
+
+        .wizard-step {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* INPUT STYLES */
+        .modern-input,
+        .modern-select {
+            height: 48px;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             overflow: hidden;
             transition: .3s;
-            background: #fff;
+            background: var(--bs-tertiary-bg);
+            color: inherit;
         }
 
         .modern-input:focus-within {
             border-color: #6259ca;
-            box-shadow: 0 0 0 4px rgba(98, 89, 202, .12);
+            background: var(--bs-body-bg);
+            box-shadow: 0 0 0 3px rgba(98, 89, 202, .12);
         }
 
         .modern-input span {
-            width: 50px;
+            width: 45px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: #6259ca;
+            opacity: 0.7;
             font-size: 16px;
         }
 
@@ -661,97 +380,166 @@
             height: 100%;
             padding-right: 16px;
             background: transparent;
+            font-size: 14px;
+            color: inherit;
         }
 
-        .modern-select {
-            height: 52px;
-            border-radius: 14px !important;
-            border: 1px solid #e5e7eb !important;
-        }
-
-        .select2-container--default .select2-selection--single {
-            height: 52px !important;
-            border-radius: 14px !important;
-            border: 1px solid #e5e7eb !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 52px !important;
-            padding-left: 14px;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 52px !important;
-        }
-
-        .custom-table thead th {
-            background: #f8fafc;
-            border-bottom: none !important;
-            padding: 16px;
-            font-size: 13px;
-            text-transform: uppercase;
-            color: #64748b;
-            font-weight: 700;
-        }
-
-        .custom-table tbody td {
-            padding: 16px;
-            vertical-align: middle;
-        }
-
-        .custom-table tbody tr {
-            transition: .2s;
-        }
-
-        .custom-table tbody tr:hover {
-            background: #f8fafc;
-        }
-
-        .dataTables_filter input {
-            border-radius: 12px !important;
-            border: 1px solid #e5e7eb !important;
-            padding: 8px 14px !important;
-        }
-
-        .dataTables_length select {
-            border-radius: 10px !important;
-            border: 1px solid #e5e7eb !important;
-        }
-
-        .profile-badge {
-            background: rgba(98, 89, 202, .1);
-            color: #6259ca;
-            padding: 10px 18px;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 13px;
+        .modern-input input::placeholder {
+            color: inherit;
+            opacity: 0.5;
         }
 
         .modern-textarea {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--bs-border-color);
+            padding: 12px 16px;
             resize: none;
+            background: var(--bs-tertiary-bg);
+            color: inherit;
             transition: .3s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
+            font-size: 14px;
         }
 
         .modern-textarea:focus {
             border-color: #6259ca;
-            box-shadow: 0 0 0 4px rgba(98, 89, 202, .12);
+            background: var(--bs-body-bg);
+            box-shadow: 0 0 0 3px rgba(98, 89, 202, .12);
+            outline: none;
         }
 
-        .row.g-4>div {
-            animation: fadeInUp .3s ease;
+        .modern-textarea::placeholder {
+            color: inherit;
+            opacity: 0.5;
         }
 
-        @keyframes fadeInUp {
+        /* SELECT2 DARK MODE FIX */
+        .select2-container--default .select2-selection--single {
+            height: 48px !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--bs-border-color) !important;
+            display: flex !important;
+            align-items: center !important;
+            background-color: var(--bs-tertiary-bg) !important;
+        }
 
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #6259ca !important;
+            background-color: var(--bs-body-bg) !important;
+            box-shadow: 0 0 0 3px rgba(98, 89, 202, .12) !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 16px;
+            font-size: 14px;
+            color: inherit !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 48px !important;
+            right: 10px !important;
+        }
+
+        .select2-dropdown {
+            background-color: var(--bs-body-bg) !important;
+            border: 1px solid var(--bs-border-color) !important;
+            color: inherit !important;
+        }
+
+        .select2-results__option {
+            color: inherit !important;
+            background-color: transparent;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #6259ca !important;
+            color: white !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background-color: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            color: inherit;
+            border-radius: 6px;
+        }
+
+        /* UPLOAD AREA */
+        .upload-area {
+            border: 2px dashed var(--bs-border-color);
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .3s;
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #6259ca;
+            background-color: var(--bs-secondary-bg);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, .1);
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        /* ACTION BUTTONS IN TABLE */
+        .btn-action {
+            background-color: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            color: inherit;
+            transition: .2s;
+        }
+
+        .btn-action.text-primary:hover {
+            color: #0d6efd !important;
+            border-color: #0d6efd;
+        }
+
+        .btn-action.text-danger:hover {
+            color: #dc3545 !important;
+            border-color: #dc3545;
+        }
+
+        /* TABLE STYLES */
+        .custom-table thead th {
+            background: var(--bs-tertiary-bg);
+            border-bottom: 2px solid var(--bs-border-color);
+            padding: 14px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.85;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .custom-table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            font-size: 14px;
+            border-color: var(--bs-border-color);
+            transition: 0.3s;
+        }
+
+        .custom-table tbody tr:hover td {
+            background: var(--bs-secondary-bg);
+        }
+
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(10px);
             }
 
             to {
@@ -761,401 +549,227 @@
         }
     </style>
 
-    <!-- SCRIPT -->
     <script>
         $(document).ready(function () {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $('#uploadArea')
-                .on('dragover', function (e) {
-                    e.preventDefault();
-                    $(this).addClass('dragover');
-                })
-                .on('dragleave', function () {
-                    $(this).removeClass('dragover');
-                })
-                .on('drop', function (e) {
+            $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
-                    e.preventDefault();
+            $('.select2').select2({ width: '100%', dropdownParent: $('#userModal') });
 
-                    $(this).removeClass('dragover');
-
-                    const files = e.originalEvent.dataTransfer.files;
-
-                    if (files.length) {
-
-                        $('#xlsxFile')[0].files = files;
-                        $('#xlsxFile').trigger('change');
-
-                    }
-
-                });
-
-            $('#chooseFile').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                document.getElementById('xlsxFile').click();
-            });
-
-            $('#uploadArea').on('click', function (e) {
-
-                if ($(e.target).is('#xlsxFile')) {
-                    return;
-                }
-
-                document.getElementById('xlsxFile').click();
-            });
-
-            $('#xlsxFile').on('change', function () {
-
-                const file = this.files[0];
-
-                if (!file) return;
-
-                const ext = file.name.split('.').pop().toLowerCase();
-
-                if (!['xlsx', 'xls'].includes(ext)) {
-
-                    swal({
-                        type: 'error',
-                        title: 'File Tidak Valid',
-                        text: 'Hanya file Excel (.xlsx atau .xls)'
-                    });
-
-                    $(this).val('');
-
-                    return;
-                }
-
-                $('.selected-file').removeClass('d-none');
-
-                $('.file-name').text(file.name);
-
-                $('.file-size').text(
-                    (file.size / 1024).toFixed(2) + ' KB'
-                );
-
-            });
-            $('#removeFile').on('click', function () {
-
-                $('#xlsxFile').val('');
-
-                $('.selected-file').addClass('d-none');
-
-            });
-
-            $('#bulkImportForm').submit(function (e) {
-
-                e.preventDefault();
-
-                let file = $('#xlsxFile')[0].files[0];
-
-                if (!file) {
-
-                    swal({
-                        type: 'warning',
-                        title: 'Pilih File',
-                        text: 'Silakan pilih file Excel terlebih dahulu'
-                    });
-
-                    return;
-                }
-
-                let formData = new FormData(this);
-
-                $.ajax({
-
-                    url: '/user/import',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-
-                    success: function (res) {
-
-                        swal({
-                            type: 'success',
-                            title: 'Berhasil',
-                            text: res.message
-                        });
-
-                        $('#userTable').DataTable().ajax.reload();
-
-                    },
-
-                    error: function (err) {
-                        console.error(err.responseJSON?.error)
-                        swal({
-                            type: 'error',
-                            title: 'Error',
-                            text: err.responseJSON?.error
-                        });
-
-                    }
-
-                });
-            });
-            $('.select2').select2({
-                width: '100%'
-            });
-
+            // ================== DATATABLES (SEMUA DATA) ==================
             let table = $('#userTable').DataTable({
                 processing: true,
                 serverSide: false,
-                responsive: {
-                    details: {
-                        type: 'column',
-                        target: 0
-                    }
-                },
-
-                columnDefs: [{
-                    className: 'dtr-control',
-                    orderable: false,
-                    targets: 0
-                }],
-
-                ajax: {
-                    url: '/user',
-                    type: 'GET',
-                    dataSrc: ''
-                },
-
+                responsive: { details: { type: 'column', target: 0 } },
+                columnDefs: [{ className: 'dtr-control', orderable: false, targets: 0 }],
+                ajax: { url: '/user', type: 'GET', dataSrc: '' },
                 columns: [
                     { data: null, defaultContent: '' },
+                    { data: 'no' },
+                    { data: 'nip' },
                     { data: 'name' },
                     { data: 'username' },
                     { data: 'role' },
                     { data: 'golongan' },
-                    { data: 'action' }
+                    { data: 'jenis_kelamin' },
+                    { data: 'tanggal_lahir' },
+                    { data: 'tanggal_masuk' },
+                    { data: 'tamatan' },
+                    { data: 'tipe_bpjs' },
+                    { data: 'domisili' },
+                    { data: 'alamat' },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-action text-primary btn-sm rounded-circle p-2" onclick="editUser(${row.id})" title="Edit User">
+                                        <i class="fe fe-edit" style="font-size: 16px;"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-action text-danger btn-sm rounded-circle p-2" onclick="deleteUser(${row.id})" title="Delete User">
+                                        <i class="fe fe-trash-2" style="font-size: 16px;"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
                 ]
             });
 
-            window.deleteUser = function (userId) {
+            // ================== MODAL & FORM LOGIC ==================
+            let currentStep = 1;
+            const totalSteps = 3;
+            let isUpdateMode = false;
 
-                swal({
-                    title: 'Are you sure?',
-                    text: 'This action cannot be undone.',
-                    type: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
-                }, function (isConfirm) {
-
-                    if (isConfirm) {
-
-                        $.ajax({
-
-                            url: `/user/delete/${userId}`,
-                            type: 'delete',
-                            success: function (res) {
-                                swal({
-                                    type: 'success',
-                                    title: 'Deleted',
-                                    text: res.message
-                                });
-
-                                $('#userTable').DataTable().ajax.reload();
-
-                            },
-
-                            error: function (err) {
-
-                                swal({
-                                    type: 'error',
-                                    title: 'Error',
-                                    text: err.responseJSON?.message ??
-                                        'An error occurred.'
-                                });
-
-                            }
-
-                        });
-
-                    }
-
-                });
+            window.resetForm = function () {
+                $('#userForm')[0].reset();
+                $('#userForm .select2').val('').trigger('change');
+                $('.invalid-feedback').remove();
+                $('.is-invalid').removeClass('is-invalid');
+                currentStep = 1;
+                isUpdateMode = false;
+                $('#modalTitle').text('Add New User');
+                updateWizardState();
             };
 
-            window.editUser = function (userId) {
-                $('#updateButton').attr('data-id', userId);
-                $('#submitButton').hide();
-                $('#updateButton').show();
-                let data = table
-                    .rows()
-                    .data()
-                    .toArray()
-                    .find(item => Number(item.id) === Number(userId));
+            $('#btnAddUser').on('click', function () {
+                resetForm();
+                $('#userModal').modal('show');
+            });
 
-                if (!data) {
+            function updateWizardState() {
+                $('.wizard-step').addClass('d-none');
+                $(`#step-${currentStep}`).removeClass('d-none');
+                $('.step-circle').removeClass('active');
+                for (let i = 1; i <= currentStep; i++) { $(`#step-circle-${i}`).addClass('active'); }
+                $('#wizardProgressBar').css('width', ((currentStep - 1) / (totalSteps - 1)) * 100 + '%');
+                $('#btnPrev').toggle(currentStep > 1);
 
-                    swal({
-                        type: 'error',
-                        title: 'Error',
-                        text: 'User data not found.'
-                    });
-
-                    return;
+                if (currentStep === totalSteps) {
+                    $('#btnNext').hide();
+                    if (isUpdateMode) { $('#updateButton').show(); $('#submitButton').hide(); }
+                    else { $('#submitButton').show(); $('#updateButton').hide(); }
+                } else {
+                    $('#btnNext').show();
+                    $('#submitButton, #updateButton').hide();
                 }
+            }
+
+            $('#btnNext').click(function () { if (currentStep < totalSteps) { currentStep++; updateWizardState(); } });
+            $('#btnPrev').click(function () { if (currentStep > 1) { currentStep--; updateWizardState(); } });
+
+            // ================== AJAX CRUD ==================
+            $('#userForm').on('submit', function (e) {
+                e.preventDefault();
+                let data = $(this).serializeArray();
+                $.post('/user/create', data)
+                    .done(function (res) {
+                        $('#userModal').modal('hide');
+                        setTimeout(() => {
+                            swal({ type: 'success', title: 'Berhasil', text: res.message ?? 'User berhasil disimpan' });
+                            $('#userTable').DataTable().ajax.reload(null, false);
+                        }, 300);
+                    })
+                    .fail(function (xhr) { handleValidationErrors(xhr); });
+            });
+
+            window.editUser = function (userId) {
+                let data = $('#userTable').DataTable().rows().data().toArray().find(item => Number(item.id) === Number(userId));
+                if (!data) return swal({ type: 'error', title: 'Error', text: 'Data tidak ditemukan.' });
+
+                resetForm();
+                isUpdateMode = true;
+                $('#modalTitle').text('Edit User');
+                $('#updateButton').attr('data-id', userId);
 
                 $('#name').val(data.name);
-
                 $('#username').val(data.username);
-
                 $('#password').val('');
-
-                $('#role')
-                    .val(data.role_id)
-                    .trigger('change');
-                $('#golongan')
-                    .val(data.golongan)
-                    .trigger('change');
-                $('#jenis_kelamin')
-                    .val(data.jenis_kelamin)
-                    .trigger('change');
+                $('#role').val(data.role_id).trigger('change');
+                $('#golongan').val(data.golongan).trigger('change');
+                $('#jenis_kelamin').val(data.jenis_kelamin).trigger('change');
                 $('#tanggal_lahir').val(data.tanggal_lahir);
                 $('#tanggal_masuk').val(data.tanggal_masuk);
                 $('#nip').val(data.nip);
-                $('#tamatan')
-                    .val(data.tamatan)
-                    .trigger('change');
+                $('#tamatan').val(data.tamatan).trigger('change');
                 $('#domisili').val(data.domisili);
-                $('#tipe_bpjs')
-                    .val(data.tipe_bpjs).trigger('change');
+                $('#tipe_bpjs').val(data.tipe_bpjs).trigger('change');
                 $('#alamat').val(data.alamat);
 
+                $('#userModal').modal('show');
             };
-
-            $('#userForm').on('submit', function (e) {
-
-                e.preventDefault();
-
-                let data = $(this).serializeArray();
-                console.log(data);
-
-                $.post('/user/create', data)
-                    .done(function (res) {
-
-                        swal({
-                            type: 'success',
-                            title: 'Berhasil',
-                            text: res.message ??
-                                'User berhasil disimpan'
-                        });
-
-                        $('#userForm')[0].reset();
-                        $('#userTable').DataTable().ajax.reload();
-
-                    })
-
-                    .fail(function (xhr) {
-                        $('.invalid-feedback').remove();
-                        $('.is-invalid').removeClass('is-invalid');
-
-                        if (xhr.status === 422) {
-
-                            let errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function (field, messages) {
-
-                                let input = $(`[name="${field}"]`);
-
-                                input.addClass('is-invalid');
-
-                                input.after(`
-                                                                                                                    <div class="invalid-feedback">
-                                                                                                                        ${messages[0]}
-                                                                                                                    </div>
-                                                                                                                `);
-                            });
-                        }
-                        swal({
-                            type: 'error',
-                            title: 'Error',
-                            text: err.responseJSON?.message ??
-                                'Terjadi kesalahan'
-                        });
-
-                    });
-
-            });
-
-            function resetForm() {
-                $('#userForm')[0].reset();
-                $('#submitButton').show();
-                $('#updateButton').hide();
-                $('#role').val('').trigger('change');
-                $('#golongan').val('').trigger('change');
-                $('#jenis_kelamin').val('').trigger('change');
-                $('#tanggal_lahir').val('');
-                $('#tanggal_masuk').val('');
-                $('#nip').val('');
-                $('#domisili').val('');
-                $('#tipe_bpjs').val('').trigger('change');
-                $('#alamat').val('');
-                $('#tamatan').val('').trigger('change');
-                $('.invalid-feedback').remove();
-                $('.is-invalid').removeClass('is-invalid');
-            }
-
-            $('#btnReset').click(function () {
-                resetForm();
-            });
 
             $('#updateButton').click(function () {
                 let userId = $(this).data('id');
-                let name = $('#name').val();
-                let username = $('#username').val();
-                let password = $('#password').val();
-                let role = $('#role').val();
-                let outlet = $('#outlet_id').val();
                 let data = $('#userForm').serializeArray();
-                if (
-                    name === '' ||
-                    username === '' ||
-                    role === ''
-                ) {
-                    swal({
-                        type: 'warning',
-                        title: 'Oops...',
-                        text: 'Semua field wajib diisi'
-                    });
 
-                    return;
-                }
-                $.ajax({
-
-                    url: '/user/update/' + userId,
-
-                    type: 'PATCH',
-
-                    data: data
-
-                })
-
+                $.ajax({ url: '/user/update/' + userId, type: 'PATCH', data: data })
                     .done(function (res) {
-                        resetForm();
-                        $('#userTable').DataTable().ajax.reload();
-
-                        swal({
-                            type: 'success',
-                            title: 'Berhasil',
-                            text: res.message ??
-                                'User berhasil diupdate'
-                        });
+                        $('#userModal').modal('hide');
+                        setTimeout(() => {
+                            swal({ type: 'success', title: 'Berhasil', text: res.message ?? 'User berhasil diupdate' });
+                            $('#userTable').DataTable().ajax.reload(null, false);
+                        }, 300);
                     })
-                    .fail(function (err) {
-                        swal({
-                            type: 'error',
-                            title: 'Error',
-                            text: err.responseJSON?.message ??
-                                'Terjadi kesalahan'
+                    .fail(function (xhr) { handleValidationErrors(xhr); });
+            });
+
+            window.deleteUser = function (userId) {
+                swal({
+                    title: 'Are you sure?', text: 'This action cannot be undone.', type: 'warning',
+                    showCancelButton: true, confirmButtonText: 'Yes, delete it!', cancelButtonText: 'Cancel'
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: `/user/delete/${userId}`, type: 'delete',
+                            success: function (res) {
+                                swal({ type: 'success', title: 'Deleted', text: res.message });
+                                $('#userTable').DataTable().ajax.reload(null, false);
+                            },
+                            error: function (err) { swal({ type: 'error', title: 'Error', text: 'Gagal menghapus data' }); }
                         });
+                    }
+                });
+            };
+
+            function handleValidationErrors(xhr) {
+                $('.invalid-feedback').remove();
+                $('.is-invalid').removeClass('is-invalid');
+                if (xhr.status === 422) {
+                    $.each(xhr.responseJSON.errors, function (field, messages) {
+                        let input = $(`[name="${field}"]`);
+                        input.addClass('is-invalid');
+                        input.parent().after(`<div class="invalid-feedback d-block mt-1">${messages[0]}</div>`);
                     });
+                } else {
+                    swal({ type: 'error', title: 'Error', text: xhr.responseJSON?.message ?? 'Terjadi kesalahan' });
+                }
+            }
+
+            // ================== BULK IMPORT LOGIC ==================
+            $('#uploadArea').on('dragover', function (e) { e.preventDefault(); $(this).addClass('dragover'); })
+                .on('dragleave', function () { $(this).removeClass('dragover'); })
+                .on('drop', function (e) {
+                    e.preventDefault(); $(this).removeClass('dragover');
+                    const files = e.originalEvent.dataTransfer.files;
+                    if (files.length) { $('#xlsxFile')[0].files = files; $('#xlsxFile').trigger('change'); }
+                })
+                .on('click', function (e) { if (!$(e.target).is('#xlsxFile')) $('#xlsxFile').click(); });
+
+            $('#chooseFile').click(function (e) { e.stopPropagation(); $('#xlsxFile').click(); });
+
+            $('#xlsxFile').on('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!['xlsx', 'xls'].includes(ext)) {
+                    swal({ type: 'error', title: 'File Tidak Valid', text: 'Hanya format .xlsx atau .xls' });
+                    $(this).val(''); return;
+                }
+                $('.selected-file').removeClass('d-none');
+                $('.file-name').text(file.name);
+                $('.file-size').text((file.size / 1024).toFixed(2) + ' KB');
+            });
+
+            $('#removeFile').click(function () { $('#xlsxFile').val(''); $('.selected-file').addClass('d-none'); });
+
+            $('#bulkImportForm').submit(function (e) {
+                e.preventDefault();
+                if (!$('#xlsxFile')[0].files[0]) return swal({ type: 'warning', title: 'Pilih File', text: 'Silakan pilih file Excel' });
+                let formData = new FormData(this);
+                $.ajax({
+                    url: '/user/import', type: 'POST', data: formData, processData: false, contentType: false,
+                    success: function (res) {
+                        $('#importModal').modal('hide');
+                        $('#xlsxFile').val(''); $('.selected-file').addClass('d-none');
+                        setTimeout(() => {
+                            swal({ type: 'success', title: 'Berhasil', text: res.message });
+                            $('#userTable').DataTable().ajax.reload(null, false);
+                        }, 300);
+                    },
+                    error: function (err) { swal({ type: 'error', title: 'Error', text: err.responseJSON?.error }); }
+                });
             });
         });
     </script>

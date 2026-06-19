@@ -8,6 +8,7 @@ use App\Models\Mutasi;
 use App\Models\OrganizationalUnit;
 use App\Models\Peringatan;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -33,9 +34,7 @@ class TeamRequestController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $approvers = $user?->profile?->organizationalUnit
-            ? $this->resolveApprovers($user->profile->organizationalUnit)
-            : collect();
+        $approvers = $user->superior()->get() ?? collect();
 
         return view('team.request.index', compact(
             'users',
@@ -44,6 +43,183 @@ class TeamRequestController extends Controller
             'approvers'
         ));
     }
+
+    public function detailUser(Request $request)
+    {
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'type' => [
+                'required',
+                Rule::in(['peringatan', 'mutasi', 'man_power'])
+            ],
+        ]);
+
+        $user = User::with([
+            'profile.jabatan',
+            'profile.organizationalUnit'
+        ])->findOrFail($request->user_id);
+
+        $data = [];
+
+        switch ($request->type) {
+            case 'peringatan':
+                $activeWarning = $user->peringatans()
+                    ->where('status', 'approved')
+                    ->whereDate('due_date', '>=', now())
+                    ->latest()
+                    ->first();
+
+                // Disesuaikan dengan array Rule validasi pada method store
+                $types = ['peringatan_1', 'peringatan_2', 'peringatan_3'];
+
+                if ($activeWarning) {
+                    $index = array_search($activeWarning->type, $types);
+                    $availableTypes = collect($types)
+                        ->slice($index + 1)
+                        ->values();
+                } else {
+                    $availableTypes = collect($types);
+                }
+
+                $data = [
+                    'user' => $user,
+                    'active_warning' => $activeWarning,
+                    'available_types' => $availableTypes,
+                ];
+                break;
+
+            case 'mutasi':
+                $currentUnitId = $user->profile?->organizational_unit_id;
+                $unitType = $user->profile?->organizationalUnit?->type;
+
+                $availableUnits = OrganizationalUnit::query()
+                    ->where('type', $unitType)
+                    ->where('id', '!=', $currentUnitId)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name']);
+
+                $data = [
+                    'user' => $user,
+                    'current_unit' => $user->profile?->organizationalUnit,
+                    'available_units' => $availableUnits,
+                ];
+                break;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    public function storePeringatan(Request $request)
+    {
+        $requester = Auth::user();
+        $allowedUsers = $requester ? $this->getManagedUsers($requester) : collect();
+        $allowedUserIds = $allowedUsers->pluck('id')->all();
+
+        $validated = $request->validate([
+            'user_id' => ['required', Rule::in($allowedUserIds)],
+            'type' => ['required', Rule::in(['peringatan_1', 'peringatan_2', 'peringatan_3'])],
+            'reason' => ['required', 'string'],
+        ]);
+
+        $approvers = $requester?->profile?->organizationalUnit
+            ? $this->resolveApprovers($requester->profile->organizationalUnit)
+            : collect();
+
+        $peringatan = DB::transaction(function () use ($validated, $requester) {
+            return Peringatan::create([
+                'user_id' => $validated['user_id'],
+                'type' => $validated['type'],
+                'reason' => $validated['reason'],
+                'issued_date' => now(), // Auto issue hari ini
+                'due_date' => null,
+                'status' => 'pending',
+                'superior_approval_status' => 'pending',
+                'approved_by' => null,
+                'superior_approved_by' => null,
+                'requested_by' => $requester?->id,
+            ]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan peringatan berhasil dikirim.',
+            'data' => $peringatan->load(['user:id,name', 'requestedBy:id,name']),
+            'approvers' => $approvers->map(function ($approver) {
+                return [
+                    'id' => $approver->id,
+                    'name' => $approver->name,
+                ];
+            })->values(),
+        ]);
+    }
+
+    public function storeMutasi(Request $request)
+    {
+
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'to_id' => ['required', 'exists:organizational_units,id'],
+            'reason' => ['required', 'string'], // Wajib diisi sesuai permintaan
+        ]);
+
+        $unitId = User::find($validated['user_id'])->profile?->organizational_unit_id;
+        $approvers = User::find($validated['user_id'])->Superior()->get() ?? collect();
+        $type = OrganizationalUnit::find($unitId)?->type;
+        $toUnitType = OrganizationalUnit::findOrFail($validated['to_id'])->type;
+
+        if ($type !== $toUnitType) {
+            return response()->json([
+                'message' => 'Unit tujuan harus memiliki tipe yang sama dengan unit asal.',
+                'errors' => ['to_id' => ['Unit tujuan harus memiliki tipe yang sama dengan unit asal.']]
+            ], 422);
+        }
+
+
+        // Validasi tambahan untuk mencegah mutasi ke unit yang sama
+        if ($unitId == $validated['to_id']) {
+            return response()->json([
+                'message' => 'Unit tujuan tidak boleh sama dengan unit asal.',
+                'errors' => ['to_id' => ['Unit tujuan tidak boleh sama dengan unit asal.']]
+            ], 422);
+        }
+
+
+        $mutasi = DB::transaction(function () use ($unitId, $validated) {
+            return Mutasi::create([
+                'user_id' => $validated['user_id'],
+                'from_id' => $unitId,
+                'to_id' => $validated['to_id'],
+                'is_head' => false,
+                'golongan' => null,
+                'reason' => $validated['reason'],
+                'effective_date' => null,
+                'status' => 'pending',
+                'superior_approval_status' => 'pending',
+                'approved_by' => null,
+                'superior_approved_by' => null,
+                'requested_by' => Auth::id(),
+            ]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan mutasi berhasil dikirim.',
+            'data' => $mutasi->load(['user:id,name', 'fromUnit:id,name', 'toUnit:id,name', 'requestedBy:id,name']),
+            'approvers' => $approvers->map(function ($approver) {
+                return [
+                    'id' => $approver->id,
+                    'name' => $approver->name,
+                ];
+            })->values(),
+        ]);
+    }
+
+
 
     public function storeManPower(Request $request)
     {
@@ -89,105 +265,7 @@ class TeamRequestController extends Controller
         ]);
     }
 
-    public function storePeringatan(Request $request)
-    {
-        $requester = Auth::user();
-        $allowedUsers = $requester ? $this->getManagedUsers($requester) : collect();
-        $allowedUserIds = $allowedUsers->pluck('id')->all();
 
-        $validated = $request->validate([
-            'user_id' => ['required', Rule::in($allowedUserIds)],
-            'type' => ['required', Rule::in(['peringatan_1', 'peringatan_2', 'peringatan_3'])],
-            'reason' => ['required', 'string'],
-            'issued_date' => ['required', 'date'],
-            'due_date' => ['nullable', 'date', 'after_or_equal:issued_date'],
-        ]);
-
-        $approvers = $requester?->profile?->organizationalUnit
-            ? $this->resolveApprovers($requester->profile->organizationalUnit)
-            : collect();
-
-        $peringatan = DB::transaction(function () use ($validated, $requester) {
-            return Peringatan::create([
-                'user_id' => $validated['user_id'],
-                'type' => $validated['type'],
-                'reason' => $validated['reason'],
-                'issued_date' => $validated['issued_date'],
-                'due_date' => $validated['due_date'] ?? null,
-                'status' => 'pending',
-                'superior_approval_status' => 'pending',
-                'approved_by' => null,
-                'superior_approved_by' => null,
-                'requested_by' => $requester?->id,
-            ]);
-        });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Permintaan peringatan berhasil dikirim.',
-            'data' => $peringatan->load(['user:id,name', 'requestedBy:id,name']),
-            'approvers' => $approvers->map(function ($approver) {
-                return [
-                    'id' => $approver->id,
-                    'name' => $approver->name,
-                ];
-            })->values(),
-        ]);
-    }
-
-    public function storeMutasi(Request $request)
-    {
-        $requester = Auth::user();
-        $allowedUsers = $requester ? $this->getManagedUsers($requester) : collect();
-        $allowedUnits = $requester ? $this->getAccessibleOrganizationalUnits($requester) : collect();
-        $allowedUserIds = $allowedUsers->pluck('id')->all();
-        $allowedUnitIds = $allowedUnits->pluck('id')->all();
-
-        $validated = $request->validate([
-            'user_id' => ['required', Rule::in($allowedUserIds)],
-            'from_id' => ['required', Rule::in($allowedUnitIds)],
-            'to_id' => ['required', 'different:from_id', Rule::in($allowedUnitIds)],
-            'jabatan_id' => ['required', 'exists:jabatans,id'],
-            'is_head' => ['nullable', 'boolean'],
-            'golongan' => ['required', 'string', 'max:255'],
-            'reason' => ['nullable', 'string'],
-            'effective_date' => ['nullable', 'date'],
-        ]);
-
-        $approvers = $requester?->profile?->organizationalUnit
-            ? $this->resolveApprovers($requester->profile->organizationalUnit)
-            : collect();
-
-        $mutasi = DB::transaction(function () use ($validated, $requester) {
-            return Mutasi::create([
-                'user_id' => $validated['user_id'],
-                'from_id' => $validated['from_id'],
-                'to_id' => $validated['to_id'],
-                'jabatan_id' => $validated['jabatan_id'],
-                'is_head' => (bool) ($validated['is_head'] ?? false),
-                'golongan' => $validated['golongan'],
-                'reason' => $validated['reason'] ?? null,
-                'effective_date' => $validated['effective_date'] ?? null,
-                'status' => 'pending',
-                'superior_approval_status' => 'pending',
-                'approved_by' => null,
-                'superior_approved_by' => null,
-                'requested_by' => $requester?->id,
-            ]);
-        });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Permintaan mutasi berhasil dikirim.',
-            'data' => $mutasi->load(['user:id,name', 'fromUnit:id,name', 'toUnit:id,name', 'jabatan:id,name', 'requestedBy:id,name']),
-            'approvers' => $approvers->map(function ($approver) {
-                return [
-                    'id' => $approver->id,
-                    'name' => $approver->name,
-                ];
-            })->values(),
-        ]);
-    }
 
     private function resolveApprovers(OrganizationalUnit $unit)
     {

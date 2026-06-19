@@ -21,5 +21,7 @@ class Profile extends Model
         'golongan',
         'created_by',
         'updated_by',
+        'avatar',
+        'background'
     ];
 }

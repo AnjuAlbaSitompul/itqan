@@ -41,6 +41,11 @@ class User extends Authenticatable
         return $this->hasOne(EmployeeProfile::class);
     }
 
+    public function ownProfile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
     // ==========================================
     // RELASI HIERARKI ATASAN & BAWAHAN BERDASARKAN UNIT
     // ==========================================
@@ -213,6 +218,11 @@ class User extends Authenticatable
     }
 
     public function bookProposals()
+    {
+        return $this->hasMany(BookProposal::class);
+    }
+
+    public function bookLogs()
     {
         return $this->hasMany(BookProposal::class);
     }

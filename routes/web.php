@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -11,9 +12,12 @@ use App\Http\Controllers\KpiMasterController;
 use App\Http\Controllers\KpiReportController;
 use App\Http\Controllers\KpiTeamController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationalUnitController;
 use App\Http\Controllers\OutletController;
+use App\Http\Controllers\PeringatanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskIdpController;
 use App\Http\Controllers\TeamRequestController;
 use App\Http\Controllers\UnitController;
@@ -37,22 +41,25 @@ Route::middleware('auth')
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/signout', [AuthController::class, 'signout'])->name('signout');
+    Route::get('/profile/me', [ProfileController::class, 'index'])->name('profile.me');
+    // Route untuk menampilkan form edit
+
+    // Route untuk memproses update (via AJAX)
+    Route::post('/profile/me/update', [ProfileController::class, 'update'])->name('profile.me.update');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 });
 
-Route::middleware(['role:admin'])->group(function () {
+Route::middleware(['role:admin,manager_hc,spv_hc'])->group(function () {
 
     Route::get('/master/users', [MasterController::class, 'users'])
         ->name('master.users');
-
     Route::get('/master/outlet', [MasterController::class, 'outlet'])
         ->name('master.outlet');
-
     Route::get('/master/jabatan', [MasterController::class, 'jabatan'])->name('master.jabatan');
-    Route::get('/master/unit', [MasterController::class, 'unit'])->name('master.unit');
+    // Route::get('/master/unit', [MasterController::class, 'unit'])->name('master.unit');
+
 
     Route::get('/user', [UserController::class, 'index']);
-
     Route::post('/user/create', [UserController::class, 'create'])
         ->name('user.create');
     Route::post('/user/import', [UserController::class, 'import'])
@@ -76,12 +83,6 @@ Route::middleware(['role:admin'])->group(function () {
     Route::patch('/jabatan/{id}', [JabatanController::class, 'updateJabatan'])->name('jabatan.update');
     Route::delete('/jabatan/{id}', [JabatanController::class, 'destroyJabatan'])->name('jabatan.destroy');
 
-    Route::get('/unit', [UnitController::class, 'unit'])
-        ->name('unit');
-    Route::post('/unit', [UnitController::class, 'storeUnit'])->name('unit.store');
-    Route::patch('/unit/{id}', [UnitController::class, 'updateUnit'])->name('unit.update');
-    Route::delete('/unit/{id}', [UnitController::class, 'destroyUnit'])->name('unit.destroy');
-
 
     Route::get('/kpi', [MasterController::class, 'kpi'])
         ->name('key.performance.indicator');
@@ -98,7 +99,6 @@ Route::middleware(['role:admin'])->group(function () {
 
 
     Route::get('/kpi/report', [KpiReportController::class, 'kpiReport'])->name('kpi.report');
-    Route::get('/reports/kpi/data', [KpiReportController::class, 'getData'])->name('reports.kpi.data');
 
 
     Route::get('/idp/shalat-schedule', [IdpMasterController::class, 'shalatSchedule'])->name('sholat.schedule');
@@ -115,13 +115,28 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/organization/structure', [OrganizationalUnitController::class, 'index'])->name('organization.structure');
     Route::post('/organization/save', [OrganizationalUnitController::class, 'store'])->name('organization.save');
 
+    Route::get('/reports/kpi/data', [KpiReportController::class, 'getData'])->name('reports.kpi.data');
+    Route::get('/reports/approval', [KpiReportController::class, 'approvalRequest'])->name('hc.approval');
+    Route::get('/reports/approval/data', [KpiReportController::class, 'approvalData'])->name('approval.data');
+    Route::post('/approval/action', [KpiReportController::class, 'processApproval'])->name('approval.action');
+
+
+    Route::get('/mutasi', [MutasiController::class, 'index'])->name('mutasi');
+    Route::get('/mutasi/data', [MutasiController::class, 'getData'])->name('mutasi.data');
+    Route::post('/mutasi/approval-hr', [MutasiController::class, 'processHrApproval'])->name('mutasi.approval.hr');
+    Route::post('/mutasi/store-direct', [MutasiController::class, 'storeDirectApproved'])->name('mutasi.storeDirect');
+
+
+    Route::get('/peringatan', [PeringatanController::class, 'index'])->name('peringatan');
+    Route::post('/peringatan', [PeringatanController::class, 'store'])->name('peringatan.store');
+    Route::get('/peringatan/data', [PeringatanController::class, 'getData'])->name('peringatan.data');
+    Route::post('/peringatan/approval-hr', [PeringatanController::class, 'processHrApproval'])->name('peringatan.approval.hr');
+
     Route::get('/attendance', [MasterController::class, 'attendance'])->name('attendance');
 });
 
 Route::middleware(['role:spv,manager,direksi'])->group(function () {
 
-
-    Route::get('/team/approval', [UserKpiApprovalController::class, 'teamApprovalList'])->name('team.approval');
     Route::get('/team/kpi', [KpiTeamController::class, 'index'])->name('team.kpi');
     Route::post('/team/kpi/assign', [KpiTeamController::class, 'assignKpi'])->name('team.kpi.assign');
     Route::put('/team/kpi/assign/{id}', [KpiTeamController::class, 'updateAssignment'])->name('team.kpi.update');
@@ -134,6 +149,7 @@ Route::middleware(['role:spv,manager,direksi'])->group(function () {
     Route::get('/team/idp/get-data', [IdpTeamController::class, 'getUserData'])->name('team.idp.get-data');
 
     Route::get('/team/request', [TeamRequestController::class, 'index'])->name('team.request');
+    Route::get('/team/request/detail', [TeamRequestController::class, 'detailUser'])->name('team.request.detail');
     Route::post('/team/request/peringatan', [TeamRequestController::class, 'storePeringatan'])->name('team.request.peringatan.store');
     Route::post('/team/request/mutasi', [TeamRequestController::class, 'storeMutasi'])->name('team.request.mutasi.store');
     Route::post('/team/request/man-power', [TeamRequestController::class, 'storeManPower'])->name('team.request.manpower.store');
@@ -143,7 +159,7 @@ Route::middleware(['role:spv,manager,direksi'])->group(function () {
     Route::post('/kpi/master/me', [KpiMasterController::class, 'storeMyKpi'])->name('kpi.master.me.store');
 });
 
-Route::middleware(['role:spv,manager'])->group(function () {
+Route::middleware(['role:spv,manager,direksi,spv_hc,manager_hc'])->group(function () {
     Route::get('/approval/kpi', [UserKpiApprovalController::class, 'index'])->name('approval.kpi');
     Route::get('/approval/kpi/list', [UserKpiApprovalController::class, 'list'])->name('approval.kpi.list');
     Route::post('/approval/kpi/{id}/{action}', [UserKpiApprovalController::class, 'approval'])->name('approval.kpi');
@@ -169,4 +185,8 @@ Route::middleware('role:pegawai,spv,manager,direksi')->group(function () {
     Route::post('/task/idp/prayer', [TaskIdpController::class, 'storePrayer'])->name('task.idp.prayer.store');
     Route::post('/task/idp/book-proposal', [TaskIdpController::class, 'storeBookProposal'])->name('task.idp.book-proposal.store');
     Route::post('/task/idp/book-log', [TaskIdpController::class, 'storeBookLog'])->name('task.idp.book-log.store');
+});
+
+Route::middleware(['role:admin,admin_hc,spv_hc,manager_hc'])->group(function () {
+    Route::post('/announcement/store', [AnnouncementController::class, 'store'])->name('announcements.store');
 });

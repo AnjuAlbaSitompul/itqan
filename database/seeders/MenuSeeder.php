@@ -50,15 +50,6 @@ class MenuSeeder extends Seeder
         ]);
 
         Menu::create([
-            'name' => 'KPI Laporan',
-            'icon' => 'fe fe-target',
-            'route' => 'kpi.report',
-            'parent_id' => $kpi->id,
-            'sort' => 1,
-            'is_active' => 1,
-        ]);
-
-        Menu::create([
             'name' => 'Jadwal Sholat',
             'icon' => 'fe fe-target',
             'route' => 'sholat.schedule',
@@ -103,14 +94,6 @@ class MenuSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        Menu::create([
-            'name' => 'Unit',
-            'icon' => 'fe fe-layers',
-            'route' => 'master.unit',
-            'parent_id' => $organization->id,
-            'sort' => 4,
-            'is_active' => 1,
-        ]);
 
 
         $karyawans = Menu::create([
@@ -130,32 +113,13 @@ class MenuSeeder extends Seeder
             'sort' => 1,
             'is_active' => 1,
         ]);
-        Menu::create([
-            'name' => 'Catatan Teguran',
-            'icon' => 'fe fe-user-check',
-            'route' => 'user.request',
-            'parent_id' => $karyawans->id,
-            'sort' => 2,
-            'is_active' => 1,
-        ]);
-
-        Menu::create([
-            'name' => 'Pengunduran Diri',
-            'icon' => 'fe fe-user-check',
-            'route' => 'user.request',
-            'parent_id' => $karyawans->id,
-            'sort' => 3,
-            'is_active' => 1,
-        ]);
-
-
 
         Menu::create([
             'name' => 'Permintaan Login',
             'icon' => 'fe fe-user-check',
             'route' => 'user.request',
             'parent_id' => $karyawans->id,
-            'sort' => 4,
+            'sort' => 2,
             'is_active' => 1,
         ]);
 
@@ -265,6 +229,50 @@ class MenuSeeder extends Seeder
             'sort' => 2,
             'is_active' => 1,
         ]);
+
+
+        $hcApproval = Menu::create([
+            'name' => 'Approval & Report',
+            'icon' => 'fe fe-check',
+            'route' => null,
+            'parent_id' => null,
+            'sort' => 9,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'Approval Request',
+            'icon' => 'fe fe-check',
+            'route' => 'hc.approval',
+            'parent_id' => $hcApproval->id,
+            'sort' => 1,
+            'is_active' => 1,
+        ]);
+
+        Menu::create([
+            'name' => 'KPI Laporan',
+            'icon' => 'fe fe-target',
+            'route' => 'kpi.report',
+            'parent_id' => $hcApproval->id,
+            'sort' => 2,
+            'is_active' => 1,
+        ]);
+        // Menu::create([
+        //     'name' => 'Daftar Mutasi',
+        //     'icon' => 'fe fe-target',
+        //     'route' => 'mutasi',
+        //     'parent_id' => $hcApproval->id,
+        //     'sort' => 3,
+        //     'is_active' => 1,
+        // ]);
+        // Menu::create([
+        //     'name' => 'Daftar Peringatan',
+        //     'icon' => 'fe fe-target',
+        //     'route' => 'peringatan',
+        //     'parent_id' => $hcApproval->id,
+        //     'sort' => 4,
+        //     'is_active' => 1,
+        // ]);
 
 
 

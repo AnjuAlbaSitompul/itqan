@@ -204,7 +204,7 @@
                 for (let i = 0; i < golonganRomawi.length; i++) {
                     for (let j = 0; j < golonganHuruf.length; j++) {
                         optionsHtml += `<option
-                value="${golonganRomawi[i]}${golonganHuruf[j]}">${golonganRomawi[i]}${golonganHuruf[j]}</option>`;
+                            value="${golonganRomawi[i]}${golonganHuruf[j]}">${golonganRomawi[i]}${golonganHuruf[j]}</option>`;
                     }
                 }
                 return optionsHtml;
@@ -288,118 +288,118 @@
 
                                 // 1. Baris Utama (NIP ditampilkan di bawah nama sebelum expand)
                                 html += `
-                                                <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#user-detail-${user.user_id}" aria-expanded="false">
-                                                    <td class="ps-4 ${rankStyle}">${index + 1}</td>
-                                                    <td>
-                                                        <div class="fw-bold text-primary">${user.user_name}</div>
-                                                        <small class="text-muted">NIP: ${user.nip ?? '-'} | Username: ${user.username ?? '-'}</small>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="d-flex flex-column align-items-center w-100">
-                                                            <div class="progress w-75" style="height: 6px;">
-                                                                <div class="progress-bar ${barColor}" style="width: ${score}%"></div>
-                                                            </div>
-                                                            <small class="text-muted mt-1">${score}%</small>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center fw-bold fs-6">
-                                                        ${score}
-                                                    </td>
-                                                    <td class="text-end pe-4">
-                                                        <i class="fe fe-chevron-down text-muted expand-icon fs-5"></i>
-                                                    </td>
-                                                </tr>
-                                            `;
+                                                            <tr class="expandable-row" data-bs-toggle="collapse" data-bs-target="#user-detail-${user.user_id}" aria-expanded="false">
+                                                                <td class="ps-4 ${rankStyle}">${index + 1}</td>
+                                                                <td>
+                                                                    <div class="fw-bold text-primary">${user.user_name}</div>
+                                                                    <small class="text-muted">NIP: ${user.nip ?? '-'} | Username: ${user.username ?? '-'}</small>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <div class="d-flex flex-column align-items-center w-100">
+                                                                        <div class="progress w-75" style="height: 6px;">
+                                                                            <div class="progress-bar ${barColor}" style="width: ${score}%"></div>
+                                                                        </div>
+                                                                        <small class="text-muted mt-1">${score}%</small>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center fw-bold fs-6">
+                                                                    ${score}
+                                                                </td>
+                                                                <td class="text-end pe-4">
+                                                                    <i class="fe fe-chevron-down text-muted expand-icon fs-5"></i>
+                                                                </td>
+                                                            </tr>
+                                                        `;
 
                                 // 2. Baris Expand (Menampilkan NIP sesudah expand & Lama Kerja)
                                 html += `
-                                                <tr class="detail-row">
-                                                    <td colspan="5">
-                                                        <div id="user-detail-${user.user_id}" class="collapse">
-                                                            <div class="card card-body rounded-0 border-start-0 border-end-0 border-bottom-0 shadow-none bg-body-tertiary p-4 m-0">
+                                                            <tr class="detail-row">
+                                                                <td colspan="5">
+                                                                    <div id="user-detail-${user.user_id}" class="collapse">
+                                                                        <div class="card card-body rounded-0 border-start-0 border-end-0 border-bottom-0 shadow-none bg-body-tertiary p-4 m-0">
 
-                                                                <div class="row g-3 mb-4">
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">NIP</small>
-                                                                        <div class="fw-bold text-body">${user.nip ?? '-'}</div>
-                                                                    </div>
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">Lama Kerja</small>
-                                                                        <div class="fw-bold text-body text-success">${lamaKerja}</div>
-                                                                    </div>
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">Unit Organisasi</small>
-                                                                        <div class="fw-bold text-body">${user.unit_name ?? '-'}</div>
-                                                                    </div>
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">Jabatan</small>
-                                                                        <div class="fw-bold text-body">${user.jabatan_name ?? '-'}</div>
-                                                                    </div>
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">Role Sistem</small>
-                                                                        <div class="fw-bold text-body">${user.role_name ?? '-'}</div>
-                                                                    </div>
-                                                                    <div class="col-md-2 col-sm-6">
-                                                                        <small class="text-muted d-block fw-semibold mb-1">Total Target KPI</small>
-                                                                        <div class="fw-bold text-body">${user.total_kpi} Item</div>
-                                                                    </div>
-                                                                </div>
+                                                                            <div class="row g-3 mb-4">
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">NIP</small>
+                                                                                    <div class="fw-bold text-body">${user.nip ?? '-'}</div>
+                                                                                </div>
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">Lama Kerja</small>
+                                                                                    <div class="fw-bold text-body text-success">${lamaKerja}</div>
+                                                                                </div>
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">Unit Organisasi</small>
+                                                                                    <div class="fw-bold text-body">${user.unit_name ?? '-'}</div>
+                                                                                </div>
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">Jabatan</small>
+                                                                                    <div class="fw-bold text-body">${user.jabatan_name ?? '-'}</div>
+                                                                                </div>
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">Role Sistem</small>
+                                                                                    <div class="fw-bold text-body">${user.role_name ?? '-'}</div>
+                                                                                </div>
+                                                                                <div class="col-md-2 col-sm-6">
+                                                                                    <small class="text-muted d-block fw-semibold mb-1">Total Target KPI</small>
+                                                                                    <div class="fw-bold text-body">${user.total_kpi} Item</div>
+                                                                                </div>
+                                                                            </div>
 
-                                                                <hr class="text-muted opacity-25 my-0 mb-4">
+                                                                            <hr class="text-muted opacity-25 my-0 mb-4">
 
-                                                                <div class="d-flex align-items-center mb-3">
-                                                                    <div class="bg-primary text-white p-2 rounded me-3 d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-                                                                        <i class="fe fe-briefcase text-white"></i>
+                                                                            <div class="d-flex align-items-center mb-3">
+                                                                                <div class="bg-primary text-white p-2 rounded me-3 d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+                                                                                    <i class="fe fe-briefcase text-white"></i>
+                                                                                </div>
+                                                                                <h6 class="mb-0 fw-bold">Form Perubahan Posisi & Mutasi</h6>
+                                                                            </div>
+                    <form class="mutation-form" data-user-id="${user.user_id}">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+
+                                <label class="form-label small text-muted fw-bold">Jabatan Baru</label>
+                                <select class="form-select form-select-sm" name="new_jabatan_id" required>
+                                    <option value="">-- Pilih Jabatan Baru --</option>
+                                    ${Object.entries(jabatans).map(([id, name]) => `<option value="${id}">${name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Pindah Unit Organisasi / Divisi</label>
+                                <select class="form-select form-select-sm" name="new_org_unit_id" required>
+                                    ${orgUnitOptionsHtml}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Pindah Role (Akses Sistem)</label>
+                                <select class="form-select form-select-sm" name="new_role_id" required>
+                                    <option value="">-- Pilih Role Baru --</option>
+                                    ${Object.entries(roles).map(([id, name]) => `<option value="${id}">${name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Golongan Baru</label>
+                                <select class="form-select form-select-sm" name="golongan_select" required>
+                                    <option value="">-- Pilih Golongan --</option>
+                                    ${renderGolongan()}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted fw-bold">Mulai Aktif Tanggal</label>
+                                <input type="date" class="form-control form-control-sm" name="effective_date" required>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-success btn-sm w-100 fw-bold text-white shadow-sm">
+                                    <i class="fe fe-save text-white me-1"></i> Simpan Perubahan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                                                                        </div>
                                                                     </div>
-                                                                    <h6 class="mb-0 fw-bold">Form Perubahan Posisi & Mutasi</h6>
-                                                                </div>
-        <form class="mutation-form" data-user-id="${user.user_id}">
-            <div class="row g-3">
-                <div class="col-md-4">
-
-                    <label class="form-label small text-muted fw-bold">Jabatan Baru</label>
-                    <select class="form-select form-select-sm" name="new_jabatan_id" required>
-                        <option value="">-- Pilih Jabatan Baru --</option>
-                        ${Object.entries(jabatans).map(([id, name]) => `<option value="${id}">${name}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Pindah Unit Organisasi / Divisi</label>
-                    <select class="form-select form-select-sm" name="new_org_unit_id" required>
-                        ${orgUnitOptionsHtml}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Pindah Role (Akses Sistem)</label>
-                    <select class="form-select form-select-sm" name="new_role_id" required>
-                        <option value="">-- Pilih Role Baru --</option>
-                        ${Object.entries(roles).map(([id, name]) => `<option value="${id}">${name}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Golongan Baru</label>
-                    <select class="form-select form-select-sm" name="golongan_select" required>
-                        <option value="">-- Pilih Golongan --</option>
-                        ${renderGolongan()}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted fw-bold">Mulai Aktif Tanggal</label>
-                    <input type="date" class="form-control form-control-sm" name="effective_date" required>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success btn-sm w-100 fw-bold text-white shadow-sm">
-                        <i class="fe fe-save text-white me-1"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </div>
-        </form>
-
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            `;
+                                                                </td>
+                                                            </tr>
+                                                        `;
                             });
                         }
 
@@ -414,22 +414,66 @@
             // Handle Submit Form Mutasi
             $(document).on('submit', '.mutation-form', function (e) {
                 e.preventDefault();
-                let userId = $(this).data('user-id');
                 let form = $(this);
+                let userId = form.data('user-id');
+
+                // Gabungkan data form dengan user_id
+                let formData = form.serialize() + '&user_id=' + userId;
 
                 Swal.fire({
                     title: 'Simpan Perubahan Posisi?',
-                    text: "Sistem akan menjadwalkan aktif posisi baru sesuai tanggal yang diisi.",
+                    text: "Sistem akan menyimpan dan menyetujui posisi baru sesuai tanggal yang diisi.",
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#198754',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Simpan!'
+                    confirmButtonText: 'Ya, Simpan!',
+                    cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        Swal.fire('Berhasil!', 'Mutasi jabatan berhasil disimpan dan dijadwalkan.', 'success');
-                        $(`#user-detail-${userId}`).collapse('hide');
-                        form.trigger('reset');
+
+                        // Tampilkan loading state
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Sedang menyimpan data mutasi',
+                            allowOutsideClick: false,
+                            didOpen: () => { Swal.showLoading(); }
+                        });
+
+                        // Jalankan request AJAX
+                        $.ajax({
+                            url: "{{ route('mutasi.storeDirect') }}", // Panggil route yang baru dibuat
+                            type: "POST",
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function (response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message
+                                });
+
+                                // Tutup accordion (collapse) detail user
+                                $(`#user-detail-${userId}`).collapse('hide');
+
+                                // Reset form setelah berhasil submit
+                                form.trigger('reset');
+                            },
+                            error: function (xhr) {
+                                let errorMessage = "Terjadi kesalahan pada sistem.";
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: errorMessage
+                                });
+                            }
+                        });
                     }
                 });
             });

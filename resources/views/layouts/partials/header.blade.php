@@ -1,3 +1,21 @@
+<style>
+    .message-menu-scroll {
+        max-height: 400px;
+        /* Sesuaikan tinggi sesuai kebutuhan */
+        overflow-y: auto;
+        /* Mengaktifkan scrollbar vertikal */
+    }
+
+    /* Opsional: Membuat scrollbar lebih rapi (untuk browser Webkit) */
+    .message-menu-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .message-menu-scroll::-webkit-scrollbar-thumb {
+        background-color: #cbd5e0;
+        border-radius: 4px;
+    }
+</style>
 <div class="app-header header sticky">
     <div class="container-fluid main-container">
         <div class="d-flex">
@@ -7,11 +25,11 @@
             <!-- sidebar-toggle-->
 
             <a class="logo-horizontal" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/brand/logo-white.png') }}" class="header-brand-img desktop-logo"
-                    alt="logo">
+                <img src="{{ asset('assets/itqanicon.png') }}" class="header-brand-img desktop-logo" alt="logo"
+                    style="max-height:50px; max-width:50px; filter: brightness(0) invert(1);">
 
-                <img src="{{ asset('assets/images/brand/logo-dark.png') }}" class="header-brand-img light-logo1"
-                    alt="logo">
+                <img src="{{ asset('assets/itqanicon.png') }}" class="header-brand-img light-logo1" alt="logo"
+                    style="max-height:50px; max-width:50px; ">
             </a>
 
             <!-- LOGO -->
@@ -145,8 +163,8 @@
                                 <a href="javascript:void(0)" data-bs-toggle="dropdown"
                                     class="nav-link leading-none d-flex">
 
-                                    <img src="{{ asset('assets/images/users/21.jpg') }}" alt="profile-user"
-                                        class="avatar profile-user brround cover-image">
+                                    <img src="{{ auth()->user()->ownProfile?->avatar ? asset('storage/' . auth()->user()->ownProfile->avatar) : "https://ui-avatars.com/api/?name=" . urlencode(auth()->user()->name) . "&background=random" }}"
+                                        alt="profile-user" class="avatar profile-user brround cover-image">
 
                                 </a>
 
@@ -158,13 +176,16 @@
                                                 {{ auth()->user()->name }}
                                             </h5>
 
-                                            {{-- <small class="text-muted">{{ auth()->user()->role }}</small> --}}
+                                            <small class="text-muted">{{ auth()->user()->role->name }}</small>
                                         </div>
                                     </div>
 
-                                    <div class="dropdown-divider m-0"></div>
-
-                                    <a class="dropdown-item" href="login.html">
+                                    <div class="dropdown-divider m-0">
+                                    </div>
+                                    <a class="dropdown-item" href="/profile/me">
+                                        <i class="dropdown-icon fe fe-user"></i> Profile
+                                    </a>
+                                    <a class="dropdown-item" href="/signout">
                                         <i class="dropdown-icon fe fe-alert-circle"></i>
                                         Sign out
                                     </a>

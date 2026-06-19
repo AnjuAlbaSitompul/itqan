@@ -19,11 +19,9 @@ class UserManagementController extends Controller
 
     public function userRequest()
     {
-        $outlets = Outlet::where('is_active', true)->select('id', 'name')->get();
         $jabatans = Jabatan::where('is_active', true)->select('id', 'name')->get();
-        $units = Unit::where('is_active', true)->select('id', 'name')->get();
         $roles = Role::select('id', 'name')->get();
-        return view('user-management.user-request.index', compact('outlets', 'jabatans', 'units', 'roles'));
+        return view('user-management.user-request.index', compact('jabatans', 'roles'));
     }
 
     public function request()
@@ -89,7 +87,6 @@ class UserManagementController extends Controller
                     'domisili' => $userRequest->domisili,
 
                     'tipe_bpjs' => $validated['tipe_bpjs'],
-                    'unit_id' => $validated['unit_id'],
                     'jabatan_id' => $validated['jabatan_id'],
                     'golongan' => $validated['golongan'],
 

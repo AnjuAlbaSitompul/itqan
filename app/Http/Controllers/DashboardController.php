@@ -14,7 +14,6 @@ use App\Models\UserKpiRealization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -27,16 +26,18 @@ class DashboardController extends Controller
         }
 
         $role = $user->role?->name ?? 'pegawai';
-        $roleView = view()->exists("dashboard.$role") ? "dashboard.$role" : 'dashboard.pegawai';
-
+        // Cek jika view spesifik ada, jika tidak gunakan default index
         $dashboardData = $this->buildDashboardData($user, $role);
 
-        return view($roleView, $dashboardData);
+        return view('dashboard.index', $dashboardData);
     }
 
     private function buildDashboardData(User $user, string $role): array
     {
-        $isManagerGroup = in_array($role, ['manager', 'spv_hc', 'manager_hc', 'spv'], true);
+        // Tentukan apakah user punya hak manajerial
+        $isManagerGroup = in_array($role, ['manager', 'spv_hc', 'manager_hc', 'spv', 'admin', 'admin_hc'], true);
+
+        // Ambil bawahan (jika pegawai biasa, isinya hanya ID dia sendiri)
         $subordinateIds = $user->getAllUsersInOrgStructure()->pluck('id')->values()->all();
         $subordinateIds = array_values(array_unique(array_merge([$user->id], $subordinateIds)));
 
@@ -109,14 +110,15 @@ class DashboardController extends Controller
             ->selectRaw('COUNT(*) as total_reports, COUNT(DISTINCT DATE(reported_at)) as total_days')
             ->first();
 
+        // UBAH PENCARIAN BERDASARKAN user_id (target) DAN status HR (approved)
         $warningSummary = [
             'peringatan' => Peringatan::query()
-                ->whereIn('requested_by', $subordinateIds)
-                ->where('superior_approval_status', 'approved')
+                ->whereIn('user_id', $subordinateIds)
+                ->where('status', 'approved')
                 ->count(),
             'mutasi' => Mutasi::query()
-                ->whereIn('requested_by', $subordinateIds)
-                ->where('superior_approval_status', 'approved')
+                ->whereIn('user_id', $subordinateIds)
+                ->where('status', 'approved')
                 ->count(),
             'manpower_pending' => ManPowerRequest::query()
                 ->whereIn('requested_by', $subordinateIds)
@@ -124,7 +126,7 @@ class DashboardController extends Controller
                 ->count(),
             'mutasi_today' => Mutasi::query()
                 ->whereDate('created_at', $today)
-                ->whereIn('requested_by', $subordinateIds)
+                ->whereIn('user_id', $subordinateIds)
                 ->count(),
             'users_to_move' => is_array($subordinateIds) ? count($subordinateIds) - 1 : 0,
         ];
@@ -164,39 +166,48 @@ class DashboardController extends Controller
 
     private function getLatestApprovedWarnings(array $subordinateIds)
     {
+        // UBAH: Cari berdasarkan target `user_id` dan `status` (HR approval)
+        $peringatan = Peringatan::with(['user.profile.jabatan', 'user.profile.organizationalUnit'])
+            ->whereIn('user_id', $subordinateIds)
+            ->where('status', 'approved')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function (Peringatan $item) {
+                return [
+                    'type' => 'peringatan',
+                    'label' => 'Surat Peringatan',
+                    'name' => $item->user?->name ?? '-',
+                    'unit' => $item->user?->profile?->organizationalUnit?->name ?? '-',
+                    'title' => $item->type,
+                    'date' => $item->updated_at?->format('d M Y, H:i'),
+                    'timestamp' => $item->updated_at // Ditambahkan untuk sorting gabungan
+                ];
+            });
+
+        $mutasi = Mutasi::with(['user.profile.jabatan', 'fromUnit', 'toUnit'])
+            ->whereIn('user_id', $subordinateIds)
+            ->where('status', 'approved')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function (Mutasi $item) {
+                return [
+                    'type' => 'mutasi',
+                    'label' => 'Mutasi Disetujui',
+                    'name' => $item->user?->name ?? '-',
+                    'unit' => ($item->fromUnit?->name ?? '-') . ' → ' . ($item->toUnit?->name ?? '-'),
+                    'title' => $item->reason ?? 'Mutasi',
+                    'date' => $item->updated_at?->format('d M Y, H:i'),
+                    'timestamp' => $item->updated_at // Ditambahkan untuk sorting gabungan
+                ];
+            });
+
+        // Gabungkan dan urutkan kembali berdasarkan tanggal terupdate
         return collect()
-            ->merge(Peringatan::with(['user.profile.jabatan', 'user.profile.organizationalUnit'])
-                ->whereIn('requested_by', $subordinateIds)
-                ->where('superior_approval_status', 'approved')
-                ->latest()
-                ->take(5)
-                ->get()
-                ->map(function (Peringatan $item) {
-                    return [
-                        'type' => 'peringatan',
-                        'label' => 'Surat Peringatan',
-                        'name' => $item->user?->name ?? '-',
-                        'unit' => $item->user?->profile?->organizationalUnit?->name ?? '-',
-                        'title' => $item->type,
-                        'date' => $item->updated_at?->format('d M Y, H:i'),
-                    ];
-                }))
-            ->merge(Mutasi::with(['user.profile.jabatan', 'fromUnit', 'toUnit'])
-                ->whereIn('requested_by', $subordinateIds)
-                ->where('superior_approval_status', 'approved')
-                ->latest()
-                ->take(5)
-                ->get()
-                ->map(function (Mutasi $item) {
-                    return [
-                        'type' => 'mutasi',
-                        'label' => 'Mutasi Disetujui',
-                        'name' => $item->user?->name ?? '-',
-                        'unit' => ($item->fromUnit?->name ?? '-') . ' → ' . ($item->toUnit?->name ?? '-'),
-                        'title' => $item->reason ?? 'Mutasi',
-                        'date' => $item->updated_at?->format('d M Y, H:i'),
-                    ];
-                }))
+            ->merge($peringatan)
+            ->merge($mutasi)
+            ->sortByDesc('timestamp')
             ->take(8)
             ->values();
     }

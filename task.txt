@@ -9,3 +9,6 @@ Dashboard
 IDP KPI, HR= [Karyawan, Organization (man power approve spv), manager approval kpi)
 Dasboard hr di gambar, 
 Pengumuman HR ONLY,
+
+outlet harus refresh untuk update selanjutnya
+- perbaikan mutasi,

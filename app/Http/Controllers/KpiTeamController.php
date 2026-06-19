@@ -205,15 +205,16 @@ class KpiTeamController extends Controller
             'kpi_masters' => 'required|array|min:1',
             'kpi_masters.*' => 'exists:kpi_masters,id',
             'approver_id' => 'required|exists:users,id',
+            'period_id' => 'required|exists:kpi_periods,id',
             'notes' => 'nullable|string'
         ]);
 
-        $activePeriod = KpiPeriod::where('status', 'open')->first();
+        $activePeriod = KpiPeriod::where('id', $request->period_id)->first();
 
-        if (!$activePeriod) {
+        if ($activePeriod->status !== 'open') {
             return response()->json([
                 'success' => false,
-                'message' => 'Tidak ada periode KPI yang sedang aktif (Open).'
+                'message' => 'Periode KPI tidak aktif. Tidak dapat menetapkan KPI.'
             ], 400);
         }
 

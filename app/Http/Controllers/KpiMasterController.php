@@ -110,33 +110,33 @@ class KpiMasterController extends Controller
 
         try {
 
-            if ($validated['status'] === 'open') {
+            // if ($validated['status'] === 'open') {
 
-                $currentOpen = KpiPeriod::where('status', 'open')
-                    ->lockForUpdate()
-                    ->first();
+            //     $currentOpen = KpiPeriod::where('status', 'open')
+            //         ->lockForUpdate()
+            //         ->first();
 
-                if ($currentOpen) {
+            //     if ($currentOpen) {
 
-                    if (
-                        Carbon::parse($currentOpen->period_end)
-                            ->lt(Carbon::today())
-                    ) {
+            //         if (
+            //             Carbon::parse($currentOpen->period_end)
+            //                 ->lt(Carbon::today())
+            //         ) {
 
-                        $currentOpen->update([
-                            'status' => 'closed'
-                        ]);
+            //             $currentOpen->update([
+            //                 'status' => 'closed'
+            //             ]);
 
-                    } else {
+            //         } else {
 
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Masih terdapat KPI Period yang sedang aktif.'
-                        ], 422);
+            //             return response()->json([
+            //                 'success' => false,
+            //                 'message' => 'Masih terdapat KPI Period yang sedang aktif.'
+            //             ], 422);
 
-                    }
-                }
-            }
+            //         }
+            //     }
+            // }
 
             $period = KpiPeriod::create([
                 'name' => $validated['name'],

@@ -89,8 +89,6 @@
                                                         class="fe fe-calendar me-1"></i></span>Daftar Approval</a></li>
                                         <li><a href="#tab19" data-bs-toggle="tab"><span><i
                                                         class="fe fe-file-text me-1"></i></span>Laporan KPI Team</a></li>
-                                        <li><a href="#tab20" data-bs-toggle="tab"><span><i
-                                                        class="fe fe-bell me-1"></i></span>Tab 4</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -102,6 +100,16 @@
                                         <form id="assignmentForm" action="#" method="POST">
                                             @csrf
                                             <div class="row mb-4">
+                                                <div class="col-md-12 mb-4">
+                                                    <label class="form-label fw-semibold">Periode</label>
+                                                    <select class="form-select select2" id="periodKpi" name="period_id"
+                                                        required>
+                                                        <option value="">Semua Periode</option>
+                                                        @foreach($periods ?? [] as $id => $name)
+                                                            <option value="{{ $id }}">{{ $name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                                 <div class="col-md-12 mb-4">
                                                     <label class="form-label fw-semibold">Pilih Anggota Tim (Bawahan) <span
                                                             class="text-danger">*</span></label>
@@ -275,10 +283,6 @@
                                             </div>
                                         </div>
 
-                                    </div>
-                                    <!-- TAB 4 -->
-                                    <div class="tab-pane" id="tab20">
-                                        <p>Konten Tab 4...</p>
                                     </div>
 
                                 </div>

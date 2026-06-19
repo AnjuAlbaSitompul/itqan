@@ -17,6 +17,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class UserController extends Controller
 {
 
+
     public function downloadTemplate()
     {
         return Excel::download(
@@ -150,7 +151,7 @@ class UserController extends Controller
             ]);
 
             // profile
-            $user->profile()->create([
+            $user->ownProfile()->create([
                 'nip' => $validated['nip'],
                 'alamat' => $validated['alamat'],
                 'tamatan' => $validated['tamatan'],
@@ -184,11 +185,10 @@ class UserController extends Controller
     {
         $users = User::with([
             'role',
-            'profile'
+            'ownProfile'
         ])->where('is_active', true)->get();
 
         $data = $users->map(function ($item, $index) {
-
             return [
                 'id' => $item->id,
                 'no' => $index + 1,
@@ -196,30 +196,15 @@ class UserController extends Controller
                 'username' => $item->username,
                 'role' => $item->role?->name ?? '-',
                 'role_id' => $item->role_id,
-                'golongan' => $item->profile?->golongan ?? '-',
-                'jenis_kelamin' => $item->profile?->jenis_kelamin ?? '-',
-                'tanggal_lahir' => $item->profile?->tanggal_lahir ?? '-',
-                'tanggal_masuk' => $item->profile?->tanggal_masuk ?? '-',
-                'domisili' => $item->profile?->domisili ?? '-',
-                'tipe_bpjs' => $item->profile?->tipe_bpjs ?? '-',
-                'tamatan' => $item->profile?->tamatan ?? '-',
-                'nip' => $item->profile?->nip ?? '-',
-                'alamat' => $item->profile?->alamat ?? '-',
-                'action' => '
-            <button 
-                class="btn btn-sm btn-primary rounded-pill"
-                onclick="editUser(' . $item->id . ')"
-            >
-                Edit
-            </button>
-
-            <button 
-                class="btn btn-sm btn-danger rounded-pill"
-                onclick="deleteUser(' . $item->id . ')"
-            >
-                Delete
-            </button>
-        '
+                'golongan' => $item->ownProfile?->golongan ?? '-',
+                'jenis_kelamin' => $item->ownProfile?->jenis_kelamin ?? '-',
+                'tanggal_lahir' => $item->ownProfile?->tanggal_lahir ?? '-',
+                'tanggal_masuk' => $item->ownProfile?->tanggal_masuk ?? '-',
+                'domisili' => $item->ownProfile?->domisili ?? '-',
+                'tipe_bpjs' => $item->ownProfile?->tipe_bpjs ?? '-',
+                'tamatan' => $item->ownProfile?->tamatan ?? '-',
+                'nip' => $item->ownProfile?->nip ?? '-',
+                'alamat' => $item->ownProfile?->alamat ?? '-',
             ];
         });
 

@@ -17,13 +17,13 @@ class OrganizationalUnitController extends Controller
     {
         $organizations = OrganizationalUnit::with([
             'childrenRecursive',
-            'employees.user',
+            'employees.user.ownProfile',
             'employees.jabatan'
         ])
             ->whereNull('parent_id')
             ->get();
 
-        $users = User::where('is_active', true)->orderBy('name')->get();
+        $users = User::where('is_active', true)->with('ownProfile')->orderBy('name')->get();
         $jabatans = Jabatan::where('is_active', true)->orderBy('name')->get();
         $outlets = Outlet::where('is_active', true)->orderBy('name')->get();
 

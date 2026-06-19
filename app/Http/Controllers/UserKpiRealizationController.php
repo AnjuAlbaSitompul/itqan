@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\UserKpi;
 use App\Models\UserKpiRealization;
 use App\Models\KpiPeriod;
+use App\Models\UserKpiApproval;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,35 +14,44 @@ class UserKpiRealizationController extends Controller
 {
     public function index(Request $request)
     {
-        $periods = KpiPeriod::whereIn('status', ['open', 'closed'])->orderBy('period_start', 'desc')->get();
-        $selectedPeriodId = $request->get('period_id', $periods->first()?->id);
+        // 1. Get all open periods
+        $periods = KpiPeriod::where('status', 'open')->orderBy('period_start', 'desc')->get();
 
-        $userKpi = UserKpi::with([
-            'kpiApproval' => function ($q) use ($selectedPeriodId) {
-                $q->where('kpi_period_id', $selectedPeriodId);
-            },
-            'kpiApproval.kpiPeriod',
-            'kpiApproval.kpiDetails.masterKpi.formulas',
-            'realizations'
-        ])
-            ->where('user_id', Auth::id())
-            ->whereHas('kpiApproval', function ($q) use ($selectedPeriodId) {
-                $q->where('kpi_period_id', $selectedPeriodId);
+        // 2. Determine selectedPeriodId using a cleaner query
+        // If request has an ID, use it; otherwise find the latest period that has a KPI for this user
+        $selectedPeriodId = $request->input('period_id');
+
+        if (!$selectedPeriodId) {
+            $selectedPeriodId = UserKpiApproval::whereHas('userKpis', function ($q) {
+                $q->where('user_id', Auth::id());
             })
-            ->first();
-
-        $isApproved = false;
-        $isExpired = false;
-        $periodInfo = null;
-
-        if ($userKpi && $userKpi->kpiApproval) {
-            $isApproved = $userKpi->kpiApproval->status === 'approved';
-            $periodInfo = $userKpi->kpiApproval->kpiPeriod;
-
-            if ($periodInfo) {
-                $isExpired = Carbon::now()->greaterThan(Carbon::parse($periodInfo->period_end));
-            }
+                ->whereIn('kpi_period_id', $periods->pluck('id'))
+                ->latest('created_at')
+                ->value('kpi_period_id');
         }
+
+        // Fallback to the first available period if no match found
+        $selectedPeriodId = $selectedPeriodId ?? $periods->first()?->id;
+
+        // 3. Fetch UserKpi with necessary relations
+        $userKpi = null;
+        if ($selectedPeriodId) {
+            $userKpi = UserKpi::with([
+                'kpiApproval.kpiPeriod',
+                'kpiApproval.kpiDetails.masterKpi.formulas',
+                'realizations'
+            ])
+                ->where('user_id', Auth::id())
+                ->whereHas('kpiApproval', function ($q) use ($selectedPeriodId) {
+                    $q->where('kpi_period_id', $selectedPeriodId);
+                })
+                ->first();
+        }
+
+        // 4. Calculate statuses
+        $isApproved = $userKpi?->kpiApproval?->status === 'approved';
+        $periodInfo = $userKpi?->kpiApproval?->kpiPeriod ?? KpiPeriod::find($selectedPeriodId);
+        $isExpired = $periodInfo ? now()->greaterThan($periodInfo->period_end) : false;
 
         return view('task.kpi.index', compact('userKpi', 'periods', 'selectedPeriodId', 'isApproved', 'isExpired', 'periodInfo'));
     }

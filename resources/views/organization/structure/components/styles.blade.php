@@ -111,6 +111,7 @@
         transition: 0.2s;
     }
 
+    /* Update di bagian .employee-avatar */
     .employee-avatar {
         width: 32px;
         height: 32px;
@@ -123,6 +124,15 @@
         font-size: 13px;
         font-weight: 600;
         flex-shrink: 0;
+        overflow: hidden;
+        /* Tambahkan ini agar border-radius memotong gambar yang lewat */
+    }
+
+    /* Tambahkan block CSS ini agar image dari avatar mengisi dengan proporsional */
+    .employee-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .employee-info {

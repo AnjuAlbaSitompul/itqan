@@ -40,19 +40,6 @@ class ApproveUserRequest extends FormRequest
                 'exists:roles,id',
             ],
 
-            'outlet_id' => [
-                Rule::requiredIf(
-                    in_array($this->role, $requiredOutletRoles)
-                ),
-                'nullable',
-                'exists:outlets,id',
-            ],
-
-            'unit_id' => [
-                'required',
-                'exists:units,id',
-            ],
-
             'jabatan_id' => [
                 'required',
                 'exists:jabatans,id',
@@ -77,12 +64,14 @@ class ApproveUserRequest extends FormRequest
         return [
             'role.required' => 'Role harus diisi.',
             'role.exists' => 'Role tidak valid.',
-            'outlet_id.required' => 'Outlet harus diisi untuk role tertentu.',
-            'outlet_id.exists' => 'Outlet tidak valid.',
-            'unit_id.required' => 'Unit harus diisi.',
-            'unit_id.exists' => 'Unit tidak valid.',
             'jabatan_id.required' => 'Jabatan harus diisi.',
             'jabatan_id.exists' => 'Jabatan tidak valid.',
+            'golongan.required' => 'Golongan harus diisi.',
+            'golongan.string' => 'Golongan harus berupa string.',
+            'golongan.max' => 'Golongan tidak boleh lebih dari 100 karakter.',
+            'tipe_bpjs.required' => 'Tipe BPJS harus diisi.',
+            'tipe_bpjs.in' => 'Tipe BPJS harus salah satu dari: Kesehatan atau Ketenagakerjaan.',
+
         ];
     }
 }
