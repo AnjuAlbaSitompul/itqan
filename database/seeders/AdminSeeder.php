@@ -35,6 +35,15 @@ class AdminSeeder extends Seeder
                 ['username' => 'pegawai2', 'name' => 'Pegawai 2'],
                 ['username' => 'pegawai3', 'name' => 'Pegawai 3'],
             ],
+            'admin_hc' => [
+                ['username' => 'adminhc1', 'name' => 'Admin HC 1'],
+            ],
+            'spv_hc' => [
+                ['username' => 'spvhc1', 'name' => 'Supervisor HC 1'],
+            ],
+            'manager_hc' => [
+                ['username' => 'managerhc1', 'name' => 'Manager HC 1'],
+            ],
         ];
 
         foreach ($roles as $roleName => $users) {

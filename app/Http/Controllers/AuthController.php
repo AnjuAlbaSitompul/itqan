@@ -18,6 +18,15 @@ class AuthController extends Controller
         return view('auth.index');
     }
 
+    public function signout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
     public function signup()
     {
         return view('auth.signup');
