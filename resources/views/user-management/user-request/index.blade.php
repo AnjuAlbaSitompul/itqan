@@ -241,28 +241,6 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">
-                                    Jabatan
-                                </label>
-
-                                <select class="form-select modern-select" id="jabatan_id">
-
-                                    <option value="">
-                                        Select Jabatan
-                                    </option>
-
-                                    @foreach ($jabatans as $jabatan)
-                                        <option value="{{ $jabatan->id }}">
-                                            {{ $jabatan->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
                                     Tipe BPJS
                                 </label>
 
@@ -287,9 +265,17 @@
                                 <label class="form-label fw-semibold">
                                     Golongan
                                 </label>
-
-                                <input type="text" name="golongan" class="form-control modern-input"
-                                    placeholder="Enter Golongan" />
+                                <select class="form-select modern-select" name="golongan" id="golongan">
+                                    @php
+                                        $golonganRomawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+                                        $golonganHuruf = ['A', 'B', 'C', 'D', 'E'];
+                                    @endphp
+                                    @foreach ($golonganRomawi as $romawi)
+                                        @foreach ($golonganHuruf as $huruf)
+                                            <option value="{{ $romawi . $huruf }}">{{ $romawi . $huruf }}</option>
+                                        @endforeach
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
@@ -534,11 +520,11 @@
                     data: 'name',
                     render: function (data, type, row) {
                         return `
-                                            <div class="d-flex align-items-center gap-2">
-                                                <i class="fe fe-users"></i>
-                                                <span>${data}</span>
-                                            </div>
-                                        `;
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <i class="fe fe-users"></i>
+                                                                    <span>${data}</span>
+                                                                </div>
+                                                            `;
                     }
                 },
                 {
@@ -550,15 +536,15 @@
                     searchable: false,
                     render: function (data, type, row) {
                         return `
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
-                                                    <i class="fe fe-check"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
-                                                    <i class="fe fe-trash"></i>
-                                                </button>
-                                            </div>
-                                        `;
+                                                                <div class="d-flex gap-2">
+                                                                    <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
+                                                                        <i class="fe fe-check"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
+                                                                        <i class="fe fe-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            `;
                     }
                 }
                 ]
@@ -658,9 +644,8 @@
             window.approveUserRequest = function (requestId) {
                 $data = {
                     role_id: $('#role_id').val(),
-                    jabatan_id: $('#jabatan_id').val(),
                     tipe_bpjs: $('#tipe_bpjs').val(),
-                    golongan: $('input[name="golongan"]').val(),
+                    golongan: $('#golongan').val(),
                 }
                 $.ajax({
                     url: '/request/approve/' + requestId,

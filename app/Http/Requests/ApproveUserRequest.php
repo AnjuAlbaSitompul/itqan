@@ -40,11 +40,6 @@ class ApproveUserRequest extends FormRequest
                 'exists:roles,id',
             ],
 
-            'jabatan_id' => [
-                'required',
-                'exists:jabatans,id',
-            ],
-
             'tipe_bpjs' => [
                 'required',
                 'in:Kesehatan,Ketenagakerjaan',
@@ -64,8 +59,6 @@ class ApproveUserRequest extends FormRequest
         return [
             'role.required' => 'Role harus diisi.',
             'role.exists' => 'Role tidak valid.',
-            'jabatan_id.required' => 'Jabatan harus diisi.',
-            'jabatan_id.exists' => 'Jabatan tidak valid.',
             'golongan.required' => 'Golongan harus diisi.',
             'golongan.string' => 'Golongan harus berupa string.',
             'golongan.max' => 'Golongan tidak boleh lebih dari 100 karakter.',

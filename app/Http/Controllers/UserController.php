@@ -259,7 +259,7 @@ class UserController extends Controller
             }
 
             // PROFILE
-            $user->profile()->updateOrCreate(
+            $user->ownProfile()->updateOrCreate(
                 [
                     'user_id' => $user->id
                 ],

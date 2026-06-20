@@ -73,7 +73,7 @@ class UserManagementController extends Controller
                 }
 
                 // create profile
-                $user->profile()->create([
+                $user->ownProfile()->create([
 
                     'nip' => $userRequest->nip,
                     'alamat' => $userRequest->alamat,
@@ -87,7 +87,6 @@ class UserManagementController extends Controller
                     'domisili' => $userRequest->domisili,
 
                     'tipe_bpjs' => $validated['tipe_bpjs'],
-                    'jabatan_id' => $validated['jabatan_id'],
                     'golongan' => $validated['golongan'],
 
                     'created_by' => Auth::id(),

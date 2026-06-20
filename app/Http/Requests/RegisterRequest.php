@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\roles;
+use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,7 +21,7 @@ class RegisterRequest extends FormRequest
      */
     public function rules(): array
     {
-        $requiredOutletRoles = roles::query()
+        $requiredOutletRoles = Role::query()
             ->whereIn('name', [
                 'pegawai',
                 'spv',
@@ -55,14 +55,14 @@ class RegisterRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:8',
+                'min:6',
                 'confirmed',
             ],
 
             'password_confirmation' => [
                 'required',
                 'string',
-                'min:8',
+                'min:6',
                 'same:password',
             ],
 

@@ -7,10 +7,10 @@
         <div class="col-xl-5 h-100">
 
             <div class="signup-scroll-container
-                        bg-body-secondary
-                        position-relative
-                        h-100
-                        overflow-auto">
+                                                bg-body-secondary
+                                                position-relative
+                                                h-100
+                                                overflow-auto">
 
                 <div class="row justify-content-center py-5 px-4">
 
@@ -85,7 +85,7 @@
                             </div>
 
                             <!-- USERNAME -->
-                            <div class="col-md-6">
+                            <div class="col-md-12">
 
                                 <label class="form-label fw-semibold">
                                     Username
@@ -104,7 +104,7 @@
                             </div>
 
                             <!-- PASSWORD -->
-                            <div class="col-md-6">
+                            <div class="col-md-12">
 
                                 <label class="form-label fw-semibold">
                                     Password
@@ -124,7 +124,7 @@
                             </div>
 
                             <!-- CONFIRM PASSWORD -->
-                            <div class="col-md-6">
+                            <div class="col-md-12">
 
                                 <label class="form-label fw-semibold">
                                     Confirm Password
@@ -258,16 +258,33 @@
                                     Tamatan
                                 </label>
 
-                                <div class="input-group modern-group">
 
-                                    <span class="input-group-text">
-                                        <i class="far fa-file-alt"></i>
-                                    </span>
+                                <select class="form-select modern-select select2" name="tamatan">
 
-                                    <input type="text" class="form-control" name="tamatan"
-                                        placeholder="Contoh: S1 Teknik Informatika">
+                                    <option value="">
+                                        Pilih Tamatan
+                                    </option>
 
-                                </div>
+                                    <option value="SMA">
+                                        SMA
+                                    </option>
+
+                                    <option value="D3">
+                                        D3
+                                    </option>
+
+                                    <option value="S1">
+                                        S1
+                                    </option>
+                                    <option value="S2">
+                                        S2
+                                    </option>
+                                    <option value="S3">
+                                        S3
+                                    </option>
+
+                                </select>
+
 
                             </div>
 
