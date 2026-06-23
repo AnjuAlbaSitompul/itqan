@@ -278,6 +278,27 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Status
+                                </label>
+                                <select class="form-select modern-select" name="status" id="status_user">
+                                    <option value="">Pilih Status User</option>
+                                    <option value="magang">Magang</option>
+                                    <option value="contract">Kontrak</option>
+                                    <option value="permanent">Tetap</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Tanggal Berakhir
+                                </label>
+                                <input type="date" class="form-control modern-input" id="due_date" name="due_date">
+                            </div>
+                        </div>
 
                     </div>
 
@@ -520,11 +541,11 @@
                     data: 'name',
                     render: function (data, type, row) {
                         return `
-                                                                <div class="d-flex align-items-center gap-2">
-                                                                    <i class="fe fe-users"></i>
-                                                                    <span>${data}</span>
-                                                                </div>
-                                                            `;
+                                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                                <i class="fe fe-users"></i>
+                                                                                                <span>${data}</span>
+                                                                                            </div>
+                                                                                        `;
                     }
                 },
                 {
@@ -536,15 +557,15 @@
                     searchable: false,
                     render: function (data, type, row) {
                         return `
-                                                                <div class="d-flex gap-2">
-                                                                    <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
-                                                                        <i class="fe fe-check"></i>
-                                                                    </button>
-                                                                    <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
-                                                                        <i class="fe fe-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                            `;
+                                                                                            <div class="d-flex gap-2">
+                                                                                                <button class="btn btn-sm btn-success" onclick="openModal(${row.id})">
+                                                                                                    <i class="fe fe-check"></i>
+                                                                                                </button>
+                                                                                                <button class="btn btn-sm btn-danger" onclick="deleteUserRequest(${row.id})">
+                                                                                                    <i class="fe fe-trash"></i>
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        `;
                     }
                 }
                 ]
@@ -646,6 +667,8 @@
                     role_id: $('#role_id').val(),
                     tipe_bpjs: $('#tipe_bpjs').val(),
                     golongan: $('#golongan').val(),
+                    status: $('#status_user').val(),
+                    due_date: $('#due_date').val(),
                 }
                 $.ajax({
                     url: '/request/approve/' + requestId,

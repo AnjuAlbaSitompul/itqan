@@ -88,7 +88,8 @@ class UserManagementController extends Controller
 
                     'tipe_bpjs' => $validated['tipe_bpjs'],
                     'golongan' => $validated['golongan'],
-
+                    'due_date' => $validated['due_date'],
+                    'status' => $validated['status'],
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);

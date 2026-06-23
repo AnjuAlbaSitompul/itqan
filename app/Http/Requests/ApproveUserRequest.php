@@ -50,6 +50,14 @@ class ApproveUserRequest extends FormRequest
                 'string',
                 'max:100',
             ],
+            'due_date' => [
+                'nullable',
+                'date',
+            ],
+            'status' => [
+                'required',
+                'in:magang,contract,permanent',
+            ],
         ];
 
     }
