@@ -17,6 +17,29 @@ use Maatwebsite\Excel\Facades\Excel;
 class UserController extends Controller
 {
 
+    public function activate($id)
+    {
+        try {
+
+            $user = User::findOrFail($id);
+
+            $user->update([
+                'is_active' => true
+            ]);
+
+            return response()->json([
+                'message' => 'User activated successfully'
+            ], 200);
+
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+
+        }
+    }
+
 
     public function downloadTemplate()
     {
@@ -161,6 +184,8 @@ class UserController extends Controller
                 'domisili' => $validated['domisili'],
                 'tipe_bpjs' => $validated['tipe_bpjs'],
                 'golongan' => $validated['golongan'],
+                'due_date' => $validated['due_date'] ?? null,
+                'status' => $validated['status'] ?? null,
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
             ]);
@@ -186,7 +211,7 @@ class UserController extends Controller
         $users = User::with([
             'role',
             'ownProfile'
-        ])->where('is_active', true)->get();
+        ])->get();
 
         $data = $users->map(function ($item, $index) {
             return [
@@ -196,6 +221,7 @@ class UserController extends Controller
                 'username' => $item->username,
                 'role' => $item->role?->name ?? '-',
                 'role_id' => $item->role_id,
+                'user_status' => $item->is_active ? true : false,
                 'golongan' => $item->ownProfile?->golongan ?? '-',
                 'jenis_kelamin' => $item->ownProfile?->jenis_kelamin ?? '-',
                 'tanggal_lahir' => $item->ownProfile?->tanggal_lahir ?? '-',
@@ -205,6 +231,8 @@ class UserController extends Controller
                 'tamatan' => $item->ownProfile?->tamatan ?? '-',
                 'nip' => $item->ownProfile?->nip ?? '-',
                 'alamat' => $item->ownProfile?->alamat ?? '-',
+                'due_date' => $item->ownProfile?->due_date ?? '-',
+                'status' => $item->ownProfile?->status ?? '-',
             ];
         });
 
@@ -274,6 +302,9 @@ class UserController extends Controller
                     'domisili' => $validated['domisili'] ?? null,
                     'golongan' => $validated['golongan'] ?? null,
                     'updated_by' => Auth::id(),
+                    'tipe_bpjs' => $validated['tipe_bpjs'] ?? null,
+                    'due_date' => $validated['due_date'] ?? null,
+                    'status' => $validated['status'] ?? null,
                 ]
             );
 

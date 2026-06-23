@@ -22,6 +22,8 @@ class Profile extends Model
         'created_by',
         'updated_by',
         'avatar',
-        'background'
+        'background',
+        'due_date',
+        'status',
     ];
 }

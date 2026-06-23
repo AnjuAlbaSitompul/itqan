@@ -36,8 +36,8 @@ class UserSheetExport implements FromArray, WithHeadings, WithTitle
     {
         return [
             [
-                'Anju Sitompul',
-                'anju',
+                'Budi Santoso',
+                'budi_santoso',
                 'password123',
                 'pegawai',
                 '20260001',

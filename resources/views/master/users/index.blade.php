@@ -34,6 +34,7 @@
                                     <th width="3%">No</th>
                                     <th>NIP</th>
                                     <th>Full Name</th>
+                                    <th>Status User</th>
                                     <th>Username</th>
                                     <th>Role</th>
                                     <th>Golongan</th>
@@ -44,6 +45,8 @@
                                     <th>BPJS</th>
                                     <th>Domisili</th>
                                     <th>Alamat</th>
+                                    <th>Status</th>
+                                    <th>Due Date</th>
                                     <th width="10%">Action</th>
                                 </tr>
                             </thead>
@@ -114,7 +117,8 @@
                                         <option value="">Pilih Role</option>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->id }}">
-                                                {{ Str::of($role->name)->replace('_', ' ')->upper() }}</option>
+                                                {{ Str::of($role->name)->replace('_', ' ')->upper() }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -151,6 +155,23 @@
                                     <div class="modern-input">
                                         <span><i class="fe fe-calendar"></i></span>
                                         <input type="date" id="tanggal_masuk" name="tanggal_masuk">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Status</label>
+                                    <select class="form-select modern-select select2" id="status" name="status">
+                                        <option value="">Pilih Status</option>
+                                        <option value="magang">Magang</option>
+                                        <option value="contract">Contract</option>
+                                        <option value="permanent">Permanent</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold mb-2">Tanggal Berakhir <small
+                                            class="text-muted">Kosongkan Jika Permanent</small></label>
+                                    <div class="modern-input">
+                                        <span><i class="fe fe-calendar"></i></span>
+                                        <input type="date" id="due_date" name="due_date">
                                     </div>
                                 </div>
                             </div>
@@ -294,8 +315,8 @@
         }
 
         /* ----------------------------------------------------
-               MEMAKSA WARNA TEXT MENGIKUTI TEMPLATE (INHERIT)
-               ---------------------------------------------------- */
+                                                                                                                                       MEMAKSA WARNA TEXT MENGIKUTI TEMPLATE (INHERIT)
+                                                                                                                                       ---------------------------------------------------- */
         body,
         label,
         h2,
@@ -497,19 +518,16 @@
         /* ACTION BUTTONS IN TABLE */
         .btn-action {
             background-color: var(--bs-tertiary-bg);
-            border: 1px solid var(--bs-border-color);
             color: inherit;
             transition: .2s;
         }
 
         .btn-action.text-primary:hover {
             color: #0d6efd !important;
-            border-color: #0d6efd;
         }
 
         .btn-action.text-danger:hover {
             color: #dc3545 !important;
-            border-color: #dc3545;
         }
 
         /* TABLE STYLES */
@@ -567,6 +585,24 @@
                     { data: 'no' },
                     { data: 'nip' },
                     { data: 'name' },
+                    {
+                        data: 'user_status',
+                        render: function (data, type, row) {
+                            let badgeClass = '';
+                            let icon = '';
+                            switch (data) {
+                                case true:
+                                    badgeClass = 'bg-success';
+                                    icon = 'fe fe-check-circle';
+                                    break;
+                                case false:
+                                    badgeClass = 'bg-danger';
+                                    icon = 'fe fe-x-circle';
+                                    break;
+                            }
+                            return `<span class=""><i class="${icon}"></i></span>`;
+                        }
+                    },
                     { data: 'username' },
                     { data: 'role' },
                     { data: 'golongan' },
@@ -577,21 +613,40 @@
                     { data: 'tipe_bpjs' },
                     { data: 'domisili' },
                     { data: 'alamat' },
+                    { data: 'status' },
+                    {
+                        data: 'due_date',
+                        render: function (data, type, row) {
+                            console.log(data)
+                            return data ? new Date(data).toLocaleDateString('id-ID') : '-';
+                        }
+                    },
                     {
                         data: null,
                         orderable: false,
                         searchable: false,
                         render: function (data, type, row) {
-                            return `
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-action text-primary btn-sm rounded-circle p-2" onclick="editUser(${row.id})" title="Edit User">
-                                        <i class="fe fe-edit" style="font-size: 16px;"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-action text-danger btn-sm rounded-circle p-2" onclick="deleteUser(${row.id})" title="Delete User">
-                                        <i class="fe fe-trash-2" style="font-size: 16px;"></i>
-                                    </button>
-                                </div>
-                            `;
+                            if (row.user_status) {
+                                return `
+                                                                    <div class="d-flex gap-2">
+                                                                        <button type="button" class="btn btn-action text-primary" onclick="editUser(${row.id})" title="Edit User">
+                                                                            <i class="fe fe-edit" style="font-size: 16px;"></i>
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-action text-danger" onclick="deleteUser(${row.id})" title="Delete User">
+                                                                            <i class="fe fe-trash-2" style="font-size: 16px;"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    `;
+                            } else {
+                                return `
+                                                                    <div class="d-flex gap-2">
+                                                                        <button type="button" class="btn btn-action text-primary" onclick="activateUser(${row.id})" title="Activate User">
+                                                                            <i class="fe fe-check" style="font-size: 16px;"></i>
+                                                                        </button>
+                                                                        </div>
+                                                                `;
+                            }
+
                         }
                     }
                 ]
@@ -653,6 +708,24 @@
                     })
                     .fail(function (xhr) { handleValidationErrors(xhr); });
             });
+
+            window.activateUser = function (userId) {
+                swal({
+                    title: 'Are you sure?', text: 'This action will activate the user.', type: 'warning',
+                    showCancelButton: true, confirmButtonText: 'Yes, activate it!', cancelButtonText: 'Cancel'
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: `/user/activate/${userId}`, type: 'patch',
+                            success: function (res) {
+                                swal({ type: 'success', title: 'Activated', text: res.message });
+                                $('#userTable').DataTable().ajax.reload(null, false);
+                            },
+                            error: function (err) { swal({ type: 'error', title: 'Error', text: 'Gagal mengaktifkan user' }); }
+                        });
+                    }
+                });
+            };
 
             window.editUser = function (userId) {
                 let data = $('#userTable').DataTable().rows().data().toArray().find(item => Number(item.id) === Number(userId));

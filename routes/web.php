@@ -171,6 +171,8 @@ Route::middleware(['role:admin,admin_hc,spv_hc,manager_hc'])->group(function () 
         ->name('user.update');
     Route::delete('/user/delete/{id}', [UserController::class, 'delete'])
         ->name('user.delete');
+    Route::patch('/user/activate/{id}', [UserController::class, 'activate'])
+        ->name('user.activate');
 
     Route::get('/jabatan', [JabatanController::class, 'jabatan'])
         ->name('jabatan');

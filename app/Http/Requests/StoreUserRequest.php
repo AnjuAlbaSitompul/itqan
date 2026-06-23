@@ -49,6 +49,8 @@ class StoreUserRequest extends FormRequest
             'tipe_bpjs' => 'required|string|max:100',
             'golongan' => 'required|string|max:4',
             'alamat' => 'required|string',
+            'due_date' => 'nullable|date',
+            'status' => 'required|in:magang,contract,permanent',
         ];
     }
 

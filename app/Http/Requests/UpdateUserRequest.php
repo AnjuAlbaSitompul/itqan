@@ -48,6 +48,8 @@ class UpdateUserRequest extends FormRequest
             'tipe_bpjs' => 'nullable|string|max:100',
             'golongan' => 'nullable|string|max:4',
             'alamat' => 'nullable|string',
+            'due_date' => 'nullable|date',
+            'status' => 'required|in:magang,contract,permanent',
         ];
     }
 
@@ -56,6 +58,8 @@ class UpdateUserRequest extends FormRequest
         return [
             'role.required' => 'The role field is required.',
             'role.exists' => 'The selected role is invalid.',
+            'status.required' => 'The status field is required.',
+            'status.in' => 'The selected status is invalid.',
         ];
     }
 }
