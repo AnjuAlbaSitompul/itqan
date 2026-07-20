@@ -147,7 +147,7 @@
                                     <div class="flex-grow-1">
                                         <div class="fw-semibold text-body">{{ $announcement['title'] }}</div>
                                         <div class="small text-muted">{{ $announcement['message'] }}</div>
-                                        <div class="small text-muted mt-1">{{ $announcement['created_at_label'] }}</div>
+                                        <div class="small text-muted mt-1" data-utc-time="{{ $announcement['created_at'] ?? '' }}">{{ $announcement['created_at_label'] }}</div>
                                     </div>
                                 </a>
                             @endforeach

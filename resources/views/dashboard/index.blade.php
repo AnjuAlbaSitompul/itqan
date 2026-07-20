@@ -491,7 +491,7 @@
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold text-body">{{ $announcement['title'] }}</div>
                                             <div class="small text-muted">{{ $announcement['message'] }}</div>
-                                            <div class="small text-muted mt-1">{{ $announcement['created_at'] }}</div>
+                                            <div class="small text-muted mt-1" data-utc-time="{{ $announcement['created_at'] }}">{{ $announcement['created_at_label'] }}</div>
                                         </div>
                                     </a>
                                 @empty
@@ -577,6 +577,24 @@
                 }
             });
 
+        });
+    </script>
+    <script>
+        // Convert announcement UTC timestamps to user's local timezone
+        document.querySelectorAll('[data-utc-time]').forEach(function (el) {
+            const utc = el.getAttribute('data-utc-time');
+            if (utc) {
+                const date = new Date(utc);
+                if (!isNaN(date.getTime())) {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                    const month = months[date.getMonth()];
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    el.textContent = day + ' ' + month + ' ' + year + ', ' + hours + ':' + minutes;
+                }
+            }
         });
     </script>
     <script>

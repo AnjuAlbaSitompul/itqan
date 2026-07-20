@@ -219,13 +219,12 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
-        return $notifications->map(function ($notification) {
-            return [
-                'title' => $notification->data['title'] ?? 'Pengumuman',
-                'message' => $notification->data['message'] ?? '-',
-                'url' => $notification->data['url'] ?? '#',
-                'created_at' => $notification->created_at?->format('d M Y, H:i'),
-            ];
-        });
+        return $notifications->map(fn ($notification) => [
+            'title' => $notification->data['title'] ?? 'Pengumuman',
+            'message' => $notification->data['message'] ?? '-',
+            'url' => $notification->data['url'] ?? '#',
+            'created_at' => $notification->created_at?->toIso8601String(),
+            'created_at_label' => $notification->created_at?->timezone('Asia/Jakarta')?->format('d M Y, H:i'),
+        ]);
     }
 }
