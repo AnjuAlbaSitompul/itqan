@@ -211,7 +211,11 @@ class UserController extends Controller
         $users = User::with([
             'role',
             'ownProfile'
-        ])->get();
+        ])
+            ->whereHas('role', function ($query) {
+                $query->where('name', '!=', 'admin');
+            })
+            ->get();
 
         $data = $users->map(function ($item, $index) {
             return [
