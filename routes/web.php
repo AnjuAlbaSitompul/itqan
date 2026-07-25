@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk menampilkan form edit
     // Route untuk memproses update (via AJAX)
     Route::post('/profile/me/update', [ProfileController::class, 'update'])->name('profile.me.update');
+    Route::post('/profile/me/change-password', [ProfileController::class, 'changePassword'])->name('profile.me.change-password');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 });
 

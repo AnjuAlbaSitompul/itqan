@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // WAJIB DIIMPOR UNTUK MENGHAPUS FILE
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use App\Models\Profile;
 
 class ProfileController extends Controller
@@ -98,6 +100,48 @@ class ProfileController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal memperbarui profil: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => ['required', 'string', 'confirmed', Password::min(8)],
+        ], [
+            'current_password.required' => 'Password saat ini wajib diisi.',
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password baru minimal 8 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+
+        // Verify current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => [
+                    'current_password' => ['Password saat ini tidak sesuai.']
+                ]
+            ], 422);
+        }
+
+        try {
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Password berhasil diubah!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengubah password: ' . $e->getMessage()
             ], 500);
         }
     }
